@@ -117,3 +117,8 @@ function hexToLight(hex){
     return `rgba(${r},${g},${b},0.18)`;
   return `rgba(${r},${g},${b},0.12)`;
 }
+
+/* =================================================================
+   HELPERS
+================================================================= */
+function studentsOf(cls){ return DATA.students.filter(s=>s.cls===cls); }
