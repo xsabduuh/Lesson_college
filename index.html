@@ -10,16 +10,17 @@
 html{font-size:15px;-webkit-text-size-adjust:100%}
 body{
   font-family:'Segoe UI',Tahoma,Arial,sans-serif;
-  background:#F0F2F8;color:#1C2340;
+  background:var(--bg);color:var(--text);
   min-height:100vh;min-height:100dvh;
   overscroll-behavior:none;
+  transition:background .25s,color .25s;
 }
 button{font-family:inherit;font-size:inherit;border:none;background:none;cursor:pointer;color:inherit}
 input,textarea,select{font-family:inherit;font-size:inherit;border:none;outline:none;background:none;color:inherit}
 a{color:inherit;text-decoration:none}
 ul,ol{list-style:none}
 
-/* ===== CSS VARIABLES ===== */
+/* ===== CSS VARIABLES – Light Mode ===== */
 :root{
   --accent:#3B4FC0;
   --accent-dark:#2D3D9E;
@@ -46,18 +47,34 @@ ul,ol{list-style:none}
   --mono:'SF Mono','Fira Code',monospace;
   --nav-h:64px;
   --topbar-h:56px;
-  /* class colors */
-  --c1:#3B82F6;
-  --c1-bg:#EBF5FB;
-  --c2:#E55B20;
-  --c2-bg:#FEF0E8;
-  /* subject colors */
-  --math:#3B4FC0;
-  --math-bg:#EBF0FB;
-  --phy:#E09B2F;
-  --phy-bg:#FEF3DC;
-  --svt:#178A6F;
-  --svt-bg:#E0F5EE;
+  --c1:#3B82F6;--c1-bg:#EBF5FB;
+  --c2:#E55B20;--c2-bg:#FEF0E8;
+  --math:#3B4FC0;--math-bg:#EBF0FB;
+  --phy:#E09B2F;--phy-bg:#FEF3DC;
+  --svt:#178A6F;--svt-bg:#E0F5EE;
+  --drawer-w:280px;
+  --shadow:0 2px 12px rgba(28,35,64,.10);
+  --shadow-lg:0 6px 24px rgba(28,35,64,.14);
+}
+/* Dark Mode */
+body.dark{
+  --surface:#1E2440;
+  --surface-2:#252B48;
+  --bg:#131729;
+  --border:#2C3356;
+  --border-2:#374070;
+  --text:#E8EAF6;
+  --text-2:#A0AACB;
+  --text-3:#5A6490;
+  --accent-light:#2D3570;
+  --danger-light:#3D1A1A;
+  --amber-light:#3D2E0A;
+  --green-light:#0D2920;
+  --purple-light:#2A1A38;
+  --c1-bg:#1A2E4A;--c2-bg:#3D1E0A;
+  --math-bg:#1A1F48;--phy-bg:#3D2E0A;--svt-bg:#0D2920;
+  --shadow:0 2px 12px rgba(0,0,0,.3);
+  --shadow-lg:0 6px 24px rgba(0,0,0,.4);
 }
 
 /* ===== LAYOUT ===== */
@@ -77,14 +94,24 @@ ul,ol{list-style:none}
   border-bottom:1px solid var(--border);
   display:flex;align-items:center;
   padding:0 12px;gap:8px;
-  box-shadow:0 1px 8px rgba(28,35,64,.06);
+  box-shadow:var(--shadow);
+  transition:background .25s,border-color .25s;
 }
 .topbar-title{font-size:17px;font-weight:700;flex:1;text-align:center}
-.back-btn{
+.back-btn,.menu-btn{
   width:36px;height:36px;display:flex;align-items:center;justify-content:center;
   border-radius:10px;color:var(--accent);background:var(--accent-light);
+  transition:background .15s;
 }
 .topbar-right{display:flex;align-items:center;gap:6px}
+.admin-badge{
+  font-size:10px;font-weight:800;padding:3px 8px;
+  border-radius:6px;background:var(--amber);color:#fff;
+}
+.search-btn{
+  width:36px;height:36px;display:flex;align-items:center;justify-content:center;
+  border-radius:10px;color:var(--text-3);background:var(--surface-2);
+}
 
 /* ===== PAGE CONTENT ===== */
 #page-content{
@@ -92,8 +119,9 @@ ul,ol{list-style:none}
   padding-bottom:calc(var(--nav-h) + 12px + env(safe-area-inset-bottom));
   -webkit-overflow-scrolling:touch;
 }
-.section{display:none;padding:14px 14px 4px}
+.section{display:none;padding:14px 14px 4px;animation:fadeIn .2s ease}
 .section.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 
 /* ===== BOTTOM NAV ===== */
 .bottom-nav{
@@ -106,24 +134,25 @@ ul,ol{list-style:none}
   display:flex;align-items:stretch;
   z-index:50;
   box-shadow:0 -2px 16px rgba(28,35,64,.08);
+  transition:background .25s,border-color .25s;
 }
 .nav-btn{
   flex:1;display:flex;flex-direction:column;
   align-items:center;justify-content:center;gap:3px;
-  font-size:11px;font-weight:600;color:var(--text-3);
-  transition:color .15s;
-  position:relative;
+  font-size:10px;font-weight:700;color:var(--text-3);
+  transition:color .15s;position:relative;
 }
 .nav-btn svg{width:22px;height:22px;transition:transform .15s}
 .nav-btn.active{color:var(--accent)}
-.nav-btn.active svg{transform:scale(1.1)}
+.nav-btn.active svg{transform:scale(1.12)}
 .nav-dot{
-  position:absolute;top:8px;right:calc(50% - 14px);
+  position:absolute;top:7px;right:calc(50% - 16px);
   min-width:16px;height:16px;border-radius:10px;
   background:var(--danger);color:#fff;font-size:10px;font-weight:700;
-  display:flex;align-items:center;justify-content:center;
-  padding:0 4px;display:none;
+  display:none;align-items:center;justify-content:center;
+  padding:0 4px;
 }
+.nav-dot.show{display:flex}
 
 /* ===== FAB ===== */
 .fab{
@@ -133,38 +162,104 @@ ul,ol{list-style:none}
   width:52px;height:52px;border-radius:16px;
   background:var(--accent);color:#fff;
   display:flex;align-items:center;justify-content:center;
-  box-shadow:0 4px 18px rgba(59,79,192,.35);
+  box-shadow:0 4px 18px rgba(59,79,192,.38);
   z-index:45;
-  transition:transform .15s,box-shadow .15s;
+  transition:transform .15s,box-shadow .15s,background .15s;
 }
 .fab:active{transform:scale(.93);box-shadow:0 2px 8px rgba(59,79,192,.25)}
+
+/* ===== DRAWER ===== */
+.drawer-overlay{
+  position:fixed;inset:0;z-index:60;
+  background:rgba(10,15,35,.55);
+  display:none;backdrop-filter:blur(3px);
+  transition:opacity .25s;
+}
+.drawer-overlay.show{display:block}
+.drawer{
+  position:fixed;top:0;right:-100%;bottom:0;
+  width:var(--drawer-w);max-width:85vw;
+  background:var(--surface);
+  z-index:65;
+  transition:right .28s cubic-bezier(.32,.72,0,1);
+  display:flex;flex-direction:column;
+  box-shadow:-4px 0 24px rgba(0,0,0,.18);
+  overflow-y:auto;
+}
+.drawer.open{right:0}
+.drawer-head{
+  padding:calc(env(safe-area-inset-top) + 16px) 20px 16px;
+  background:var(--accent);color:#fff;
+  border-bottom:1px solid rgba(255,255,255,.15);
+}
+.drawer-head h2{font-size:18px;font-weight:800;margin-bottom:2px}
+.drawer-head p{font-size:12px;opacity:.8}
+.drawer-close{
+  position:absolute;top:calc(env(safe-area-inset-top) + 14px);
+  left:14px;width:32px;height:32px;
+  display:flex;align-items:center;justify-content:center;
+  border-radius:8px;background:rgba(255,255,255,.18);color:#fff;
+}
+.drawer-section{padding:10px 0}
+.drawer-label{
+  font-size:10px;font-weight:800;color:var(--text-3);
+  letter-spacing:.6px;text-transform:uppercase;
+  padding:6px 20px 4px;
+}
+.drawer-item{
+  display:flex;align-items:center;gap:12px;
+  padding:12px 20px;font-size:14px;font-weight:600;
+  color:var(--text-2);transition:background .1s,color .1s;
+  cursor:pointer;position:relative;
+}
+.drawer-item:active{background:var(--accent-light)}
+.drawer-item.active{
+  color:var(--accent);background:var(--accent-light);
+  border-right:3px solid var(--accent);
+}
+.drawer-item .di-icon{
+  width:36px;height:36px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+.drawer-item .di-count{
+  margin-right:auto;
+  font-size:11px;font-weight:700;font-family:var(--mono);
+  background:var(--bg);color:var(--text-3);
+  padding:2px 8px;border-radius:20px;
+}
+.drawer-divider{height:1px;background:var(--border);margin:4px 0}
 
 /* ===== CARDS & PANELS ===== */
 .panel{
   background:var(--surface);border-radius:var(--radius-lg);
   border:1px solid var(--border);margin-bottom:12px;
   overflow:hidden;
+  transition:background .25s,border-color .25s;
+  box-shadow:var(--shadow);
 }
 .panel-title{
-  font-size:13px;font-weight:700;color:var(--text-3);
-  padding:12px 16px 0;letter-spacing:.4px;text-transform:uppercase;
+  font-size:11px;font-weight:800;color:var(--text-3);
+  padding:12px 16px 4px;letter-spacing:.5px;text-transform:uppercase;
 }
 .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.stat-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px}
 .stat-card{
   background:var(--surface);border-radius:var(--radius-lg);
   border:1px solid var(--border);padding:14px;
   display:flex;flex-direction:column;gap:4px;
+  box-shadow:var(--shadow);
+  transition:background .25s,border-color .25s;
 }
-.stat-card .s-label{font-size:12px;color:var(--text-3);font-weight:600}
+.stat-card .s-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:6px;flex-shrink:0}
+.stat-card .s-label{font-size:11px;color:var(--text-3);font-weight:700}
 .stat-card .s-val{font-size:26px;font-weight:800;color:var(--text);font-family:var(--mono)}
 .stat-card .s-sub{font-size:11px;color:var(--text-3);margin-top:2px}
 .stat-card.accent{background:var(--accent);border-color:var(--accent)}
 .stat-card.accent .s-label,.stat-card.accent .s-val,.stat-card.accent .s-sub{color:#fff}
 
 /* ===== CLASS PILLS ===== */
-.class-tabs{
-  display:flex;gap:8px;margin-bottom:14px;
-}
+.class-tabs{display:flex;gap:8px;margin-bottom:14px}
 .class-tab{
   flex:1;padding:9px 8px;border-radius:10px;
   font-size:13px;font-weight:700;
@@ -172,8 +267,8 @@ ul,ol{list-style:none}
   background:var(--surface);color:var(--text-3);
   text-align:center;transition:all .15s;
 }
-.class-tab.active-1{background:var(--c1-bg);border-color:var(--c1);color:var(--c1)}
-.class-tab.active-2{background:var(--c2-bg);border-color:var(--c2);color:var(--c2)}
+.class-tab.act-1ere{background:var(--c1-bg);border-color:var(--c1);color:var(--c1)}
+.class-tab.act-2eme{background:var(--c2-bg);border-color:var(--c2);color:var(--c2)}
 
 /* ===== SUBJECT PILLS ===== */
 .subj-row{
@@ -183,7 +278,7 @@ ul,ol{list-style:none}
 }
 .subj-row::-webkit-scrollbar{display:none}
 .subj-pill{
-  padding:6px 12px;border-radius:20px;
+  padding:7px 14px;border-radius:20px;
   font-size:12px;font-weight:700;white-space:nowrap;
   border:1.5px solid var(--border);
   background:var(--surface);color:var(--text-3);
@@ -197,34 +292,40 @@ ul,ol{list-style:none}
 .card-item{
   display:flex;align-items:center;gap:12px;
   padding:12px 14px;border-bottom:1px solid var(--border);
+  transition:background .1s;
 }
 .card-item:last-child{border-bottom:none}
+.card-item:active{background:var(--surface-2)}
 .card-item-icon{
-  width:40px;height:40px;border-radius:12px;flex-shrink:0;
+  width:42px;height:42px;border-radius:12px;flex-shrink:0;
   display:flex;align-items:center;justify-content:center;
 }
 .card-item-body{flex:1;min-width:0}
-.card-item-title{font-size:14px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card-item-title{font-size:14px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .card-item-sub{font-size:12px;color:var(--text-3);margin-top:2px}
 .card-item-actions{display:flex;gap:6px;align-items:center;flex-shrink:0}
 
 /* ===== BUTTONS ===== */
 .btn{
   display:inline-flex;align-items:center;justify-content:center;gap:6px;
-  padding:10px 18px;border-radius:10px;font-size:14px;font-weight:700;
+  padding:11px 18px;border-radius:10px;font-size:14px;font-weight:700;
   transition:opacity .15s,transform .1s;
 }
 .btn:active{opacity:.8;transform:scale(.97)}
 .btn-accent{background:var(--accent);color:#fff}
 .btn-outline{background:var(--surface);border:1.5px solid var(--border-2);color:var(--text-2)}
 .btn-danger{background:var(--danger-light);color:var(--danger)}
+.btn-green{background:var(--green-light);color:var(--green)}
 .btn-full{width:100%}
+.btn-sm{padding:7px 12px;font-size:13px;border-radius:8px}
 .btn-icon{
   width:34px;height:34px;display:flex;align-items:center;justify-content:center;
   border-radius:9px;background:var(--surface-2);color:var(--text-3);
+  transition:background .1s;flex-shrink:0;
 }
 .btn-icon.accent{background:var(--accent-light);color:var(--accent)}
 .btn-icon.danger{background:var(--danger-light);color:var(--danger)}
+.btn-icon.green{background:var(--green-light);color:var(--green)}
 
 /* ===== BADGE ===== */
 .badge{
@@ -235,7 +336,7 @@ ul,ol{list-style:none}
 .badge-green{background:var(--green-light);color:var(--green)}
 .badge-amber{background:var(--amber-light);color:#A0711F}
 .badge-red{background:var(--danger-light);color:var(--danger)}
-.badge-gray{background:#EEF0F5;color:var(--text-3)}
+.badge-gray{background:var(--surface-2);color:var(--text-3)}
 .badge-blue{background:var(--accent-light);color:var(--accent)}
 .badge-math{background:var(--math-bg);color:var(--math)}
 .badge-phy{background:var(--phy-bg);color:var(--phy)}
@@ -250,27 +351,26 @@ ul,ol{list-style:none}
   width:100%;padding:11px 13px;
   border-radius:10px;border:1.5px solid var(--border);
   background:var(--surface-2);font-size:14px;color:var(--text);
-  transition:border-color .15s;
+  transition:border-color .15s,background .15s;
 }
-.field:focus{border-color:var(--accent);background:#fff}
+.field:focus{border-color:var(--accent);background:var(--surface)}
 textarea.field{resize:vertical;min-height:80px;line-height:1.5}
 select.field{-webkit-appearance:none;appearance:none}
 .req{color:var(--danger)}
 .field-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.field-note{font-size:12px;color:var(--text-3);margin-top:4px;padding:8px 12px;background:var(--accent-light);border-radius:8px;border-right:3px solid var(--accent)}
 
-/* ===== TABS (inside sections) ===== */
+/* ===== TABS ===== */
 .tabs-scroll{
-  display:flex;gap:2px;overflow-x:auto;
-  padding:0 0 0;border-bottom:1px solid var(--border);
+  display:flex;gap:0;overflow-x:auto;
+  border-bottom:2px solid var(--border);
   -webkit-overflow-scrolling:touch;scrollbar-width:none;
   margin:0 -14px 14px;padding:0 14px;
 }
 .tabs-scroll::-webkit-scrollbar{display:none}
 .tab-btn{
-  padding:10px 14px;font-size:13px;font-weight:700;
+  padding:10px 16px;font-size:13px;font-weight:700;
   color:var(--text-3);border-bottom:2.5px solid transparent;
-  white-space:nowrap;transition:color .15s;
+  white-space:nowrap;transition:color .15s;margin-bottom:-2px;
 }
 .tab-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
 
@@ -279,19 +379,19 @@ select.field{-webkit-appearance:none;appearance:none}
   display:flex;align-items:center;gap:10px;
   padding:0 0 12px;
 }
-.section-header h2{font-size:16px;font-weight:700;flex:1}
+.section-header h2{font-size:16px;font-weight:800;flex:1}
 .count-badge{
   background:var(--accent-light);color:var(--accent);
-  border-radius:20px;padding:2px 10px;
+  border-radius:20px;padding:3px 11px;
   font-size:12px;font-weight:700;font-family:var(--mono);
 }
 
 /* ===== PROGRESS BAR ===== */
 .progress-bar{height:7px;border-radius:6px;background:var(--bg);overflow:hidden}
-.progress-fill{height:100%;border-radius:6px;background:var(--accent);transition:width .4s}
+.progress-fill{height:100%;border-radius:6px;background:var(--accent);transition:width .5s ease}
 
 /* ===== QUICK MARK ===== */
-.quick-mark-row{display:flex;gap:6px}
+.quick-mark-row{display:flex;gap:5px}
 .qm-btn{
   flex:1;padding:8px 4px;border-radius:9px;font-size:12px;font-weight:700;
   border:1.5px solid var(--border);background:var(--surface);color:var(--text-2);
@@ -313,15 +413,15 @@ select.field{-webkit-appearance:none;appearance:none}
 /* ===== OVERLAY / SHEET ===== */
 .overlay{
   position:fixed;inset:0;z-index:100;
-  background:rgba(15,20,40,.5);
+  background:rgba(10,15,35,.55);
   display:none;align-items:flex-end;
-  backdrop-filter:blur(2px);
+  backdrop-filter:blur(3px);
 }
 .overlay.show{display:flex}
 .sheet{
   background:var(--surface);width:100%;
   border-radius:var(--radius-xl) var(--radius-xl) 0 0;
-  max-height:92vh;max-height:92dvh;
+  max-height:94vh;max-height:94dvh;
   overflow-y:auto;
   animation:sheetUp .28s cubic-bezier(.32,.72,0,1);
 }
@@ -339,24 +439,29 @@ select.field{-webkit-appearance:none;appearance:none}
   display:flex;gap:10px;
   padding:12px 16px calc(12px + env(safe-area-inset-bottom));
   border-top:1px solid var(--border);
+  background:var(--surface);
 }
 .sheet-foot .btn{flex:1}
 
 /* ===== TOAST ===== */
 #toast-area{
-  position:fixed;top:70px;right:0;left:0;
+  position:fixed;top:68px;right:0;left:0;
   display:flex;flex-direction:column;align-items:center;
   z-index:200;gap:6px;pointer-events:none;
+  max-width:520px;margin:0 auto;
 }
 .toast{
   background:#1C2340;color:#fff;
   padding:10px 20px;border-radius:12px;
   font-size:13px;font-weight:600;
-  box-shadow:0 4px 20px rgba(0,0,0,.25);
+  box-shadow:var(--shadow-lg);
   max-width:90%;text-align:center;
+  animation:toastIn .25s ease;
 }
+@keyframes toastIn{from{transform:translateY(-10px);opacity:0}to{transform:none;opacity:1}}
 .toast.success{background:var(--green)}
 .toast.error{background:var(--danger)}
+.toast.info{background:var(--accent)}
 
 /* ===== EMPTY STATE ===== */
 .empty{
@@ -367,31 +472,11 @@ select.field{-webkit-appearance:none;appearance:none}
 .empty h4{font-size:15px;font-weight:700;color:var(--text-2)}
 .empty p{font-size:13px;color:var(--text-3)}
 
-/* ===== MORE GRID ===== */
-.more-grid{
-  display:grid;grid-template-columns:repeat(3,1fr);gap:10px;
-  margin-bottom:12px;
-}
-.more-card{
-  background:var(--surface);border-radius:var(--radius-lg);
-  border:1px solid var(--border);padding:14px 8px;
-  display:flex;flex-direction:column;align-items:center;gap:8px;
-  text-align:center;transition:transform .12s,box-shadow .12s;
-  position:relative;
-}
-.more-card:active{transform:scale(.95)}
-.more-card-icon{
-  width:44px;height:44px;border-radius:14px;
-  display:flex;align-items:center;justify-content:center;
-}
-.more-card-label{font-size:12px;font-weight:700;color:var(--text-2);line-height:1.2}
-.more-card .badge{position:absolute;top:6px;left:6px}
-
 /* ===== SESSION CARDS ===== */
 .session-card{
   background:var(--surface);border-radius:var(--radius-lg);
   border:1px solid var(--border);margin-bottom:10px;
-  overflow:hidden;
+  overflow:hidden;box-shadow:var(--shadow);
 }
 .session-card-head{
   display:flex;align-items:center;gap:10px;
@@ -401,12 +486,44 @@ select.field{-webkit-appearance:none;appearance:none}
   padding:0 14px 12px;border-top:1px solid var(--border);
   display:none;
 }
-.session-card.open .session-card-body{display:block}
+.session-card.open .session-card-body{display:block;animation:fadeIn .18s ease}
 .session-date-badge{
   padding:4px 10px;border-radius:8px;
   font-size:11px;font-weight:700;font-family:var(--mono);
   background:var(--surface-2);color:var(--text-3);
 }
+
+/* ===== LESSON CARD ===== */
+.lesson-card{
+  background:var(--surface);border-radius:var(--radius-lg);
+  border:1px solid var(--border);margin-bottom:10px;
+  overflow:hidden;box-shadow:var(--shadow);
+}
+.lesson-card-head{
+  display:flex;align-items:center;gap:12px;
+  padding:14px;cursor:pointer;
+}
+.lesson-card-body{
+  padding:0 14px 14px;
+  display:none;border-top:1px solid var(--border);
+}
+.lesson-card.open .lesson-card-body{display:block;animation:fadeIn .18s ease}
+.lesson-section{margin-bottom:12px}
+.lesson-section-title{
+  font-size:11px;font-weight:800;color:var(--text-3);
+  letter-spacing:.4px;text-transform:uppercase;margin-bottom:6px;
+}
+.lesson-content{
+  font-size:13px;color:var(--text-2);line-height:1.7;
+  padding:10px 12px;background:var(--surface-2);border-radius:8px;
+}
+.lesson-term-row{
+  display:flex;gap:8px;align-items:flex-start;
+  padding:6px 0;border-bottom:1px dashed var(--border);font-size:13px;
+}
+.lesson-term-row:last-child{border-bottom:none}
+.lesson-term-key{font-weight:700;color:var(--accent);flex-shrink:0;min-width:100px}
+.lesson-term-val{color:var(--text-2)}
 
 /* ===== ATTENDANCE TABLE ===== */
 .att-row{
@@ -424,18 +541,139 @@ select.field{-webkit-appearance:none;appearance:none}
 .grade-item:last-child{border-bottom:none}
 .grade-score{
   font-size:20px;font-weight:800;font-family:var(--mono);
-  color:var(--accent);min-width:44px;text-align:center;
+  color:var(--accent);min-width:48px;text-align:center;
 }
 .grade-score.pass{color:var(--green)}
 .grade-score.fail{color:var(--danger)}
 .grade-score.avg{color:var(--amber)}
 
-/* ===== DIVIDER ===== */
-.divider{height:1px;background:var(--border);margin:6px 0}
+/* ===== EXERCISE CARD ===== */
+.ex-card{
+  background:var(--surface);border-radius:var(--radius-lg);
+  border:1px solid var(--border);margin-bottom:10px;
+  overflow:hidden;box-shadow:var(--shadow);
+}
+.ex-card-head{padding:14px;display:flex;align-items:flex-start;gap:10px}
+.ex-num{
+  width:32px;height:32px;border-radius:8px;
+  background:var(--accent-light);color:var(--accent);
+  font-size:13px;font-weight:800;font-family:var(--mono);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.ex-solution{
+  padding:12px 14px;
+  border-top:1px dashed var(--border);
+  display:none;background:var(--surface-2);
+}
+.ex-solution.show{display:block;animation:fadeIn .2s ease}
+
+/* ===== PAYMENT STATUS ===== */
+.pay-month-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:6px;
+  padding:12px;
+}
+.pay-month-card{
+  border-radius:8px;border:1.5px solid var(--border);
+  padding:8px 6px;text-align:center;cursor:pointer;
+  transition:all .15s;font-size:11px;font-weight:700;
+}
+.pay-month-card.paid{background:var(--green-light);border-color:var(--green);color:var(--green)}
+.pay-month-card.unpaid{background:var(--danger-light);border-color:var(--danger);color:var(--danger)}
+.pay-month-card.partial{background:var(--amber-light);border-color:var(--amber);color:#A0711F}
+.pay-month-card.late{background:var(--purple-light);border-color:var(--purple);color:var(--purple)}
+.pay-month-card.none{background:var(--surface-2);border-color:var(--border);color:var(--text-3)}
+
+/* ===== SEARCH ===== */
+.search-bar{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 14px;background:var(--surface);
+  border:1.5px solid var(--border);border-radius:12px;
+  margin-bottom:14px;
+}
+.search-bar input{flex:1;font-size:14px;color:var(--text)}
+.search-bar svg{color:var(--text-3);flex-shrink:0}
+.search-result-item{
+  display:flex;align-items:center;gap:12px;
+  padding:12px 14px;border-bottom:1px solid var(--border);
+  cursor:pointer;transition:background .1s;
+}
+.search-result-item:active{background:var(--surface-2)}
+.search-result-type{
+  font-size:10px;font-weight:700;padding:2px 7px;border-radius:5px;
+  background:var(--accent-light);color:var(--accent);
+}
+
+/* ===== ADMIN MODE ===== */
+.admin-actions{
+  display:none;gap:6px;
+}
+body.admin-mode .admin-actions{display:flex}
+.admin-actions .btn-icon{background:var(--amber-light);color:var(--amber)}
+
+/* ===== SETTINGS ===== */
+.setting-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 16px;border-bottom:1px solid var(--border);
+}
+.setting-row:last-child{border-bottom:none}
+.setting-label{font-size:14px;font-weight:600;color:var(--text)}
+.setting-sub{font-size:12px;color:var(--text-3);margin-top:2px}
+/* Toggle */
+.toggle{
+  position:relative;width:46px;height:26px;
+  background:var(--border-2);border-radius:13px;
+  transition:background .2s;cursor:pointer;flex-shrink:0;
+}
+.toggle.on{background:var(--accent)}
+.toggle::after{
+  content:'';position:absolute;top:3px;right:3px;
+  width:20px;height:20px;border-radius:50%;
+  background:#fff;transition:right .2s;
+  box-shadow:0 1px 4px rgba(0,0,0,.2);
+}
+.toggle.on::after{right:calc(100% - 23px)}
+/* Color Picker */
+.color-options{display:flex;gap:8px;flex-wrap:wrap;padding:4px 0}
+.color-opt{
+  width:32px;height:32px;border-radius:50%;cursor:pointer;
+  border:3px solid transparent;transition:border-color .15s,transform .1s;
+}
+.color-opt.selected{border-color:var(--text);transform:scale(1.15)}
+
+/* ===== GLOSSARY ===== */
+.term-card{
+  background:var(--surface);border-radius:var(--radius-lg);
+  border:1px solid var(--border);margin-bottom:8px;
+  padding:14px;box-shadow:var(--shadow);
+}
+.term-word{font-size:15px;font-weight:800;color:var(--accent);margin-bottom:4px}
+.term-def{font-size:13px;color:var(--text-2);line-height:1.6}
+.term-tags{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+
+/* ===== PLANNING / TIMELINE ===== */
+.timeline-item{
+  display:flex;gap:12px;padding:0 0 16px 0;position:relative;
+}
+.timeline-item:not(:last-child)::before{
+  content:'';position:absolute;right:18px;top:36px;
+  width:2px;bottom:0;background:var(--border);
+}
+.timeline-dot{
+  width:36px;height:36px;border-radius:50%;
+  border:3px solid var(--border);background:var(--surface);
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;z-index:1;
+}
+.timeline-dot.done{background:var(--green);border-color:var(--green);color:#fff}
+.timeline-dot.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.timeline-body{flex:1;background:var(--surface);border-radius:var(--radius-lg);border:1px solid var(--border);padding:12px}
 
 /* ===== CHART ===== */
 canvas{display:block;max-width:100%}
-.chart-wrap{padding:14px 16px}
+.chart-wrap{padding:8px 14px 14px}
+
+/* ===== DIVIDER ===== */
+.divider{height:1px;background:var(--border);margin:8px 0}
 
 /* ===== PRINT ===== */
 #print-area{display:none}
@@ -444,22 +682,40 @@ canvas{display:block;max-width:100%}
   #print-area{display:block!important}
 }
 
-/* ===== DESKTOP ===== */
-@media(min-width:640px){
+/* ===== RESPONSIVE ===== */
+@media(min-width:520px){
   .stat-grid{grid-template-columns:repeat(4,1fr)}
-  .more-grid{grid-template-columns:repeat(4,1fr)}
-  .field-grid-2{grid-template-columns:1fr 1fr}
 }
 </style>
 </head>
 <body>
 
+<!-- ===== DRAWER ===== -->
+<div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawer()"></div>
+<nav class="drawer" id="drawer">
+  <div class="drawer-head">
+    <button class="drawer-close" onclick="closeDrawer()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <h2>مساعد الأستاذ</h2>
+    <p>نظام إدارة مركز الدعم</p>
+  </div>
+  <div id="drawer-content"></div>
+</nav>
+
 <div id="app">
   <!-- TOP BAR -->
   <header class="topbar" id="topbar">
-    <div id="topbar-left" style="width:40px"></div>
+    <button class="menu-btn" onclick="openDrawer()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+        <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    </button>
     <div class="topbar-title" id="topbar-title">مساعد الأستاذ</div>
     <div class="topbar-right" id="topbar-right">
+      <button class="search-btn" onclick="navigate('search')" title="بحث">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </button>
       <div id="today-badge" style="font-size:11px;font-weight:700;color:var(--text-3);font-family:var(--mono)"></div>
     </div>
   </header>
@@ -468,17 +724,19 @@ canvas{display:block;max-width:100%}
   <div id="page-content">
     <div class="section active" id="sec-dashboard"></div>
     <div class="section" id="sec-students"></div>
-    <div class="section" id="sec-attendance"></div>
-    <div class="section" id="sec-grades"></div>
-    <div class="section" id="sec-more"></div>
-    <div class="section" id="sec-sessions"></div>
     <div class="section" id="sec-lessons"></div>
     <div class="section" id="sec-exercises"></div>
     <div class="section" id="sec-homework"></div>
+    <div class="section" id="sec-glossary"></div>
+    <div class="section" id="sec-sessions"></div>
+    <div class="section" id="sec-attendance"></div>
+    <div class="section" id="sec-grades"></div>
     <div class="section" id="sec-payments"></div>
-    <div class="section" id="sec-data"></div>
+    <div class="section" id="sec-reports"></div>
+    <div class="section" id="sec-settings"></div>
     <div class="section" id="sec-student-detail"></div>
-    <div class="section" id="sec-performance"></div>
+    <div class="section" id="sec-search"></div>
+    <div class="section" id="sec-data"></div>
   </div>
 
   <!-- BOTTOM NAV -->
@@ -494,8 +752,7 @@ canvas{display:block;max-width:100%}
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
         <circle cx="9" cy="7" r="4"/>
-        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
       </svg>
       التلاميذ
       <span class="nav-dot" id="nd-students"></span>
@@ -513,16 +770,17 @@ canvas{display:block;max-width:100%}
       </svg>
       النقاط
     </button>
-    <button class="nav-btn" data-nav="more" onclick="navigate('more')">
+    <button class="nav-btn" data-nav="settings" onclick="navigate('settings')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/>
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
       </svg>
-      المزيد
+      الإعدادات
     </button>
   </nav>
 
   <!-- FAB -->
-  <button class="fab" id="main-fab" onclick="handleFab()">
+  <button class="fab" id="main-fab" onclick="handleFab()" style="display:none">
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
       <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
     </svg>
@@ -543,18 +801,32 @@ canvas{display:block;max-width:100%}
 /* =================================================================
    CONSTANTS
 ================================================================= */
-const SK = 'tutorV3';
+const SK = 'tutorV4';
 const CLASSES = [
   { id:'1ere', label:'1ère Collège', color:'var(--c1)', bg:'var(--c1-bg)', short:'1ère' },
   { id:'2eme', label:'2ème Collège', color:'var(--c2)', bg:'var(--c2-bg)', short:'2ème' }
 ];
 const SUBJECTS = [
-  { id:'math', label:'Mathématiques', short:'Maths', color:'var(--math)', bg:'var(--math-bg)', cls:'math' },
+  { id:'math', label:'Mathématiques', short:'Maths',   color:'var(--math)', bg:'var(--math-bg)', cls:'math' },
   { id:'phy',  label:'Physique-Chimie', short:'Physique', color:'var(--phy)',  bg:'var(--phy-bg)',  cls:'phy'  },
-  { id:'svt',  label:'SVT',            short:'SVT',     color:'var(--svt)',  bg:'var(--svt-bg)',  cls:'svt'  }
+  { id:'svt',  label:'SVT',            short:'SVT',    color:'var(--svt)',  bg:'var(--svt-bg)',  cls:'svt'  }
 ];
-const GRADE_TYPES = ['فرض محروس','اختبار','مشاركة','ملاحظة'];
+const GRADE_TYPES = ['فرض محروس','اختبار','مشاركة','ملاحظة','فرض منزلي'];
 const ATT_STATUS  = { present:'حاضر', absent:'غائب', late:'متأخر' };
+const PAY_STATUS  = { paid:'مدفوع', unpaid:'غير مدفوع', partial:'جزئي', late:'متأخر', none:'—' };
+const PAY_STATUS_CLS = { paid:'paid', unpaid:'unpaid', partial:'partial', late:'late', none:'none' };
+const MONTHS_AR = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليوز','غشت','شتنبر','أكتوبر','نونبر','دجنبر'];
+const LEVEL_COLORS = {
+  'سهل':'badge-green','متوسط':'badge-amber','صعب':'badge-red','تحدٍّ':'badge-blue'
+};
+const ACCENT_COLORS = [
+  {name:'أزرق داكن',val:'#3B4FC0'},
+  {name:'أخضر',val:'#178A6F'},
+  {name:'بنفسجي',val:'#7C3AED'},
+  {name:'برتقالي',val:'#D05A20'},
+  {name:'وردي',val:'#C0396A'},
+  {name:'سماوي',val:'#0891B2'},
+];
 
 function subjById(id){ return SUBJECTS.find(s=>s.id===id)||SUBJECTS[0] }
 function clsById(id){  return CLASSES.find(c=>c.id===id)||CLASSES[0]  }
@@ -568,19 +840,36 @@ function defaultData(){
     sessions:[],
     attendance:[],
     grades:[],
-    payments:[],
+    payments:[],      // monthly subscription payments
     lessons:[],
     exercises:[],
     homework:[],
-    settings:{ defaultFee:200 }
+    glossary:[],
+    settings:{
+      defaultFee:200,
+      darkMode:false,
+      accentColor:'#3B4FC0',
+      adminMode:false
+    }
   };
 }
 let DATA = (function(){
   try{
     const r=localStorage.getItem(SK);
-    if(!r)return defaultData();
-    const p=JSON.parse(r);
-    return {...defaultData(),...p};
+    if(r){
+      const p=JSON.parse(r);
+      const merged={...defaultData(),...p};
+      merged.settings={...defaultData().settings,...(p.settings||{})};
+      return merged;
+    }
+    // Migrate from old key
+    const old=localStorage.getItem('tutorV3');
+    if(old){
+      const p=JSON.parse(old);
+      const d=defaultData();
+      return {...d,...p,settings:{...d.settings,...(p.settings||{})}};
+    }
+    return defaultData();
   }catch(e){return defaultData();}
 })();
 
@@ -588,8 +877,46 @@ function save(){ localStorage.setItem(SK,JSON.stringify(DATA)); updateBadges(); 
 function uid(){ return '_'+Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
 function esc(s){ if(s==null)return''; return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]); }
 function today(){ return new Date().toISOString().slice(0,10); }
+function currentYM(){ return new Date().toISOString().slice(0,7); }
 function fdate(d){ if(!d)return'—'; const p=d.split('-'); return `${p[2]}/${p[1]}/${p[0]}`; }
-function monthLabel(ym){ const [y,m]=ym.split('-'); const ms=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليوز','غشت','شتنبر','أكتوبر','نونبر','دجنبر']; return ms[+m-1]+' '+y; }
+function monthLabel(ym){ if(!ym)return'—'; const [y,m]=ym.split('-'); return (MONTHS_AR[+m-1]||ym)+' '+y; }
+function getYearMonths(){ 
+  const months=[];
+  const now=new Date();
+  const yr=now.getFullYear();
+  // Academic year Sep → Jun
+  const start=now.getMonth()<8?yr-1:yr;
+  for(let m=8;m<12;m++) months.push(`${start}-${String(m+1).padStart(2,'0')}`);
+  for(let m=0;m<6;m++) months.push(`${start+1}-${String(m+1).padStart(2,'0')}`);
+  return months;
+}
+
+/* =================================================================
+   APPLY SETTINGS
+================================================================= */
+function applySettings(){
+  document.body.classList.toggle('dark',!!DATA.settings.darkMode);
+  document.body.classList.toggle('admin-mode',!!DATA.settings.adminMode);
+  const r=document.documentElement;
+  const c=DATA.settings.accentColor||'#3B4FC0';
+  r.style.setProperty('--accent',c);
+  r.style.setProperty('--accent-dark',shadeColor(c,-15));
+  r.style.setProperty('--accent-light',hexToLight(c));
+}
+function shadeColor(hex,pct){
+  const n=parseInt(hex.slice(1),16);
+  const r=Math.min(255,Math.max(0,(n>>16)+(pct*2.55|0)));
+  const g=Math.min(255,Math.max(0,((n>>8)&0xff)+(pct*2.55|0)));
+  const b=Math.min(255,Math.max(0,(n&0xff)+(pct*2.55|0)));
+  return `#${(r<<16|g<<8|b).toString(16).padStart(6,'0')}`;
+}
+function hexToLight(hex){
+  const n=parseInt(hex.slice(1),16);
+  const r=(n>>16);const g=(n>>8)&0xff;const b=n&0xff;
+  if(document.body.classList.contains('dark'))
+    return `rgba(${r},${g},${b},0.18)`;
+  return `rgba(${r},${g},${b},0.12)`;
+}
 
 /* =================================================================
    TOAST
@@ -599,7 +926,11 @@ function toast(msg,type=''){
   el.className='toast'+(type?' '+type:'');
   el.textContent=msg;
   document.getElementById('toast-area').appendChild(el);
-  setTimeout(()=>{el.style.transition='opacity .3s';el.style.opacity='0';setTimeout(()=>el.remove(),300);},2600);
+  setTimeout(()=>{
+    el.style.transition='opacity .3s,transform .3s';
+    el.style.opacity='0';el.style.transform='translateY(-8px)';
+    setTimeout(()=>el.remove(),300);
+  },2600);
 }
 
 /* =================================================================
@@ -628,15 +959,68 @@ function overlayClick(e){
 }
 
 /* =================================================================
+   DRAWER
+================================================================= */
+function openDrawer(){
+  renderDrawer();
+  document.getElementById('drawer').classList.add('open');
+  document.getElementById('drawer-overlay').classList.add('show');
+  document.body.style.overflow='hidden';
+}
+function closeDrawer(){
+  document.getElementById('drawer').classList.remove('open');
+  document.getElementById('drawer-overlay').classList.remove('show');
+  document.body.style.overflow='';
+}
+function renderDrawer(){
+  const items=[
+    {key:'dashboard',    icon:IC.home,   color:'var(--accent)',  bg:'var(--accent-light)',label:'الرئيسية'},
+    {key:'students',     icon:IC.user,   color:'var(--c1)',      bg:'var(--c1-bg)',       label:'التلاميذ',        count:DATA.students.length},
+    {key:'lessons',      icon:IC.book,   color:'var(--math)',    bg:'var(--math-bg)',     label:'الدروس',          count:DATA.lessons.length},
+    {key:'exercises',    icon:IC.pen,    color:'var(--phy)',     bg:'var(--phy-bg)',      label:'التمارين',        count:DATA.exercises.length},
+    {key:'homework',     icon:IC.clip,   color:'var(--danger)',  bg:'var(--danger-light)',label:'الفروض',          count:DATA.homework.length},
+    {key:'glossary',     icon:IC.book2,  color:'var(--purple)',  bg:'var(--purple-light)',label:'المصطلحات',       count:DATA.glossary.length},
+    {key:'sessions',     icon:IC.clock,  color:'var(--accent)',  bg:'var(--accent-light)',label:'التخطيط الزمني',  count:DATA.sessions.length},
+    {key:'attendance',   icon:IC.check,  color:'var(--green)',   bg:'var(--green-light)', label:'الحضور والغياب'},
+    {key:'grades',       icon:IC.star,   color:'var(--amber)',   bg:'var(--amber-light)', label:'الأداء والنقاط'},
+    {key:'payments',     icon:IC.money,  color:'var(--green)',   bg:'var(--green-light)', label:'الدفع الشهري'},
+    {key:'reports',      icon:IC.chart,  color:'var(--purple)',  bg:'var(--purple-light)',label:'التقارير'},
+    {key:'settings',     icon:IC.gear,   color:'var(--text-3)',  bg:'var(--surface-2)',   label:'الإعدادات'},
+    {key:'data',         icon:IC.db,     color:'var(--text-3)',  bg:'var(--surface-2)',   label:'النسخ الاحتياطي'},
+  ];
+  document.getElementById('drawer-content').innerHTML=`
+    <div class="drawer-section">
+      ${items.map(it=>`
+        <div class="drawer-item ${currentSection===it.key?'active':''}" onclick="closeDrawer();navigate('${it.key}')">
+          <div class="di-icon" style="background:${it.bg};color:${it.color}">${it.icon}</div>
+          <span>${it.label}</span>
+          ${it.count!=null?`<span class="di-count">${it.count}</span>`:''}
+        </div>`).join('')}
+    </div>
+    <div class="drawer-divider"></div>
+    <div class="drawer-section" style="padding:12px 20px">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <span style="font-size:13px;font-weight:700;color:var(--text-3)">وضع الإدارة</span>
+        <div class="toggle ${DATA.settings.adminMode?'on':''}" onclick="toggleAdminMode()"></div>
+      </div>
+      <div style="font-size:11px;color:var(--text-3);margin-top:4px">تفعيل أدوات التعديل والحذف</div>
+    </div>
+  `;
+}
+function toggleAdminMode(){
+  DATA.settings.adminMode=!DATA.settings.adminMode;
+  save();applySettings();
+  renderDrawer();
+  toast(DATA.settings.adminMode?'وضع الإدارة مفعّل':'وضع الإدارة مُعطَّل','info');
+}
+
+/* =================================================================
    NAVIGATION
 ================================================================= */
 let currentSection='dashboard';
 let currentStudentId=null;
 let navHistory=['dashboard'];
-let filterClass='1ere';
-let filterSubj='math';
 
-// Sub-filters per section (persisted in JS state)
 let filAtt   ={cls:'1ere', date:today()};
 let filGrades={cls:'1ere', subj:'math'};
 let filSess  ={cls:'1ere', subj:'math'};
@@ -644,57 +1028,62 @@ let filLess  ={cls:'1ere', subj:'math'};
 let filExer  ={cls:'1ere', subj:'math'};
 let filHW    ={cls:'1ere', subj:'math'};
 let filPay   ={cls:'1ere'};
-let filStud  ={cls:'1ere'};
+let filStud  ={cls:'1ere', q:''};
+let filGloss ={subj:'math'};
 
 const SECTION_TITLES={
   dashboard:'مساعد الأستاذ',
   students:'التلاميذ',
-  attendance:'سجل الحضور',
-  grades:'النقاط',
-  more:'المزيد',
-  sessions:'جدول الحصص',
+  attendance:'الحضور والغياب',
+  grades:'النقاط والأداء',
+  sessions:'التخطيط الزمني',
   lessons:'الدروس',
   exercises:'التمارين',
   homework:'الفروض',
-  payments:'الأداءات',
-  data:'البيانات',
+  payments:'الدفع الشهري',
+  glossary:'المصطلحات',
+  reports:'التقارير',
+  settings:'الإعدادات',
+  data:'النسخ الاحتياطي',
   'student-detail':'بطاقة التلميذ',
-  performance:'الأداء والإحصاء',
+  search:'البحث',
 };
-const MAIN_NAVS=['dashboard','students','attendance','grades','more'];
-const NO_FAB   =['more','data','performance'];
+const MAIN_NAVS=['dashboard','students','attendance','grades','settings'];
+const NO_FAB=['settings','data','reports','search'];
 
 function _nav(key,extra){
   document.querySelectorAll('.section').forEach(el=>el.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(btn=>{
-    const isMain=MAIN_NAVS.includes(key)?btn.dataset.nav===key:btn.dataset.nav==='more';
-    btn.classList.toggle('active',isMain);
+    const k=MAIN_NAVS.includes(key)?key:'';
+    btn.classList.toggle('active',btn.dataset.nav===k);
   });
-  document.getElementById('main-fab').style.display=NO_FAB.includes(key)?'none':'';
+  const fab=document.getElementById('main-fab');
+  fab.style.display=NO_FAB.includes(key)?'none':'flex';
   const tl=document.getElementById('topbar-left');
-  if(!MAIN_NAVS.includes(key)){
-    tl.innerHTML=`<button class="back-btn" onclick="goBack()">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
-    </button>`;
-  } else { tl.innerHTML=''; }
+  const tr=document.getElementById('topbar-right');
   currentSection=key;
-  document.getElementById('topbar-title').textContent=SECTION_TITLES[key]||'';
+  document.getElementById('topbar-title').textContent=SECTION_TITLES[key]||key;
   const sec=document.getElementById('sec-'+key);
   if(sec){ sec.classList.add('active'); document.getElementById('page-content').scrollTop=0; }
   // Render
-  if(key==='dashboard')      renderDashboard();
-  else if(key==='students')  renderStudents();
-  else if(key==='attendance')renderAttendance();
-  else if(key==='grades')    renderGrades();
-  else if(key==='more')      renderMore();
-  else if(key==='sessions')  renderSessions();
-  else if(key==='lessons')   renderLessons();
-  else if(key==='exercises') renderExercises();
-  else if(key==='homework')  renderHomework();
-  else if(key==='payments')  renderPayments();
-  else if(key==='data')      renderData();
-  else if(key==='performance') renderPerformance();
-  else if(key==='student-detail') renderStudentDetail(extra);
+  const renderers={
+    dashboard:renderDashboard,
+    students:renderStudents,
+    attendance:renderAttendance,
+    grades:renderGrades,
+    sessions:renderSessions,
+    lessons:renderLessons,
+    exercises:renderExercises,
+    homework:renderHomework,
+    payments:renderPayments,
+    glossary:renderGlossary,
+    reports:renderReports,
+    settings:renderSettings,
+    data:renderData,
+    search:renderSearch,
+  };
+  if(key==='student-detail') renderStudentDetail(extra);
+  else if(renderers[key]) renderers[key]();
 }
 function navigate(key,extra,noHistory){
   if(!noHistory) navHistory.push(key+(extra?'|'+extra:''));
@@ -709,7 +1098,11 @@ function goBack(){
 }
 function updateBadges(){
   const nd=document.getElementById('nd-students');
-  if(nd){nd.textContent=DATA.students.length;nd.style.display=DATA.students.length>0?'':'none';}
+  if(nd){
+    const n=DATA.students.length;
+    nd.textContent=n;
+    nd.classList.toggle('show',n>0);
+  }
 }
 
 /* =================================================================
@@ -718,54 +1111,76 @@ function updateBadges(){
 function handleFab(){
   const s=currentSection;
   if(s==='students')    openStudentForm();
-  else if(s==='attendance') openAttForm();
+  else if(s==='attendance') toast('اختر التاريخ وانقر على حالة كل تلميذ','info');
   else if(s==='grades') openGradeForm();
   else if(s==='sessions') openSessionForm();
   else if(s==='lessons')  openLessonForm();
   else if(s==='exercises') openExerciseForm();
   else if(s==='homework') openHomeworkForm();
-  else if(s==='payments') openPaymentForm();
+  else if(s==='payments') openPaymentSheet();
+  else if(s==='glossary') openGlossaryForm();
   else openStudentForm();
 }
 
 /* =================================================================
-   SVG ICONS (inline helpers)
+   SVG ICONS
 ================================================================= */
 const IC={
-  user:   `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`,
+  user:   `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`,
   edit:   `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`,
   trash:  `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>`,
   plus:   `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`,
   book:   `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>`,
+  book2:  `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>`,
   pen:    `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>`,
+  clip:   `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>`,
   clock:  `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`,
   star:   `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`,
   money:  `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>`,
   chart:  `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/></svg>`,
   db:     `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>`,
   home:   `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`,
+  gear:   `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>`,
   chev:   `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>`,
   chevDown:`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>`,
   check:  `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>`,
+  eye:    `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`,
+  eyeOff: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`,
+  search: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>`,
+  sun:    `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`,
+  moon:   `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`,
 };
 
 /* =================================================================
-   CLASS / SUBJECT SELECTORS (HTML helpers)
+   HTML HELPERS
 ================================================================= */
 function classTabsHtml(active,fn){
   return `<div class="class-tabs">
-    ${CLASSES.map(c=>`<button class="class-tab ${active===c.id?'active-'+c.id.replace('ere','1').replace('eme','2'):''}" onclick="${fn}('${c.id}')">${c.label}</button>`).join('')}
+    ${CLASSES.map(c=>`<button class="class-tab ${active===c.id?'act-'+c.id:''}" onclick="${fn}('${c.id}')">${c.label}</button>`).join('')}
   </div>`;
 }
-function subjPillsHtml(active,fn){
+function subjPillsHtml(active,fn,all=false){
+  const allBtn=all?`<button class="subj-pill ${active===''?'math':''}" onclick="${fn}('')">الكل</button>`:'';
   return `<div class="subj-row">
+    ${allBtn}
     ${SUBJECTS.map(s=>`<button class="subj-pill ${active===s.id?s.cls:''}" onclick="${fn}('${s.id}')">${s.label}</button>`).join('')}
   </div>`;
 }
 function classColor(cls){ return cls==='1ere'?'var(--c1)':'var(--c2)'; }
 function classBg(cls){    return cls==='1ere'?'var(--c1-bg)':'var(--c2-bg)'; }
 function classBadge(cls){ return cls==='1ere'?'badge-c1':'badge-c2'; }
-function subjShort(id){   return subjById(id).short; }
+function emptyHtml(title,sub){
+  return `<div class="empty">
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12" opacity=".4"/></svg>
+    <h4>${title}</h4><p>${sub}</p>
+  </div>`;
+}
+function adminBtns(editFn,delFn){
+  return `<div class="admin-actions">
+    <button class="btn-icon accent" onclick="${editFn}">${IC.edit}</button>
+    <button class="btn-icon danger"  onclick="${delFn}">${IC.trash}</button>
+  </div>`;
+}
 
 /* =================================================================
    STUDENTS
@@ -774,45 +1189,66 @@ function studentsOf(cls){ return DATA.students.filter(s=>s.cls===cls); }
 
 function renderStudents(){
   const cls=filStud.cls;
-  const list=studentsOf(cls);
+  const q=(filStud.q||'').toLowerCase();
+  let list=studentsOf(cls);
+  if(q) list=list.filter(s=>s.name.toLowerCase().includes(q)||(s.phone||'').includes(q));
   const sec=document.getElementById('sec-students');
   sec.innerHTML=`
     ${classTabsHtml(cls,"setStudCls")}
+    <div class="search-bar">
+      ${IC.search}
+      <input id="stud-search" placeholder="بحث بالاسم أو الهاتف..." value="${esc(filStud.q||'')}"
+        oninput="filterStudents(this.value)">
+      ${filStud.q?`<button onclick="filterStudents('')" style="color:var(--text-3)">✕</button>`:''}
+    </div>
     <div class="section-header">
       <h2>تلاميذ ${clsById(cls).label}</h2>
       <span class="count-badge">${list.length}</span>
     </div>
     <div class="panel">
       ${list.length===0
-        ? emptyHtml('لا يوجد تلاميذ','أضف تلميذاً باستخدام الزر أسفله')
-        : list.map(s=>`
+        ? emptyHtml(q?'لا نتائج':'لا يوجد تلاميذ',q?'جرب كلمة بحث أخرى':'أضف تلميذاً باستخدام الزر أسفله')
+        : list.map((s,i)=>`
           <div class="card-item" onclick="navigate('student-detail','${s.id}')">
-            <div class="card-item-icon" style="background:${classBg(s.cls)};color:${classColor(s.cls)}">${IC.user}</div>
+            <div class="card-item-icon" style="background:${classBg(s.cls)};color:${classColor(s.cls)}">
+              <span style="font-size:17px;font-weight:800;font-family:var(--mono)">${i+1}</span>
+            </div>
             <div class="card-item-body">
               <div class="card-item-title">${esc(s.name)}</div>
-              <div class="card-item-sub">${esc(s.phone||'')} ${s.notes?'· '+esc(s.notes.slice(0,30)):''}</div>
+              <div class="card-item-sub">${s.phone?esc(s.phone):'لا يوجد هاتف'} ${s.status?`· <span style="color:${s.status==='نشط'?'var(--green)':'var(--danger)'}">${esc(s.status)}</span>`:''}</div>
             </div>
             <div class="card-item-actions">
-              <button class="btn-icon accent" onclick="event.stopPropagation();openStudentForm('${s.id}')">${IC.edit}</button>
-              <button class="btn-icon danger" onclick="event.stopPropagation();deleteStudent('${s.id}')">${IC.trash}</button>
-              ${IC.chev}
+              ${adminBtns(`event.stopPropagation();openStudentForm('${s.id}')`,`event.stopPropagation();deleteStudent('${s.id}')`)}
+              <span style="color:var(--text-3)">${IC.chev}</span>
             </div>
           </div>`).join('')}
     </div>`;
 }
-function setStudCls(cls){ filStud.cls=cls; renderStudents(); }
+function setStudCls(cls){ filStud.cls=cls; filStud.q=''; renderStudents(); }
+function filterStudents(q){ filStud.q=q; renderStudents(); }
 
 function openStudentForm(id){
   const s=id?DATA.students.find(x=>x.id===id):{};
   const clsOpts=CLASSES.map(c=>`<option value="${c.id}" ${(s.cls||filStud.cls)===c.id?'selected':''}>${c.label}</option>`).join('');
-  showSheet(id?'تعديل التلميذ':'إضافة تلميذ',`
+  const statusOpts=['نشط','متوقف','منسحب'].map(v=>`<option value="${v}" ${(s.status||'نشط')===v?'selected':''}>${v}</option>`).join('');
+  showSheet(id?'تعديل بيانات التلميذ':'تسجيل تلميذ جديد',`
     <div class="field-row"><label>الاسم الكامل <span class="req">*</span></label>
-      <input class="field" id="sf-name" value="${esc(s.name||'')}"></div>
-    <div class="field-row"><label>القسم <span class="req">*</span></label>
-      <select class="field" id="sf-cls">${clsOpts}</select></div>
-    <div class="field-row"><label>رقم الهاتف (أولياء)</label>
-      <input class="field" id="sf-phone" value="${esc(s.phone||'')}"></div>
-    <div class="field-row"><label>ملاحظة</label>
+      <input class="field" id="sf-name" placeholder="اسم ولقب التلميذ" value="${esc(s.name||'')}"></div>
+    <div class="field-grid-2">
+      <div class="field-row"><label>القسم <span class="req">*</span></label>
+        <select class="field" id="sf-cls">${clsOpts}</select></div>
+      <div class="field-row"><label>الحالة</label>
+        <select class="field" id="sf-status">${statusOpts}</select></div>
+    </div>
+    <div class="field-row"><label>رقم ولي الأمر</label>
+      <input class="field" id="sf-phone" type="tel" placeholder="0600000000" value="${esc(s.phone||'')}"></div>
+    <div class="field-grid-2">
+      <div class="field-row"><label>تاريخ التسجيل</label>
+        <input class="field" type="date" id="sf-regdate" value="${s.regDate||today()}"></div>
+      <div class="field-row"><label>الأجر الشهري (د.م)</label>
+        <input class="field" type="number" id="sf-fee" value="${s.fee||DATA.settings.defaultFee||200}"></div>
+    </div>
+    <div class="field-row"><label>ملاحظات</label>
       <textarea class="field" id="sf-notes">${esc(s.notes||'')}</textarea></div>
     <input type="hidden" id="sf-id" value="${id||''}">
   `,[
@@ -825,21 +1261,19 @@ function saveStudent(){
   const name=document.getElementById('sf-name').value.trim();
   const cls=document.getElementById('sf-cls').value;
   if(!name){toast('أدخل اسم التلميذ','error');return;}
-  if(id){
-    const s=DATA.students.find(x=>x.id===id);
-    s.name=name;s.cls=cls;
-    s.phone=document.getElementById('sf-phone').value.trim();
-    s.notes=document.getElementById('sf-notes').value.trim();
-  } else {
-    DATA.students.push({id:uid(),name,cls,
-      phone:document.getElementById('sf-phone').value.trim(),
-      notes:document.getElementById('sf-notes').value.trim()
-    });
-  }
+  const obj={name,cls,
+    status:document.getElementById('sf-status').value,
+    phone:document.getElementById('sf-phone').value.trim(),
+    regDate:document.getElementById('sf-regdate').value,
+    fee:+document.getElementById('sf-fee').value||DATA.settings.defaultFee,
+    notes:document.getElementById('sf-notes').value.trim()
+  };
+  if(id){ Object.assign(DATA.students.find(x=>x.id===id),obj); }
+  else { DATA.students.push({id:uid(),...obj}); }
   save();closeSheet();toast('تم الحفظ','success');renderStudents();
 }
 function deleteStudent(id){
-  if(!confirm('حذف هذا التلميذ؟'))return;
+  if(!confirm('سيتم حذف التلميذ وجميع بياناته (الحضور، النقاط، الأداءات). هل تؤكد؟'))return;
   DATA.students=DATA.students.filter(s=>s.id!==id);
   DATA.attendance=DATA.attendance.filter(a=>a.sid!==id);
   DATA.grades=DATA.grades.filter(g=>g.sid!==id);
@@ -850,72 +1284,241 @@ function deleteStudent(id){
 /* =================================================================
    STUDENT DETAIL
 ================================================================= */
+let detailTab='info';
 function renderStudentDetail(id){
+  if(!id){navigate('students');return;}
+  currentStudentId=id;
   const s=DATA.students.find(x=>x.id===id);
   if(!s){navigate('students');return;}
   document.getElementById('topbar-title').textContent=s.name;
-  const atts=DATA.attendance.filter(a=>a.sid===id);
-  const present=atts.filter(a=>a.status==='present').length;
-  const total=atts.length;
-  const grades=DATA.grades.filter(g=>g.sid===id);
-  const pays=DATA.payments.filter(p=>p.sid===id);
-  const paid=pays.reduce((acc,p)=>acc+Number(p.amount||0),0);
-  const cls=clsById(s.cls);
   const sec=document.getElementById('sec-student-detail');
   sec.innerHTML=`
     <div class="panel" style="padding:16px">
       <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px">
-        <div style="width:56px;height:56px;border-radius:18px;background:${classBg(s.cls)};color:${classColor(s.cls)};display:flex;align-items:center;justify-content:center">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <div style="width:58px;height:58px;border-radius:18px;background:${classBg(s.cls)};color:${classColor(s.cls)};display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800">
+          ${s.name.charAt(0)}
+        </div>
+        <div style="flex:1">
+          <div style="font-size:18px;font-weight:800">${esc(s.name)}</div>
+          <div style="display:flex;gap:6px;margin-top:4px;flex-wrap:wrap">
+            <span class="badge ${classBadge(s.cls)}">${clsById(s.cls).label}</span>
+            ${s.status?`<span class="badge ${s.status==='نشط'?'badge-green':s.status==='متوقف'?'badge-amber':'badge-red'}">${esc(s.status)}</span>`:''}
+          </div>
+        </div>
+        <div class="admin-actions">
+          <button class="btn-icon accent" onclick="openStudentForm('${s.id}')">${IC.edit}</button>
+        </div>
+      </div>
+    </div>
+    <div class="tabs-scroll">
+      <button class="tab-btn ${detailTab==='info'?'active':''}" onclick="setDetailTab('info','${id}')">المعلومات</button>
+      <button class="tab-btn ${detailTab==='attendance'?'active':''}" onclick="setDetailTab('attendance','${id}')">الحضور</button>
+      <button class="tab-btn ${detailTab==='grades'?'active':''}" onclick="setDetailTab('grades','${id}')">النتائج</button>
+      <button class="tab-btn ${detailTab==='payments'?'active':''}" onclick="setDetailTab('payments','${id}')">الدفع</button>
+      <button class="tab-btn ${detailTab==='notes'?'active':''}" onclick="setDetailTab('notes','${id}')">ملاحظات</button>
+    </div>
+    <div id="detail-tab-content"></div>
+  `;
+  renderDetailTab(id);
+}
+function setDetailTab(tab,id){
+  detailTab=tab;
+  renderStudentDetail(id);
+}
+function renderDetailTab(id){
+  const s=DATA.students.find(x=>x.id===id);
+  const cont=document.getElementById('detail-tab-content');
+  if(!cont)return;
+  if(detailTab==='info'){
+    cont.innerHTML=`
+      <div class="panel">
+        ${s.phone?`<div class="data-row"><span class="key">هاتف ولي الأمر</span><span class="val" style="font-family:var(--mono)">${esc(s.phone)}</span></div>`:''}
+        <div class="data-row"><span class="key">تاريخ التسجيل</span><span class="val">${fdate(s.regDate)}</span></div>
+        <div class="data-row"><span class="key">الأجر الشهري</span><span class="val">${s.fee||DATA.settings.defaultFee||200} د.م</span></div>
+        <div class="data-row"><span class="key">القسم</span><span class="val">${clsById(s.cls).label}</span></div>
+      </div>`;
+  } else if(detailTab==='attendance'){
+    const atts=DATA.attendance.filter(a=>a.sid===id);
+    const present=atts.filter(a=>a.status==='present').length;
+    const absent=atts.filter(a=>a.status==='absent').length;
+    const late=atts.filter(a=>a.status==='late').length;
+    const total=atts.length;
+    const pct=total>0?Math.round(present/total*100):0;
+    cont.innerHTML=`
+      <div class="stat-grid-3" style="margin-bottom:12px">
+        <div class="stat-card" style="align-items:center;padding:12px 8px">
+          <div class="s-val" style="color:var(--green);font-size:22px">${present}</div>
+          <div class="s-label">حاضر</div>
+        </div>
+        <div class="stat-card" style="align-items:center;padding:12px 8px">
+          <div class="s-val" style="color:var(--danger);font-size:22px">${absent}</div>
+          <div class="s-label">غائب</div>
+        </div>
+        <div class="stat-card" style="align-items:center;padding:12px 8px">
+          <div class="s-val" style="color:var(--amber);font-size:22px">${late}</div>
+          <div class="s-label">متأخر</div>
+        </div>
+      </div>
+      <div class="panel" style="padding:14px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+          <span style="font-size:13px;font-weight:700;color:var(--text-3)">نسبة الحضور</span>
+          <span style="font-size:15px;font-weight:800;font-family:var(--mono);color:${pct>=75?'var(--green)':pct>=50?'var(--amber)':'var(--danger)'}">${pct}%</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${pct>=75?'var(--green)':pct>=50?'var(--amber)':'var(--danger)'}"></div></div>
+      </div>
+      <div class="panel">
+        <div class="panel-title">سجل الحضور</div>
+        ${atts.length===0?`<div style="padding:16px;text-align:center;color:var(--text-3);font-size:13px">لا توجد سجلات</div>`
+        : atts.slice().reverse().slice(0,20).map(a=>{
+            const sc=a.status==='present'?'badge-green':a.status==='absent'?'badge-red':'badge-amber';
+            return `<div class="data-row">
+              <span class="key">${fdate(a.date)}</span>
+              <span class="badge ${sc}">${ATT_STATUS[a.status]}</span>
+            </div>`;
+          }).join('')}
+      </div>`;
+  } else if(detailTab==='grades'){
+    const grades=DATA.grades.filter(g=>g.sid===id);
+    const avg=grades.length>0?grades.reduce((a,g)=>a+(g.max>0?g.score/g.max:0),0)/grades.length*20:null;
+    cont.innerHTML=`
+      ${avg!=null?`<div class="panel" style="padding:14px;display:flex;align-items:center;gap:14px;margin-bottom:12px">
+        <div style="width:56px;height:56px;border-radius:16px;background:var(--accent-light);color:var(--accent);display:flex;flex-direction:column;align-items:center;justify-content:center">
+          <span style="font-size:18px;font-weight:800;font-family:var(--mono)">${avg.toFixed(1)}</span>
+          <span style="font-size:10px;opacity:.7">/20</span>
         </div>
         <div>
-          <div style="font-size:18px;font-weight:800">${esc(s.name)}</div>
-          <span class="badge ${classBadge(s.cls)}">${cls.label}</span>
+          <div style="font-size:12px;color:var(--text-3);font-weight:600">المعدل العام</div>
+          <div style="font-size:13px;color:var(--text-2);margin-top:2px">${grades.length} نقطة مسجلة</div>
         </div>
-      </div>
-      ${s.phone?`<div class="data-row"><span class="key">الهاتف</span><span class="val" style="font-family:var(--mono)">${esc(s.phone)}</span></div>`:''}
-      ${s.notes?`<div class="data-row"><span class="key">ملاحظة</span><span class="val">${esc(s.notes)}</span></div>`:''}
-    </div>
-
-    <div class="stat-grid">
-      <div class="stat-card">
-        <div class="s-label">الحضور</div>
-        <div class="s-val">${present}/${total}</div>
-        <div class="s-sub">${total>0?Math.round(present/total*100):0}% نسبة الحضور</div>
-      </div>
-      <div class="stat-card">
-        <div class="s-label">النقاط المسجلة</div>
-        <div class="s-val">${grades.length}</div>
-        <div class="s-sub">في جميع المواد</div>
-      </div>
-    </div>
-
-    <div class="panel">
-      <div class="panel-title">آخر النقاط</div>
-      ${grades.length===0
-        ? `<div style="padding:16px;text-align:center;color:var(--text-3);font-size:13px">لا توجد نقاط</div>`
-        : grades.slice(-6).reverse().map(g=>{
+      </div>`:''}
+      <div class="panel">
+        <div class="panel-title">النقاط المسجلة</div>
+        ${grades.length===0?`<div style="padding:16px;text-align:center;color:var(--text-3);font-size:13px">لا توجد نقاط</div>`
+        :grades.slice().reverse().map(g=>{
             const subj=subjById(g.subj);
             const pct=g.max>0?g.score/g.max:0;
             const sc=pct>=0.7?'pass':pct>=0.5?'avg':'fail';
             return `<div class="grade-item">
-              <div class="grade-score ${sc}">${g.score}<span style="font-size:12px;opacity:.6">/${g.max}</span></div>
-              <div style="flex:1">
+              <div class="grade-score ${sc}">${g.score}<span style="font-size:11px;opacity:.5">/${g.max}</span></div>
+              <div style="flex:1;min-width:0">
                 <div style="font-size:13px;font-weight:600">${esc(g.title)}</div>
                 <div style="font-size:11px;color:var(--text-3)">${subj.label} · ${fdate(g.date)}</div>
               </div>
               <span class="badge badge-${subj.cls}">${subj.short}</span>
             </div>`;
           }).join('')}
+      </div>
+      <div class="chart-wrap" style="padding:10px 4px">
+        <canvas id="grade-chart-${id}" height="140"></canvas>
+      </div>`;
+    setTimeout(()=>drawStudentGradeChart(id,grades),0);
+  } else if(detailTab==='payments'){
+    const fee=s.fee||DATA.settings.defaultFee||200;
+    const months=getYearMonths();
+    const pays=DATA.payments.filter(p=>p.sid===id);
+    const paidTotal=pays.reduce((a,p)=>a+Number(p.paid||0),0);
+    const totalExpected=months.length*fee;
+    const unpaidTotal=Math.max(0,totalExpected-paidTotal);
+    cont.innerHTML=`
+      <div class="stat-grid" style="margin-bottom:12px">
+        <div class="stat-card" style="border-color:var(--green)">
+          <div class="s-label">المدفوع</div>
+          <div class="s-val" style="color:var(--green);font-size:22px">${paidTotal}</div>
+          <div class="s-sub">درهم</div>
+        </div>
+        <div class="stat-card" style="border-color:var(--danger)">
+          <div class="s-label">المتبقي</div>
+          <div class="s-val" style="color:var(--danger);font-size:22px">${unpaidTotal}</div>
+          <div class="s-sub">درهم</div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-title" style="padding:12px 16px 8px;display:flex;justify-content:space-between;align-items:center">
+          <span>الأشهر الدراسية</span>
+          <span style="font-size:11px;color:var(--text-3)">${fee} د.م/شهر</span>
+        </div>
+        <div class="pay-month-grid">
+          ${months.map(ym=>{
+            const p=pays.find(x=>x.month===ym)||{status:'none'};
+            const st=p.status||'none';
+            return `<div class="pay-month-card ${PAY_STATUS_CLS[st]||'none'}" onclick="openMonthPayment('${id}','${ym}')">
+              <div style="font-size:10px;margin-bottom:3px">${monthLabel(ym).split(' ')[0]}</div>
+              <div style="font-size:10px">${PAY_STATUS[st]}</div>
+              ${p.paid?`<div style="font-size:9px;margin-top:2px">${p.paid} د.م</div>`:''}
+            </div>`;
+          }).join('')}
+        </div>
+      </div>`;
+  } else if(detailTab==='notes'){
+    cont.innerHTML=`
+      <div class="panel" style="padding:14px">
+        <textarea class="field" id="student-notes-ta" style="min-height:180px;border:none;background:transparent;padding:0"
+          placeholder="اكتب ملاحظاتك عن التلميذ هنا..."
+          oninput="autoSaveNotes('${id}')">${esc(s.notes||'')}</textarea>
+        <div style="text-align:left;font-size:11px;color:var(--text-3);margin-top:8px" id="notes-saved-ind">تحفظ تلقائياً</div>
+      </div>`;
+  }
+}
+let notesSaveTimer=null;
+function autoSaveNotes(id){
+  clearTimeout(notesSaveTimer);
+  notesSaveTimer=setTimeout(()=>{
+    const ta=document.getElementById('student-notes-ta');
+    if(!ta)return;
+    const s=DATA.students.find(x=>x.id===id);
+    if(s){ s.notes=ta.value; save(); }
+    const ind=document.getElementById('notes-saved-ind');
+    if(ind) ind.textContent='✓ تم الحفظ';
+  },800);
+}
+function openMonthPayment(sid,ym){
+  const s=DATA.students.find(x=>x.id===sid);
+  const fee=s?s.fee||DATA.settings.defaultFee:DATA.settings.defaultFee;
+  const pays=DATA.payments.filter(p=>p.sid===sid);
+  const existing=pays.find(p=>p.month===ym)||{};
+  const statusOpts=['none','paid','partial','late','unpaid'].map(v=>
+    `<option value="${v}" ${(existing.status||'none')===v?'selected':''}>${PAY_STATUS[v]}</option>`).join('');
+  showSheet(`أداء ${monthLabel(ym)}`,`
+    <div class="field-row"><label>الحالة</label>
+      <select class="field" id="mp-status">${statusOpts}</select></div>
+    <div class="field-grid-2">
+      <div class="field-row"><label>المبلغ المدفوع (د.م)</label>
+        <input class="field" type="number" id="mp-paid" value="${existing.paid||fee}"></div>
+      <div class="field-row"><label>تاريخ الدفع</label>
+        <input class="field" type="date" id="mp-date" value="${existing.date||today()}"></div>
     </div>
-
-    <div class="panel">
-      <div class="panel-title">الأداءات</div>
-      ${pays.length===0
-        ? `<div style="padding:16px;text-align:center;color:var(--text-3);font-size:13px">لا توجد مدفوعات</div>`
-        : `<div class="data-row"><span class="key">إجمالي المدفوع</span><span class="val" style="color:var(--green)">${paid} د.م</span></div>`
-          +pays.slice(-5).reverse().map(p=>`<div class="data-row"><span class="key">${esc(p.month||p.note||'')}</span><span class="val">${p.amount} د.م</span></div>`).join('')}
-    </div>`;
+    <div class="field-row"><label>ملاحظة</label>
+      <input class="field" id="mp-note" value="${esc(existing.note||'')}"></div>
+    <input type="hidden" id="mp-sid" value="${sid}">
+    <input type="hidden" id="mp-month" value="${ym}">
+    <input type="hidden" id="mp-id" value="${existing.id||''}">
+  `,[
+    {label:'إلغاء',cls:'btn-outline',fn:'closeSheet()'},
+    {label:'حفظ',cls:'btn-accent',fn:'saveMonthPayment()'}
+  ]);
+}
+function saveMonthPayment(){
+  const sid=document.getElementById('mp-sid').value;
+  const month=document.getElementById('mp-month').value;
+  const existId=document.getElementById('mp-id').value;
+  const obj={
+    sid,month,
+    status:document.getElementById('mp-status').value,
+    paid:+document.getElementById('mp-paid').value,
+    date:document.getElementById('mp-date').value,
+    note:document.getElementById('mp-note').value.trim()
+  };
+  if(existId){
+    const idx=DATA.payments.findIndex(p=>p.id===existId);
+    if(idx>=0) DATA.payments[idx]={...DATA.payments[idx],...obj};
+    else DATA.payments.push({id:uid(),...obj});
+  } else {
+    const existing=DATA.payments.find(p=>p.sid===sid&&p.month===month);
+    if(existing) Object.assign(existing,obj);
+    else DATA.payments.push({id:uid(),...obj});
+  }
+  save();closeSheet();toast('تم الحفظ','success');
+  renderStudentDetail(sid);
 }
 
 /* =================================================================
@@ -927,25 +1530,34 @@ function renderAttendance(){
   const stds=studentsOf(cls);
   const todayAtts=DATA.attendance.filter(a=>a.date===date&&a.cls===cls);
   const getStatus=sid=>{ const r=todayAtts.find(a=>a.sid===sid); return r?r.status:''; };
+  const nP=stds.filter(s=>getStatus(s.id)==='present').length;
+  const nA=stds.filter(s=>getStatus(s.id)==='absent').length;
+  const nL=stds.filter(s=>getStatus(s.id)==='late').length;
   const sec=document.getElementById('sec-attendance');
-  const attStats=stds.map(s=>getStatus(s.id));
-  const nP=attStats.filter(x=>x==='present').length;
-  const nA=attStats.filter(x=>x==='absent').length;
-  const nL=attStats.filter(x=>x==='late').length;
   sec.innerHTML=`
     ${classTabsHtml(cls,"setAttCls")}
     <div class="panel" style="padding:12px 14px;margin-bottom:12px">
       <div style="display:flex;align-items:center;gap:10px">
         <label style="font-size:13px;font-weight:700;color:var(--text-3);white-space:nowrap">التاريخ</label>
         <input class="field" type="date" id="att-date" value="${date}" onchange="setAttDate(this.value)" style="flex:1;padding:8px 10px">
+        <button class="btn btn-accent btn-sm" onclick="setAttDate('${today()}')">اليوم</button>
       </div>
     </div>
     ${stds.length===0
       ? `<div class="panel">${emptyHtml('لا يوجد تلاميذ','أضف تلاميذ أولاً في قسم التلاميذ')}</div>`
-      : `<div style="display:flex;gap:8px;margin-bottom:12px">
-          <div class="stat-card" style="flex:1;padding:10px"><div class="s-label">حاضر</div><div class="s-val" style="color:var(--green)">${nP}</div></div>
-          <div class="stat-card" style="flex:1;padding:10px"><div class="s-label">غائب</div><div class="s-val" style="color:var(--danger)">${nA}</div></div>
-          <div class="stat-card" style="flex:1;padding:10px"><div class="s-label">متأخر</div><div class="s-val" style="color:var(--amber)">${nL}</div></div>
+      : `<div class="stat-grid-3" style="margin-bottom:12px">
+          <div class="stat-card" style="align-items:center;padding:12px 8px">
+            <div class="s-val" style="color:var(--green)">${nP}</div>
+            <div class="s-label">حاضر</div>
+          </div>
+          <div class="stat-card" style="align-items:center;padding:12px 8px">
+            <div class="s-val" style="color:var(--danger)">${nA}</div>
+            <div class="s-label">غائب</div>
+          </div>
+          <div class="stat-card" style="align-items:center;padding:12px 8px">
+            <div class="s-val" style="color:var(--amber)">${nL}</div>
+            <div class="s-label">متأخر</div>
+          </div>
         </div>
         <div class="panel" style="padding:0 14px">
           ${stds.map(s=>{
@@ -953,16 +1565,15 @@ function renderAttendance(){
             return `<div class="att-row">
               <div class="att-name">${esc(s.name)}</div>
               <div class="quick-mark-row">
-                <button class="qm-btn ${st==='present'?'present':''}" onclick="quickMark('${s.id}','present','${cls}','${date}')">حاضر</button>
-                <button class="qm-btn ${st==='absent'?'absent':''}"  onclick="quickMark('${s.id}','absent','${cls}','${date}')">غائب</button>
-                <button class="qm-btn ${st==='late'?'late':''}"    onclick="quickMark('${s.id}','late','${cls}','${date}')">متأخر</button>
+                <button class="qm-btn ${st==='present'?'present':''}" onclick="quickMark('${s.id}','present','${cls}','${date}')">✓</button>
+                <button class="qm-btn ${st==='absent'?'absent':''}"  onclick="quickMark('${s.id}','absent','${cls}','${date}')">✗</button>
+                <button class="qm-btn ${st==='late'?'late':''}"    onclick="quickMark('${s.id}','late','${cls}','${date}')">تأخر</button>
               </div>
             </div>`;
           }).join('')}
         </div>`}
-
     <div class="panel" style="margin-top:12px">
-      <div class="panel-title">السجل الأخير</div>
+      <div class="panel-title">آخر السجلات</div>
       ${DATA.attendance.filter(a=>a.cls===cls).slice(-20).reverse().map(a=>{
         const st=DATA.students.find(s=>s.id===a.sid);
         const sc=a.status==='present'?'badge-green':a.status==='absent'?'badge-red':'badge-amber';
@@ -985,13 +1596,9 @@ function quickMark(sid,status,cls,date){
   }
   save();renderAttendance();
 }
-function openAttForm(){
-  // Quick shortcut: just scroll to date and prompt
-  toast('اختر التاريخ وانقر على حالة كل تلميذ');
-}
 
 /* =================================================================
-   GRADES
+   GRADES (النقاط)
 ================================================================= */
 function renderGrades(){
   const cls=filGrades.cls;
@@ -1004,17 +1611,20 @@ function renderGrades(){
   sec.innerHTML=`
     ${classTabsHtml(cls,"setGradeCls")}
     ${subjPillsHtml(subj,"setGradeSubj")}
-    ${avg!==null?`<div class="panel" style="padding:14px;margin-bottom:12px;display:flex;align-items:center;gap:12px">
-      <div style="width:48px;height:48px;border-radius:14px;background:${s.bg};color:${s.color};display:flex;align-items:center;justify-content:center">${IC.star}</div>
+    ${avg!=null?`<div class="panel" style="padding:14px;margin-bottom:12px;display:flex;align-items:center;gap:12px">
+      <div style="width:50px;height:50px;border-radius:14px;background:${s.bg};color:${s.color};display:flex;flex-direction:column;align-items:center;justify-content:center">
+        <span style="font-size:18px;font-weight:800;font-family:var(--mono)">${avg.toFixed(1)}</span>
+        <span style="font-size:10px;opacity:.7">/20</span>
+      </div>
       <div>
         <div style="font-size:12px;color:var(--text-3);font-weight:600">المعدل العام</div>
-        <div style="font-size:24px;font-weight:800;font-family:var(--mono);color:${s.color}">${avg.toFixed(2)}/20</div>
+        <div style="font-size:22px;font-weight:800;font-family:var(--mono);color:${s.color}">${avg.toFixed(2)}/20</div>
       </div>
       <div style="flex:1;text-align:left"><span class="badge badge-${s.cls}">${s.label}</span></div>
     </div>`:''}
     <div class="panel">
       <div style="padding:12px 14px 8px;display:flex;align-items:center;justify-content:space-between">
-        <span style="font-size:13px;font-weight:700;color:var(--text-3)">النقاط المسجلة</span>
+        <span style="font-size:13px;font-weight:800;color:var(--text-3)">النقاط المسجلة</span>
         <span class="count-badge">${grades.length}</span>
       </div>
       ${grades.length===0
@@ -1024,19 +1634,24 @@ function renderGrades(){
             const pct=g.max>0?g.score/g.max:0;
             const sc=pct>=0.7?'pass':pct>=0.5?'avg':'fail';
             return `<div class="grade-item">
-              <div class="grade-score ${sc}">${g.score}<span style="font-size:12px;opacity:.55">/${g.max}</span></div>
+              <div class="grade-score ${sc}">${g.score}<span style="font-size:11px;opacity:.5">/${g.max}</span></div>
               <div style="flex:1;min-width:0">
                 <div style="font-size:13px;font-weight:600">${esc(g.title)}</div>
                 <div style="font-size:11px;color:var(--text-3)">${esc(std?.name||'—')} · ${fdate(g.date)}</div>
                 ${g.type?`<span class="badge badge-gray" style="margin-top:3px">${esc(g.type)}</span>`:''}
               </div>
-              <div style="display:flex;gap:5px">
+              <div class="admin-actions">
                 <button class="btn-icon accent" onclick="openGradeForm('${g.id}')">${IC.edit}</button>
-                <button class="btn-icon danger" onclick="deleteGrade('${g.id}')">${IC.trash}</button>
+                <button class="btn-icon danger"  onclick="deleteGrade('${g.id}')">${IC.trash}</button>
               </div>
+              <span class="badge badge-${s.cls}" style="margin-right:4px">${s.short}</span>
             </div>`;
           }).join('')}
+    </div>
+    <div class="chart-wrap">
+      <canvas id="grade-bar-chart" height="150"></canvas>
     </div>`;
+  setTimeout(()=>drawGradeBarChart(grades,stds,subj),0);
 }
 function setGradeCls(cls){ filGrades.cls=cls; renderGrades(); }
 function setGradeSubj(subj){ filGrades.subj=subj; renderGrades(); }
@@ -1056,15 +1671,15 @@ function openGradeForm(id){
       <div class="field-row"><label>المادة</label><select class="field" id="gf-subj">${subjOpts}</select></div>
     </div>
     <div class="field-row"><label>التلميذ <span class="req">*</span></label>
-      <select class="field" id="gf-sid"><option value="">-- اختر --</option>${stdOpts}</select></div>
+      <select class="field" id="gf-sid"><option value="">-- اختر التلميذ --</option>${stdOpts}</select></div>
     <div class="field-row"><label>عنوان التقييم <span class="req">*</span></label>
-      <input class="field" id="gf-title" value="${esc(g.title||'')}"></div>
+      <input class="field" id="gf-title" placeholder="مثال: فرض محروس 1" value="${esc(g.title||'')}"></div>
     <div class="field-grid-2">
-      <div class="field-row"><label>النقطة</label><input class="field" type="number" id="gf-score" min="0" value="${g.score||0}"></div>
-      <div class="field-row"><label>من</label><input class="field" type="number" id="gf-max" min="1" value="${g.max||20}"></div>
+      <div class="field-row"><label>النقطة المحصل عليها</label><input class="field" type="number" id="gf-score" min="0" value="${g.score??0}"></div>
+      <div class="field-row"><label>من (المجموع)</label><input class="field" type="number" id="gf-max" min="1" value="${g.max||20}"></div>
     </div>
     <div class="field-grid-2">
-      <div class="field-row"><label>النوع</label><select class="field" id="gf-type">${typeOpts}</select></div>
+      <div class="field-row"><label>نوع التقييم</label><select class="field" id="gf-type">${typeOpts}</select></div>
       <div class="field-row"><label>التاريخ</label><input class="field" type="date" id="gf-date" value="${g.date||today()}"></div>
     </div>
     <div class="field-row"><label>ملاحظة</label><textarea class="field" id="gf-note" style="min-height:60px">${esc(g.note||'')}</textarea></div>
@@ -1078,7 +1693,7 @@ function reloadGradeStd(cls){
   const stds=studentsOf(cls);
   const sel=document.getElementById('gf-sid');
   if(!sel)return;
-  sel.innerHTML='<option value="">-- اختر --</option>'+stds.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join('');
+  sel.innerHTML='<option value="">-- اختر التلميذ --</option>'+stds.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join('');
 }
 function saveGrade(){
   const id=document.getElementById('gf-id').value;
@@ -1106,7 +1721,7 @@ function deleteGrade(id){
 }
 
 /* =================================================================
-   SESSIONS (جدول الحصص)
+   SESSIONS (التخطيط الزمني)
 ================================================================= */
 function renderSessions(){
   const cls=filSess.cls;
@@ -1123,11 +1738,10 @@ function renderSessions(){
       <div class="section-header"><h2>الحصص القادمة</h2><span class="count-badge">${upcoming.length}</span></div>
       ${upcoming.map(x=>sessionCardHtml(x,s)).join('')}`:''}
     ${past.length>0?`
-      <div class="section-header" style="margin-top:6px"><h2>الحصص الماضية</h2><span class="count-badge">${past.length}</span></div>
+      <div class="section-header" style="margin-top:6px"><h2>الحصص السابقة</h2><span class="count-badge">${past.length}</span></div>
       ${past.slice().reverse().map(x=>sessionCardHtml(x,s)).join('')}`:''}
     ${sessions.length===0?`<div class="panel">${emptyHtml('لا توجد حصص','خطط لحصتك القادمة باستخدام الزر أسفله')}</div>`:''}
   `;
-  // Bind toggles
   sec.querySelectorAll('.session-card-head').forEach(h=>{
     h.addEventListener('click',()=>h.parentElement.classList.toggle('open'));
   });
@@ -1137,8 +1751,8 @@ function sessionCardHtml(x,s){
   return `<div class="session-card" data-id="${x.id}">
     <div class="session-card-head">
       <div class="session-date-badge">${fdate(x.date)} ${x.time||''}</div>
-      <div style="flex:1;margin:0 8px">
-        <div style="font-size:14px;font-weight:700">${esc(x.title)}</div>
+      <div style="flex:1;margin:0 8px;min-width:0">
+        <div style="font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(x.title)}</div>
         <div style="font-size:11px;color:var(--text-3)">${esc(x.lesson||'')}</div>
       </div>
       <span class="badge ${isPast?'badge-gray':'badge-blue'}">${isPast?'منتهية':'قادمة'}</span>
@@ -1148,40 +1762,39 @@ function sessionCardHtml(x,s){
       ${x.lesson?`<div style="margin:10px 0 6px"><span class="badge badge-${s.cls}">الدرس</span> <span style="font-size:13px;margin-right:6px">${esc(x.lesson)}</span></div>`:''}
       ${x.exercises?`<div style="margin-bottom:6px"><span class="badge badge-amber">التمارين</span> <span style="font-size:13px;margin-right:6px">${esc(x.exercises)}</span></div>`:''}
       ${x.homework?`<div style="margin-bottom:6px"><span class="badge badge-red">الفرض</span> <span style="font-size:13px;margin-right:6px">${esc(x.homework)}</span></div>`:''}
-      ${x.notes?`<div style="font-size:12px;color:var(--text-3);margin-top:8px;padding:8px;background:var(--surface-2);border-radius:8px">${esc(x.notes)}</div>`:''}
+      ${x.notes?`<div style="font-size:12px;color:var(--text-3);margin-top:8px;padding:8px 10px;background:var(--surface-2);border-radius:8px">${esc(x.notes)}</div>`:''}
       <div style="display:flex;gap:8px;margin-top:12px">
-        <button class="btn btn-outline" style="flex:1;font-size:13px" onclick="openSessionForm('${x.id}')">${IC.edit} تعديل</button>
-        <button class="btn btn-danger" style="padding:10px 14px" onclick="deleteSession('${x.id}')">${IC.trash}</button>
+        <button class="btn btn-outline btn-sm" style="flex:1" onclick="openSessionForm('${x.id}')">${IC.edit} تعديل</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteSession('${x.id}')">${IC.trash}</button>
       </div>
     </div>
   </div>`;
 }
 function setSessCls(cls){ filSess.cls=cls; renderSessions(); }
 function setSessSubj(subj){ filSess.subj=subj; renderSessions(); }
-
 function openSessionForm(id){
   const x=id?DATA.sessions.find(s=>s.id===id):{};
   const cls=x.cls||filSess.cls;
   const subj=x.subj||filSess.subj;
   const clsOpts=CLASSES.map(c=>`<option value="${c.id}" ${cls===c.id?'selected':''}>${c.label}</option>`).join('');
   const subjOpts=SUBJECTS.map(s=>`<option value="${s.id}" ${subj===s.id?'selected':''}>${s.label}</option>`).join('');
-  showSheet(id?'تعديل حصة':'تخطيط حصة',`
+  showSheet(id?'تعديل حصة':'تخطيط حصة جديدة',`
     <div class="field-grid-2">
       <div class="field-row"><label>القسم <span class="req">*</span></label><select class="field" id="xf-cls">${clsOpts}</select></div>
       <div class="field-row"><label>المادة <span class="req">*</span></label><select class="field" id="xf-subj">${subjOpts}</select></div>
     </div>
     <div class="field-row"><label>عنوان الحصة <span class="req">*</span></label>
-      <input class="field" id="xf-title" value="${esc(x.title||'')}"></div>
+      <input class="field" id="xf-title" placeholder="موضوع الحصة" value="${esc(x.title||'')}"></div>
     <div class="field-grid-2">
       <div class="field-row"><label>التاريخ</label><input class="field" type="date" id="xf-date" value="${x.date||today()}"></div>
       <div class="field-row"><label>الوقت</label><input class="field" type="time" id="xf-time" value="${x.time||''}"></div>
     </div>
     <div class="field-row"><label>الدرس المقرر تدريسه</label>
-      <input class="field" id="xf-lesson" value="${esc(x.lesson||'')}"></div>
+      <input class="field" id="xf-lesson" placeholder="عنوان الدرس" value="${esc(x.lesson||'')}"></div>
     <div class="field-row"><label>التمارين المخططة</label>
-      <textarea class="field" id="xf-exercises" style="min-height:70px">${esc(x.exercises||'')}</textarea></div>
+      <textarea class="field" id="xf-exercises" style="min-height:60px" placeholder="تمارين الحصة">${esc(x.exercises||'')}</textarea></div>
     <div class="field-row"><label>الفرض (إن وجد)</label>
-      <input class="field" id="xf-homework" value="${esc(x.homework||'')}"></div>
+      <input class="field" id="xf-homework" placeholder="عنوان الفرض" value="${esc(x.homework||'')}"></div>
     <div class="field-row"><label>ملاحظات</label>
       <textarea class="field" id="xf-notes" style="min-height:60px">${esc(x.notes||'')}</textarea></div>
     <input type="hidden" id="xf-id" value="${id||''}">
@@ -1197,8 +1810,7 @@ function saveSession(){
   const obj={
     cls:document.getElementById('xf-cls').value,
     subj:document.getElementById('xf-subj').value,
-    title,
-    date:document.getElementById('xf-date').value,
+    title,date:document.getElementById('xf-date').value,
     time:document.getElementById('xf-time').value,
     lesson:document.getElementById('xf-lesson').value.trim(),
     exercises:document.getElementById('xf-exercises').value.trim(),
@@ -1216,7 +1828,7 @@ function deleteSession(id){
 }
 
 /* =================================================================
-   LESSONS (الدروس)
+   LESSONS (الدروس) – Accordion Cards
 ================================================================= */
 function renderLessons(){
   const cls=filLess.cls;
@@ -1231,23 +1843,40 @@ function renderLessons(){
       <h2>دروس ${s.label}</h2>
       <span class="count-badge">${items.length}</span>
     </div>
-    <div class="panel">
-      ${items.length===0
-        ? emptyHtml('لا توجد دروس','أضف درساً باستخدام الزر أسفله')
-        : items.map(l=>`
-          <div class="card-item">
-            <div class="card-item-icon" style="background:${s.bg};color:${s.color}">${IC.book}</div>
-            <div class="card-item-body">
-              <div class="card-item-title">${esc(l.title)}</div>
-              <div class="card-item-sub">${fdate(l.date)}${l.chapter?' · '+esc(l.chapter):''}</div>
-              ${l.content?`<div style="font-size:12px;color:var(--text-3);margin-top:4px">${esc(l.content.slice(0,80))}${l.content.length>80?'…':''}</div>`:''}
-            </div>
-            <div class="card-item-actions">
-              <button class="btn-icon accent" onclick="openLessonForm('${l.id}')">${IC.edit}</button>
-              <button class="btn-icon danger"  onclick="deleteLesson('${l.id}')">${IC.trash}</button>
-            </div>
-          </div>`).join('')}
-    </div>`;
+    ${items.length===0?`<div class="panel">${emptyHtml('لا توجد دروس','أضف درساً باستخدام الزر أسفله')}</div>`
+    :items.map((l,i)=>lessonCardHtml(l,s,i+1)).join('')}`;
+  sec.querySelectorAll('.lesson-card-head').forEach(h=>{
+    h.addEventListener('click',e=>{
+      if(e.target.closest('button')) return;
+      h.parentElement.classList.toggle('open');
+    });
+  });
+}
+function lessonCardHtml(l,s,num){
+  return `<div class="lesson-card" data-id="${l.id}">
+    <div class="lesson-card-head">
+      <div style="width:38px;height:38px;border-radius:11px;background:${s.bg};color:${s.color};display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;flex-shrink:0">${num}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:14px;font-weight:700">${esc(l.title)}</div>
+        <div style="font-size:11px;color:var(--text-3);margin-top:2px">
+          ${l.unit?`<span class="badge badge-gray" style="margin-left:4px">${esc(l.unit)}</span>`:''}
+          ${l.semester?`<span class="badge badge-${s.cls}">${esc(l.semester)}</span>`:''}
+          ${l.date?fdate(l.date):''}
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;align-items:center">
+        ${adminBtns(`event.stopPropagation();openLessonForm('${l.id}')`,`event.stopPropagation();deleteLesson('${l.id}')`)}
+        <span style="color:var(--text-3)">${IC.chevDown}</span>
+      </div>
+    </div>
+    <div class="lesson-card-body">
+      ${l.summary?`<div class="lesson-section"><div class="lesson-section-title">ملخص الدرس</div><div class="lesson-content">${esc(l.summary)}</div></div>`:''}
+      ${l.objectives?`<div class="lesson-section"><div class="lesson-section-title">الأهداف التعليمية</div><div class="lesson-content">${esc(l.objectives)}</div></div>`:''}
+      ${l.terms?`<div class="lesson-section"><div class="lesson-section-title">المصطلحات الأساسية</div><div class="lesson-content">${esc(l.terms)}</div></div>`:''}
+      ${l.content?`<div class="lesson-section"><div class="lesson-section-title">المحتوى التفصيلي</div><div class="lesson-content">${esc(l.content)}</div></div>`:''}
+      ${l.notes?`<div class="lesson-section"><div class="lesson-section-title">ملاحظات</div><div class="lesson-content" style="border-right:3px solid var(--amber);background:var(--amber-light)">${esc(l.notes)}</div></div>`:''}
+    </div>
+  </div>`;
 }
 function setLessCls(cls){ filLess.cls=cls; renderLessons(); }
 function setLessSubj(subj){ filLess.subj=subj; renderLessons(); }
@@ -1257,18 +1886,33 @@ function openLessonForm(id){
   const subj=l.subj||filLess.subj;
   const clsOpts=CLASSES.map(c=>`<option value="${c.id}" ${cls===c.id?'selected':''}>${c.label}</option>`).join('');
   const subjOpts=SUBJECTS.map(s=>`<option value="${s.id}" ${subj===s.id?'selected':''}>${s.label}</option>`).join('');
-  showSheet(id?'تعديل درس':'إضافة درس',`
+  const semOpts=['الدورة الأولى','الدورة الثانية','الدورة الثالثة'].map(v=>
+    `<option value="${v}" ${l.semester===v?'selected':''}>${v}</option>`).join('');
+  showSheet(id?'تعديل درس':'إضافة درس جديد',`
     <div class="field-grid-2">
       <div class="field-row"><label>القسم</label><select class="field" id="lf-cls">${clsOpts}</select></div>
       <div class="field-row"><label>المادة</label><select class="field" id="lf-subj">${subjOpts}</select></div>
     </div>
-    <div class="field-row"><label>عنوان الدرس <span class="req">*</span></label><input class="field" id="lf-title" value="${esc(l.title||'')}"></div>
+    <div class="field-row"><label>عنوان الدرس <span class="req">*</span></label>
+      <input class="field" id="lf-title" placeholder="عنوان الدرس الكامل" value="${esc(l.title||'')}"></div>
     <div class="field-grid-2">
-      <div class="field-row"><label>الفصل/الوحدة</label><input class="field" id="lf-chapter" value="${esc(l.chapter||'')}"></div>
-      <div class="field-row"><label>التاريخ</label><input class="field" type="date" id="lf-date" value="${l.date||today()}"></div>
+      <div class="field-row"><label>الوحدة</label>
+        <input class="field" id="lf-unit" placeholder="الوحدة أو الفصل" value="${esc(l.unit||'')}"></div>
+      <div class="field-row"><label>الدورة</label>
+        <select class="field" id="lf-semester"><option value="">—</option>${semOpts}</select></div>
     </div>
-    <div class="field-row"><label>محتوى الدرس</label><textarea class="field" id="lf-content">${esc(l.content||'')}</textarea></div>
-    <div class="field-row"><label>أهداف الدرس</label><textarea class="field" id="lf-goals" style="min-height:60px">${esc(l.goals||'')}</textarea></div>
+    <div class="field-row"><label>التاريخ</label>
+      <input class="field" type="date" id="lf-date" value="${l.date||today()}"></div>
+    <div class="field-row"><label>ملخص الدرس</label>
+      <textarea class="field" id="lf-summary" style="min-height:70px" placeholder="ملخص موجز للدرس">${esc(l.summary||'')}</textarea></div>
+    <div class="field-row"><label>الأهداف التعليمية</label>
+      <textarea class="field" id="lf-objectives" style="min-height:60px" placeholder="ما يجب على التلميذ تحقيقه">${esc(l.objectives||'')}</textarea></div>
+    <div class="field-row"><label>المصطلحات الأساسية</label>
+      <textarea class="field" id="lf-terms" style="min-height:60px" placeholder="المصطلحات الأساسية للدرس">${esc(l.terms||'')}</textarea></div>
+    <div class="field-row"><label>محتوى الدرس التفصيلي</label>
+      <textarea class="field" id="lf-content" style="min-height:80px">${esc(l.content||'')}</textarea></div>
+    <div class="field-row"><label>ملاحظات</label>
+      <textarea class="field" id="lf-notes" style="min-height:50px">${esc(l.notes||'')}</textarea></div>
     <input type="hidden" id="lf-id" value="${id||''}">
   `,[
     {label:'إلغاء',cls:'btn-outline',fn:'closeSheet()'},
@@ -1283,10 +1927,14 @@ function saveLesson(){
     cls:document.getElementById('lf-cls').value,
     subj:document.getElementById('lf-subj').value,
     title,
-    chapter:document.getElementById('lf-chapter').value.trim(),
+    unit:document.getElementById('lf-unit').value.trim(),
+    semester:document.getElementById('lf-semester').value,
     date:document.getElementById('lf-date').value,
+    summary:document.getElementById('lf-summary').value.trim(),
+    objectives:document.getElementById('lf-objectives').value.trim(),
+    terms:document.getElementById('lf-terms').value.trim(),
     content:document.getElementById('lf-content').value.trim(),
-    goals:document.getElementById('lf-goals').value.trim()
+    notes:document.getElementById('lf-notes').value.trim()
   };
   if(id){ Object.assign(DATA.lessons.find(x=>x.id===id),obj); }
   else { DATA.lessons.push({id:uid(),...obj}); }
@@ -1306,7 +1954,15 @@ function renderExercises(){
   const subj=filExer.subj;
   const items=DATA.exercises.filter(e=>e.cls===cls&&e.subj===subj).slice().reverse();
   const s=subjById(subj);
+  const byLevel={
+    'سهل':items.filter(e=>e.level==='سهل'),
+    'متوسط':items.filter(e=>e.level==='متوسط'),
+    'صعب':items.filter(e=>e.level==='صعب'),
+    'تحدٍّ':items.filter(e=>e.level==='تحدٍّ'),
+    'أخرى':items.filter(e=>!['سهل','متوسط','صعب','تحدٍّ'].includes(e.level))
+  };
   const sec=document.getElementById('sec-exercises');
+  let num=0;
   sec.innerHTML=`
     ${classTabsHtml(cls,"setExerCls")}
     ${subjPillsHtml(subj,"setExerSubj")}
@@ -1314,23 +1970,46 @@ function renderExercises(){
       <h2>تمارين ${s.label}</h2>
       <span class="count-badge">${items.length}</span>
     </div>
-    <div class="panel">
-      ${items.length===0
-        ? emptyHtml('لا توجد تمارين','أضف تمريناً باستخدام الزر أسفله')
-        : items.map(e=>`
-          <div class="card-item">
-            <div class="card-item-icon" style="background:${s.bg};color:${s.color}">${IC.pen}</div>
-            <div class="card-item-body">
-              <div class="card-item-title">${esc(e.title)}</div>
-              <div class="card-item-sub">${fdate(e.date)}${e.level?' · '+esc(e.level):''}</div>
-              ${e.content?`<div style="font-size:12px;color:var(--text-3);margin-top:4px">${esc(e.content.slice(0,80))}${e.content.length>80?'…':''}</div>`:''}
-            </div>
-            <div class="card-item-actions">
-              <button class="btn-icon accent" onclick="openExerciseForm('${e.id}')">${IC.edit}</button>
-              <button class="btn-icon danger"  onclick="deleteExercise('${e.id}')">${IC.trash}</button>
-            </div>
-          </div>`).join('')}
-    </div>`;
+    ${items.length===0?`<div class="panel">${emptyHtml('لا توجد تمارين','أضف تمريناً باستخدام الزر أسفله')}</div>`
+    :Object.entries(byLevel).filter(([,v])=>v.length>0).map(([level,exs])=>`
+      <div style="margin-bottom:4px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+          <span class="badge ${LEVEL_COLORS[level]||'badge-gray'}" style="font-size:12px;padding:4px 12px">${level}</span>
+          <span class="count-badge">${exs.length}</span>
+        </div>
+        ${exs.map(e=>{
+          num++;
+          return exerciseCardHtml(e,s,num);
+        }).join('')}
+      </div>`).join('')}
+  `;
+}
+function exerciseCardHtml(e,s,num){
+  return `<div class="ex-card" data-id="${e.id}">
+    <div class="ex-card-head">
+      <div class="ex-num">${num}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:14px;font-weight:700">${esc(e.title)}</div>
+        <div style="font-size:12px;color:var(--text-3);margin-top:2px">${fdate(e.date)}${e.level?` · <span class="badge ${LEVEL_COLORS[e.level]||'badge-gray'}">${esc(e.level)}</span>`:''}</div>
+        ${e.content?`<div style="font-size:13px;color:var(--text-2);margin-top:8px;line-height:1.6">${esc(e.content)}</div>`:''}
+        <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+          ${e.solution?`<button class="btn btn-outline btn-sm" onclick="toggleSolution('${e.id}')" id="sol-btn-${e.id}">${IC.eye} إظهار الحل</button>`:''}
+          ${adminBtns(`openExerciseForm('${e.id}')`,`deleteExercise('${e.id}')`)}
+        </div>
+      </div>
+    </div>
+    ${e.solution?`<div class="ex-solution" id="sol-${e.id}">
+      <div style="font-size:11px;font-weight:800;color:var(--green);margin-bottom:6px;text-transform:uppercase;letter-spacing:.4px">الحل</div>
+      <div style="font-size:13px;color:var(--text-2);line-height:1.7">${esc(e.solution)}</div>
+    </div>`:''}
+  </div>`;
+}
+function toggleSolution(id){
+  const sol=document.getElementById('sol-'+id);
+  const btn=document.getElementById('sol-btn-'+id);
+  if(!sol)return;
+  const showing=sol.classList.toggle('show');
+  if(btn) btn.innerHTML=showing?`${IC.eyeOff} إخفاء الحل`:`${IC.eye} إظهار الحل`;
 }
 function setExerCls(cls){ filExer.cls=cls; renderExercises(); }
 function setExerSubj(subj){ filExer.subj=subj; renderExercises(); }
@@ -1340,19 +2019,22 @@ function openExerciseForm(id){
   const subj=e.subj||filExer.subj;
   const clsOpts=CLASSES.map(c=>`<option value="${c.id}" ${cls===c.id?'selected':''}>${c.label}</option>`).join('');
   const subjOpts=SUBJECTS.map(s=>`<option value="${s.id}" ${subj===s.id?'selected':''}>${s.label}</option>`).join('');
-  const levOpts=['سهل','متوسط','صعب','تحدٍّ'].map(l=>`<option value="${l}" ${e.level===l?'selected':''}>${l}</option>`).join('');
-  showSheet(id?'تعديل تمرين':'إضافة تمرين',`
+  const levOpts=['','سهل','متوسط','صعب','تحدٍّ'].map(l=>`<option value="${l}" ${(e.level||'')===l?'selected':''}>${l||'غير محدد'}</option>`).join('');
+  showSheet(id?'تعديل تمرين':'إضافة تمرين جديد',`
     <div class="field-grid-2">
       <div class="field-row"><label>القسم</label><select class="field" id="ef-cls">${clsOpts}</select></div>
       <div class="field-row"><label>المادة</label><select class="field" id="ef-subj">${subjOpts}</select></div>
     </div>
-    <div class="field-row"><label>عنوان التمرين <span class="req">*</span></label><input class="field" id="ef-title" value="${esc(e.title||'')}"></div>
+    <div class="field-row"><label>عنوان التمرين <span class="req">*</span></label>
+      <input class="field" id="ef-title" placeholder="عنوان التمرين" value="${esc(e.title||'')}"></div>
     <div class="field-grid-2">
       <div class="field-row"><label>المستوى</label><select class="field" id="ef-level">${levOpts}</select></div>
       <div class="field-row"><label>التاريخ</label><input class="field" type="date" id="ef-date" value="${e.date||today()}"></div>
     </div>
-    <div class="field-row"><label>نص التمرين / الوصف</label><textarea class="field" id="ef-content">${esc(e.content||'')}</textarea></div>
-    <div class="field-row"><label>الحل (اختياري)</label><textarea class="field" id="ef-solution" style="min-height:60px">${esc(e.solution||'')}</textarea></div>
+    <div class="field-row"><label>نص التمرين</label>
+      <textarea class="field" id="ef-content" style="min-height:100px" placeholder="نص التمرين أو السؤال...">${esc(e.content||'')}</textarea></div>
+    <div class="field-row"><label>الحل (اختياري)</label>
+      <textarea class="field" id="ef-solution" style="min-height:80px" placeholder="الحل المقترح...">${esc(e.solution||'')}</textarea></div>
     <input type="hidden" id="ef-id" value="${id||''}">
   `,[
     {label:'إلغاء',cls:'btn-outline',fn:'closeSheet()'},
@@ -1366,8 +2048,7 @@ function saveExercise(){
   const obj={
     cls:document.getElementById('ef-cls').value,
     subj:document.getElementById('ef-subj').value,
-    title,
-    level:document.getElementById('ef-level').value,
+    title,level:document.getElementById('ef-level').value,
     date:document.getElementById('ef-date').value,
     content:document.getElementById('ef-content').value.trim(),
     solution:document.getElementById('ef-solution').value.trim()
@@ -1388,7 +2069,8 @@ function deleteExercise(id){
 function renderHomework(){
   const cls=filHW.cls;
   const subj=filHW.subj;
-  const items=DATA.homework.filter(h=>h.cls===cls&&h.subj===subj).sort((a,b)=>a.dueDate>b.dueDate?1:-1);
+  const items=DATA.homework.filter(h=>h.cls===cls&&h.subj===subj)
+    .sort((a,b)=>a.dueDate>b.dueDate?1:-1);
   const s=subjById(subj);
   const sec=document.getElementById('sec-homework');
   sec.innerHTML=`
@@ -1404,13 +2086,13 @@ function renderHomework(){
         : items.map(h=>{
             const overdue=h.dueDate&&h.dueDate<today();
             return `<div class="card-item">
-              <div class="card-item-icon" style="background:${s.bg};color:${s.color}">${IC.book}</div>
+              <div class="card-item-icon" style="background:${s.bg};color:${s.color}">${IC.clip}</div>
               <div class="card-item-body">
                 <div class="card-item-title">${esc(h.title)}</div>
-                <div class="card-item-sub">تسليم: ${fdate(h.dueDate||'')} ${overdue?'<span class="badge badge-red">متأخر</span>':''}</div>
-                ${h.content?`<div style="font-size:12px;color:var(--text-3);margin-top:4px">${esc(h.content.slice(0,80))}${h.content.length>80?'…':''}</div>`:''}
+                <div class="card-item-sub">تسليم: ${fdate(h.dueDate||'')} ${overdue?'<span class="badge badge-red" style="font-size:10px">متأخر</span>':''}</div>
+                ${h.content?`<div style="font-size:12px;color:var(--text-3);margin-top:3px">${esc(h.content.slice(0,80))}${h.content.length>80?'…':''}</div>`:''}
               </div>
-              <div class="card-item-actions">
+              <div class="admin-actions">
                 <button class="btn-icon accent" onclick="openHomeworkForm('${h.id}')">${IC.edit}</button>
                 <button class="btn-icon danger"  onclick="deleteHomework('${h.id}')">${IC.trash}</button>
               </div>
@@ -1425,17 +2107,21 @@ function openHomeworkForm(id){
   const subj=h.subj||filHW.subj;
   const clsOpts=CLASSES.map(c=>`<option value="${c.id}" ${cls===c.id?'selected':''}>${c.label}</option>`).join('');
   const subjOpts=SUBJECTS.map(s=>`<option value="${s.id}" ${subj===s.id?'selected':''}>${s.label}</option>`).join('');
-  showSheet(id?'تعديل فرض':'إضافة فرض',`
+  showSheet(id?'تعديل فرض':'إضافة فرض جديد',`
     <div class="field-grid-2">
       <div class="field-row"><label>القسم</label><select class="field" id="hf-cls">${clsOpts}</select></div>
       <div class="field-row"><label>المادة</label><select class="field" id="hf-subj">${subjOpts}</select></div>
     </div>
-    <div class="field-row"><label>عنوان الفرض <span class="req">*</span></label><input class="field" id="hf-title" value="${esc(h.title||'')}"></div>
+    <div class="field-row"><label>عنوان الفرض <span class="req">*</span></label>
+      <input class="field" id="hf-title" placeholder="عنوان الفرض" value="${esc(h.title||'')}"></div>
     <div class="field-grid-2">
-      <div class="field-row"><label>تاريخ الإعطاء</label><input class="field" type="date" id="hf-date" value="${h.date||today()}"></div>
-      <div class="field-row"><label>تاريخ التسليم</label><input class="field" type="date" id="hf-due" value="${h.dueDate||''}"></div>
+      <div class="field-row"><label>تاريخ الإعطاء</label>
+        <input class="field" type="date" id="hf-date" value="${h.date||today()}"></div>
+      <div class="field-row"><label>تاريخ التسليم</label>
+        <input class="field" type="date" id="hf-due" value="${h.dueDate||''}"></div>
     </div>
-    <div class="field-row"><label>وصف الفرض</label><textarea class="field" id="hf-content">${esc(h.content||'')}</textarea></div>
+    <div class="field-row"><label>وصف الفرض</label>
+      <textarea class="field" id="hf-content" style="min-height:80px" placeholder="تعليمات وتفاصيل الفرض">${esc(h.content||'')}</textarea></div>
     <input type="hidden" id="hf-id" value="${id||''}">
   `,[
     {label:'إلغاء',cls:'btn-outline',fn:'closeSheet()'},
@@ -1449,8 +2135,7 @@ function saveHomework(){
   const obj={
     cls:document.getElementById('hf-cls').value,
     subj:document.getElementById('hf-subj').value,
-    title,
-    date:document.getElementById('hf-date').value,
+    title,date:document.getElementById('hf-date').value,
     dueDate:document.getElementById('hf-due').value,
     content:document.getElementById('hf-content').value.trim()
   };
@@ -1465,206 +2150,396 @@ function deleteHomework(id){
 }
 
 /* =================================================================
-   PAYMENTS (الأداءات)
+   GLOSSARY (المصطلحات)
+================================================================= */
+function renderGlossary(){
+  const subj=filGloss.subj;
+  const items=DATA.glossary.filter(t=>t.subj===subj||!subj).slice().reverse();
+  const sec=document.getElementById('sec-glossary');
+  sec.innerHTML=`
+    ${subjPillsHtml(subj,"setGlossSubj",true)}
+    <div class="section-header">
+      <h2>المصطلحات</h2>
+      <span class="count-badge">${items.length}</span>
+    </div>
+    ${items.length===0?`<div class="panel">${emptyHtml('لا توجد مصطلحات','أضف مصطلحاً باستخدام الزر أسفله')}</div>`
+    :items.map(t=>{
+        const s=subjById(t.subj);
+        return `<div class="term-card">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start">
+            <div class="term-word">${esc(t.word)}</div>
+            <div class="admin-actions">
+              <button class="btn-icon accent" onclick="openGlossaryForm('${t.id}')">${IC.edit}</button>
+              <button class="btn-icon danger"  onclick="deleteGlossary('${t.id}')">${IC.trash}</button>
+            </div>
+          </div>
+          ${t.wordFr?`<div style="font-size:13px;color:var(--accent);font-style:italic;margin-bottom:4px">${esc(t.wordFr)}</div>`:''}
+          <div class="term-def">${esc(t.definition)}</div>
+          <div class="term-tags">
+            <span class="badge badge-${s.cls}">${s.short}</span>
+            ${t.unit?`<span class="badge badge-gray">${esc(t.unit)}</span>`:''}
+          </div>
+        </div>`;}).join('')}`;
+}
+function setGlossSubj(subj){ filGloss.subj=subj; renderGlossary(); }
+function openGlossaryForm(id){
+  const t=id?DATA.glossary.find(x=>x.id===id):{};
+  const subjOpts=SUBJECTS.map(s=>`<option value="${s.id}" ${(t.subj||'math')===s.id?'selected':''}>${s.label}</option>`).join('');
+  showSheet(id?'تعديل مصطلح':'إضافة مصطلح جديد',`
+    <div class="field-row"><label>المصطلح بالعربية <span class="req">*</span></label>
+      <input class="field" id="tf-word" value="${esc(t.word||'')}"></div>
+    <div class="field-row"><label>المصطلح بالفرنسية</label>
+      <input class="field" id="tf-wordfr" value="${esc(t.wordFr||'')}"></div>
+    <div class="field-row"><label>التعريف <span class="req">*</span></label>
+      <textarea class="field" id="tf-def" style="min-height:80px">${esc(t.definition||'')}</textarea></div>
+    <div class="field-grid-2">
+      <div class="field-row"><label>المادة</label><select class="field" id="tf-subj">${subjOpts}</select></div>
+      <div class="field-row"><label>الوحدة</label><input class="field" id="tf-unit" value="${esc(t.unit||'')}"></div>
+    </div>
+    <input type="hidden" id="tf-id" value="${id||''}">
+  `,[
+    {label:'إلغاء',cls:'btn-outline',fn:'closeSheet()'},
+    {label:'حفظ',cls:'btn-accent',fn:'saveGlossary()'}
+  ]);
+}
+function saveGlossary(){
+  const id=document.getElementById('tf-id').value;
+  const word=document.getElementById('tf-word').value.trim();
+  const def=document.getElementById('tf-def').value.trim();
+  if(!word||!def){toast('أدخل المصطلح والتعريف','error');return;}
+  const obj={word,wordFr:document.getElementById('tf-wordfr').value.trim(),
+    definition:def,
+    subj:document.getElementById('tf-subj').value,
+    unit:document.getElementById('tf-unit').value.trim()};
+  if(id){ Object.assign(DATA.glossary.find(x=>x.id===id),obj); }
+  else { DATA.glossary.push({id:uid(),...obj}); }
+  save();closeSheet();toast('تم الحفظ','success');renderGlossary();
+}
+function deleteGlossary(id){
+  if(!confirm('حذف هذا المصطلح؟'))return;
+  DATA.glossary=DATA.glossary.filter(t=>t.id!==id);
+  save();toast('تم الحذف');renderGlossary();
+}
+
+/* =================================================================
+   PAYMENTS (الدفع الشهري)
 ================================================================= */
 function renderPayments(){
   const cls=filPay.cls;
   const stds=studentsOf(cls);
-  const pays=DATA.payments.filter(p=>stds.some(s=>s.id===p.sid));
-  const totalPaid=pays.reduce((a,p)=>a+Number(p.amount||0),0);
+  const months=getYearMonths();
   const sec=document.getElementById('sec-payments');
+  let totalPaid=0,totalUnpaid=0;
+  stds.forEach(s=>{
+    const fee=s.fee||DATA.settings.defaultFee;
+    const pays=DATA.payments.filter(p=>p.sid===s.id);
+    totalPaid+=pays.reduce((a,p)=>a+Number(p.paid||0),0);
+    const paidMonths=pays.filter(p=>p.status==='paid').length;
+    totalUnpaid+=(months.length-paidMonths)*fee;
+  });
   sec.innerHTML=`
     ${classTabsHtml(cls,"setPayCls")}
     <div class="stat-grid" style="margin-bottom:12px">
-      <div class="stat-card accent">
-        <div class="s-label">إجمالي المدفوع</div>
-        <div class="s-val">${totalPaid}</div>
+      <div class="stat-card" style="border-top:3px solid var(--green)">
+        <div class="s-label">المداخيل المجموعة</div>
+        <div class="s-val" style="color:var(--green);font-size:22px">${totalPaid}</div>
         <div class="s-sub">درهم مغربي</div>
       </div>
-      <div class="stat-card">
-        <div class="s-label">عدد الأداءات</div>
-        <div class="s-val">${pays.length}</div>
-        <div class="s-sub">في ${clsById(cls).label}</div>
+      <div class="stat-card" style="border-top:3px solid var(--danger)">
+        <div class="s-label">المبالغ غير المؤداة</div>
+        <div class="s-val" style="color:var(--danger);font-size:22px">${totalUnpaid}</div>
+        <div class="s-sub">درهم مغربي</div>
       </div>
     </div>
     <div class="panel">
-      ${pays.length===0
-        ? emptyHtml('لا توجد أداءات','أضف أداءً باستخدام الزر أسفله')
-        : pays.slice().reverse().map(p=>{
-            const s=DATA.students.find(x=>x.id===p.sid);
-            return `<div class="card-item">
-              <div class="card-item-icon" style="background:var(--green-light);color:var(--green)">${IC.money}</div>
-              <div class="card-item-body">
-                <div class="card-item-title">${esc(s?.name||'—')}</div>
-                <div class="card-item-sub">${esc(p.month||'')} · ${fdate(p.date)}</div>
-                ${p.note?`<div style="font-size:12px;color:var(--text-3)">${esc(p.note)}</div>`:''}
+      <div class="panel-title">حالة الأداء لكل تلميذ</div>
+      ${stds.length===0?emptyHtml('لا يوجد تلاميذ','أضف تلاميذ أولاً')
+      :stds.map(s=>{
+          const fee=s.fee||DATA.settings.defaultFee;
+          const pays=DATA.payments.filter(p=>p.sid===s.id);
+          const paidM=pays.filter(p=>p.status==='paid').length;
+          const pct=months.length>0?Math.round(paidM/months.length*100):0;
+          return `<div class="card-item" onclick="navigate('student-detail','${s.id}');setTimeout(()=>setDetailTab('payments','${s.id}'),50)">
+            <div class="card-item-icon" style="background:${classBg(s.cls)};color:${classColor(s.cls)};font-size:16px;font-weight:800">${s.name.charAt(0)}</div>
+            <div class="card-item-body">
+              <div class="card-item-title">${esc(s.name)}</div>
+              <div style="margin-top:6px">
+                <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${pct>=75?'var(--green)':pct>=50?'var(--amber)':'var(--danger)'}"></div></div>
               </div>
-              <div class="card-item-actions">
-                <span style="font-size:16px;font-weight:800;font-family:var(--mono);color:var(--green)">${p.amount}</span>
-                <button class="btn-icon danger" onclick="deletePayment('${p.id}')">${IC.trash}</button>
-              </div>
-            </div>`;}).join('')}
+              <div style="font-size:11px;color:var(--text-3);margin-top:3px">${paidM}/${months.length} أشهر · ${fee} د.م/شهر</div>
+            </div>
+            <span style="color:var(--text-3)">${IC.chev}</span>
+          </div>`;}).join('')}
     </div>`;
 }
 function setPayCls(cls){ filPay.cls=cls; renderPayments(); }
-function openPaymentForm(){
-  const cls=filPay.cls;
-  const stds=studentsOf(cls);
-  if(stds.length===0){toast('لا يوجد تلاميذ في هذا القسم','error');return;}
-  const stdOpts=stds.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join('');
-  const ym=new Date().toISOString().slice(0,7);
-  showSheet('تسجيل أداء',`
-    <div class="field-row"><label>التلميذ <span class="req">*</span></label>
-      <select class="field" id="pf-sid"><option value="">-- اختر --</option>${stdOpts}</select></div>
-    <div class="field-grid-2">
-      <div class="field-row"><label>المبلغ (د.م) <span class="req">*</span></label>
-        <input class="field" type="number" id="pf-amount" value="${DATA.settings.defaultFee||200}"></div>
-      <div class="field-row"><label>الشهر</label>
-        <input class="field" type="month" id="pf-month" value="${ym}"></div>
-    </div>
-    <div class="field-row"><label>التاريخ</label>
-      <input class="field" type="date" id="pf-date" value="${today()}"></div>
-    <div class="field-row"><label>ملاحظة</label>
-      <input class="field" id="pf-note" value=""></div>
-  `,[
-    {label:'إلغاء',cls:'btn-outline',fn:'closeSheet()'},
-    {label:'حفظ',cls:'btn-accent',fn:'savePayment()'}
-  ]);
-}
-function savePayment(){
-  const sid=document.getElementById('pf-sid').value;
-  const amount=document.getElementById('pf-amount').value;
-  if(!sid||!amount){toast('اختر التلميذ وأدخل المبلغ','error');return;}
-  DATA.payments.push({id:uid(),sid,amount:+amount,
-    month:document.getElementById('pf-month').value,
-    date:document.getElementById('pf-date').value,
-    note:document.getElementById('pf-note').value.trim()
-  });
-  save();closeSheet();toast('تم التسجيل','success');renderPayments();
-}
-function deletePayment(id){
-  if(!confirm('حذف هذا الأداء؟'))return;
-  DATA.payments=DATA.payments.filter(p=>p.id!==id);
-  save();toast('تم الحذف');renderPayments();
+function openPaymentSheet(){
+  // Navigate to student detail payments tab
+  toast('اختر تلميذاً لتسجيل الأداء','info');
+  navigate('payments');
 }
 
 /* =================================================================
-   MORE
+   REPORTS (التقارير)
 ================================================================= */
-function renderMore(){
-  const items=[
-    {key:'sessions',icon:IC.clock,color:'var(--accent)',bg:'var(--accent-light)',label:'جدول الحصص',count:DATA.sessions.length},
-    {key:'lessons',icon:IC.book,color:'var(--math)',bg:'var(--math-bg)',label:'الدروس',count:DATA.lessons.length},
-    {key:'exercises',icon:IC.pen,color:'var(--phy)',bg:'var(--phy-bg)',label:'التمارين',count:DATA.exercises.length},
-    {key:'homework',icon:IC.book,color:'var(--danger)',bg:'var(--danger-light)',label:'الفروض',count:DATA.homework.length},
-    {key:'payments',icon:IC.money,color:'var(--green)',bg:'var(--green-light)',label:'الأداءات',count:DATA.payments.length},
-    {key:'performance',icon:IC.chart,color:'var(--purple)',bg:'var(--purple-light)',label:'الإحصاء',count:null},
-    {key:'data',icon:IC.db,color:'var(--text-3)',bg:'#EEF0F5',label:'البيانات',count:null},
-  ];
-  const sec=document.getElementById('sec-more');
-  sec.innerHTML=`
-    <div class="more-grid">
-      ${items.map(it=>`
-        <button class="more-card" onclick="navigate('${it.key}')">
-          <div class="more-card-icon" style="background:${it.bg};color:${it.color}">${it.icon}</div>
-          <div class="more-card-label">${it.label}</div>
-          ${it.count!=null?`<span class="badge badge-gray" style="position:absolute;top:6px;left:6px;font-size:10px">${it.count}</span>`:''}
-        </button>`).join('')}
-    </div>
-
-    <div class="panel" style="margin-top:4px">
-      <div class="panel-title">إعدادات</div>
-      <div class="data-row">
-        <span class="key">الأجر الشهري الافتراضي</span>
-        <div style="display:flex;align-items:center;gap:8px">
-          <input id="set-fee" type="number" class="field" style="width:90px;padding:6px 10px;text-align:center" value="${DATA.settings.defaultFee||200}">
-          <span style="font-size:13px;color:var(--text-3)">د.م</span>
-          <button class="btn btn-accent" style="padding:7px 12px;font-size:12px" onclick="saveFee()">حفظ</button>
-        </div>
-      </div>
-    </div>`;
-}
-function saveFee(){
-  DATA.settings.defaultFee=+document.getElementById('set-fee').value;
-  save();toast('تم الحفظ','success');
-}
-
-/* =================================================================
-   PERFORMANCE
-================================================================= */
-function renderPerformance(){
-  const sec=document.getElementById('sec-performance');
+function renderReports(){
   const totalSt=DATA.students.length;
   const totalSess=DATA.sessions.length;
   const totalGr=DATA.grades.length;
+  const totalAtt=DATA.attendance.length;
+  const presentAtt=DATA.attendance.filter(a=>a.status==='present').length;
+  const attRate=totalAtt>0?Math.round(presentAtt/totalAtt*100):0;
   const avgBySubj=SUBJECTS.map(s=>{
     const gs=DATA.grades.filter(g=>g.subj===s.id&&g.max>0);
     const avg=gs.length>0?gs.reduce((a,g)=>a+g.score/g.max,0)/gs.length*20:null;
     return {s,avg};
   });
-  const attByClass=CLASSES.map(c=>{
-    const total=DATA.attendance.filter(a=>a.cls===c.id).length;
-    const present=DATA.attendance.filter(a=>a.cls===c.id&&a.status==='present').length;
-    return {c,total,present};
-  });
+  const sec=document.getElementById('sec-reports');
   sec.innerHTML=`
     <div class="stat-grid">
-      <div class="stat-card"><div class="s-label">إجمالي التلاميذ</div><div class="s-val">${totalSt}</div></div>
-      <div class="stat-card"><div class="s-label">الحصص المخططة</div><div class="s-val">${totalSess}</div></div>
-      <div class="stat-card"><div class="s-label">النقاط المسجلة</div><div class="s-val">${totalGr}</div></div>
-      <div class="stat-card"><div class="s-label">سجلات الحضور</div><div class="s-val">${DATA.attendance.length}</div></div>
+      <div class="stat-card">
+        <div class="s-label">إجمالي التلاميذ</div>
+        <div class="s-val">${totalSt}</div>
+        <div class="s-sub">مسجلون</div>
+      </div>
+      <div class="stat-card">
+        <div class="s-label">الحصص المخططة</div>
+        <div class="s-val">${totalSess}</div>
+      </div>
+      <div class="stat-card">
+        <div class="s-label">النقاط المسجلة</div>
+        <div class="s-val">${totalGr}</div>
+      </div>
+      <div class="stat-card">
+        <div class="s-label">نسبة الحضور</div>
+        <div class="s-val" style="color:${attRate>=75?'var(--green)':attRate>=50?'var(--amber)':'var(--danger)'}">${attRate}%</div>
+      </div>
     </div>
 
-    <div class="panel">
+    <div class="panel" style="margin-bottom:12px">
       <div class="panel-title">المعدل العام حسب المادة</div>
       ${avgBySubj.map(({s,avg})=>`
         <div class="data-row">
           <div style="display:flex;align-items:center;gap:8px">
             <span class="badge badge-${s.cls}">${s.label}</span>
           </div>
-          <span style="font-size:16px;font-weight:800;font-family:var(--mono);color:${s.color}">
+          <span style="font-size:18px;font-weight:800;font-family:var(--mono);color:${s.color}">
             ${avg!=null?avg.toFixed(2)+'/20':'—'}
           </span>
         </div>`).join('')}
     </div>
 
-    <div class="panel">
+    <div class="panel" style="margin-bottom:12px">
       <div class="panel-title">الحضور حسب القسم</div>
-      ${attByClass.map(({c,total,present})=>`
-        <div style="padding:12px 14px;border-bottom:1px solid var(--border)">
+      ${CLASSES.map(c=>{
+        const total=DATA.attendance.filter(a=>a.cls===c.id).length;
+        const present=DATA.attendance.filter(a=>a.cls===c.id&&a.status==='present').length;
+        const pct=total>0?Math.round(present/total*100):0;
+        return `<div style="padding:12px 14px;border-bottom:1px solid var(--border)">
           <div style="display:flex;justify-content:space-between;margin-bottom:6px">
             <span style="font-weight:700;color:${c.color}">${c.label}</span>
-            <span style="font-size:13px;color:var(--text-3)">${present}/${total} حاضر</span>
+            <span style="font-size:13px;color:var(--text-3)">${present}/${total} · ${pct}%</span>
           </div>
-          <div class="progress-bar"><div class="progress-fill" style="width:${total>0?Math.round(present/total*100):0}%;background:${c.color}"></div></div>
-        </div>`).join('')}
+          <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${c.color}"></div></div>
+        </div>`;}).join('')}
+    </div>
+
+    <div class="chart-wrap" style="padding:8px 0">
+      <canvas id="reports-chart" height="180"></canvas>
     </div>
 
     <div class="panel">
-      <div class="panel-title">تلاميذ القسم الأول</div>
-      ${studentPerformanceRows('1ere')}
-    </div>
-    <div class="panel">
-      <div class="panel-title">تلاميذ القسم الثاني</div>
-      ${studentPerformanceRows('2eme')}
+      <div class="panel-title">أداء التلاميذ</div>
+      ${studentPerformanceRows()}
     </div>`;
+  setTimeout(()=>drawReportsChart(),0);
 }
-function studentPerformanceRows(cls){
-  const stds=studentsOf(cls);
-  if(stds.length===0) return `<div style="padding:14px;text-align:center;color:var(--text-3);font-size:13px">لا يوجد تلاميذ</div>`;
-  return stds.map(s=>{
+function studentPerformanceRows(){
+  const allStds=DATA.students;
+  if(allStds.length===0) return `<div style="padding:14px;text-align:center;color:var(--text-3);font-size:13px">لا يوجد تلاميذ</div>`;
+  return allStds.map(s=>{
     const gs=DATA.grades.filter(g=>g.sid===s.id&&g.max>0);
     const avg=gs.length>0?gs.reduce((a,g)=>a+g.score/g.max,0)/gs.length*20:null;
     const atts=DATA.attendance.filter(a=>a.sid===s.id);
     const pct=atts.length>0?Math.round(DATA.attendance.filter(a=>a.sid===s.id&&a.status==='present').length/atts.length*100):null;
     return `<div class="data-row">
-      <span class="key">${esc(s.name)}</span>
+      <div>
+        <div style="font-size:13px;font-weight:700">${esc(s.name)}</div>
+        <span class="badge ${classBadge(s.cls)}" style="margin-top:3px">${clsById(s.cls).short}</span>
+      </div>
       <div style="display:flex;gap:8px;align-items:center">
-        ${pct!=null?`<span class="badge badge-gray">${pct}%</span>`:''}
-        <span style="font-size:15px;font-weight:800;font-family:var(--mono);color:var(--accent)">${avg!=null?avg.toFixed(1):' —'}</span>
+        ${pct!=null?`<span class="badge badge-gray">${pct}% حضور</span>`:''}
+        <span style="font-size:17px;font-weight:800;font-family:var(--mono);color:var(--accent)">${avg!=null?avg.toFixed(1):'—'}</span>
       </div>
     </div>`;
   }).join('');
+}
+
+/* =================================================================
+   SETTINGS (الإعدادات)
+================================================================= */
+function renderSettings(){
+  const s=DATA.settings;
+  const sec=document.getElementById('sec-settings');
+  sec.innerHTML=`
+    <div class="panel" style="margin-bottom:12px">
+      <div class="panel-title">المظهر</div>
+      <div class="setting-row">
+        <div>
+          <div class="setting-label">${s.darkMode?IC.moon:IC.sun} الوضع الليلي</div>
+          <div class="setting-sub">تغيير مظهر التطبيق</div>
+        </div>
+        <div class="toggle ${s.darkMode?'on':''}" onclick="toggleDark()"></div>
+      </div>
+      <div class="setting-row" style="flex-direction:column;align-items:flex-start;gap:12px">
+        <div>
+          <div class="setting-label">اللون الرئيسي</div>
+          <div class="setting-sub">تخصيص لون واجهة التطبيق</div>
+        </div>
+        <div class="color-options">
+          ${ACCENT_COLORS.map(c=>`
+            <div class="color-opt ${(s.accentColor||'#3B4FC0')===c.val?'selected':''}"
+              style="background:${c.val}" title="${c.name}"
+              onclick="setAccent('${c.val}')"></div>`).join('')}
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-bottom:12px">
+      <div class="panel-title">الإدارة</div>
+      <div class="setting-row">
+        <div>
+          <div class="setting-label">وضع الإدارة</div>
+          <div class="setting-sub">إظهار أزرار التعديل والحذف</div>
+        </div>
+        <div class="toggle ${s.adminMode?'on':''}" onclick="toggleAdminMode()"></div>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-bottom:12px">
+      <div class="panel-title">الإعدادات الافتراضية</div>
+      <div class="setting-row">
+        <div class="setting-label">الأجر الشهري الافتراضي</div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <input id="set-fee" type="number" class="field" style="width:90px;padding:7px 10px;text-align:center" value="${s.defaultFee||200}">
+          <span style="font-size:13px;color:var(--text-3)">د.م</span>
+          <button class="btn btn-accent btn-sm" onclick="saveFee()">حفظ</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-bottom:12px">
+      <div class="panel-title">البيانات</div>
+      <div style="display:flex;flex-direction:column;gap:0">
+        <div class="setting-row" style="cursor:pointer" onclick="exportData()">
+          <div>
+            <div class="setting-label">تصدير البيانات</div>
+            <div class="setting-sub">حفظ نسخة احتياطية بصيغة JSON</div>
+          </div>
+          <span style="color:var(--accent)">${IC.chev}</span>
+        </div>
+        <div class="setting-row" style="cursor:pointer" onclick="document.getElementById('import-input').click()">
+          <div>
+            <div class="setting-label">استيراد البيانات</div>
+            <div class="setting-sub">استعادة من ملف JSON</div>
+          </div>
+          <span style="color:var(--accent)">${IC.chev}</span>
+        </div>
+        <div class="setting-row" style="cursor:pointer" onclick="resetData()">
+          <div>
+            <div class="setting-label" style="color:var(--danger)">مسح جميع البيانات</div>
+            <div class="setting-sub">حذف كل البيانات نهائياً</div>
+          </div>
+          <span style="color:var(--danger)">${IC.chev}</span>
+        </div>
+      </div>
+    </div>
+    <p style="text-align:center;font-size:11px;color:var(--text-3);padding:8px">مساعد الأستاذ v4.0 · جميع البيانات محفوظة محلياً</p>
+  `;
+}
+function toggleDark(){
+  DATA.settings.darkMode=!DATA.settings.darkMode;
+  save();applySettings();renderSettings();
+  // Update accent light after dark mode switch
+  setTimeout(()=>{ const c=DATA.settings.accentColor||'#3B4FC0'; document.documentElement.style.setProperty('--accent-light',hexToLight(c)); },50);
+}
+function setAccent(val){
+  DATA.settings.accentColor=val;
+  save();applySettings();renderSettings();
+}
+function saveFee(){
+  const v=+document.getElementById('set-fee').value;
+  if(v<=0){toast('أدخل مبلغاً صحيحاً','error');return;}
+  DATA.settings.defaultFee=v;
+  save();toast('تم الحفظ','success');
+}
+
+/* =================================================================
+   SEARCH (البحث)
+================================================================= */
+let searchQ='';
+function renderSearch(){
+  const sec=document.getElementById('sec-search');
+  sec.innerHTML=`
+    <div class="search-bar">
+      ${IC.search}
+      <input id="global-search" placeholder="ابحث في التلاميذ، الدروس، التمارين..." autofocus
+        oninput="doSearch(this.value)" value="${esc(searchQ)}">
+      ${searchQ?`<button onclick="doSearch('')" style="color:var(--text-3)">✕</button>`:''}
+    </div>
+    <div id="search-results">${searchQ?buildSearchResults(searchQ):`<div class="empty"><h4>ابدأ الكتابة للبحث</h4><p>يبحث في التلاميذ، الدروس، التمارين، الفروض، المصطلحات</p></div>`}</div>
+  `;
+  setTimeout(()=>document.getElementById('global-search')?.focus(),100);
+}
+function doSearch(q){
+  searchQ=q;
+  const res=document.getElementById('search-results');
+  if(!res)return;
+  if(!q){res.innerHTML=`<div class="empty"><h4>ابدأ الكتابة للبحث</h4><p>يبحث في جميع محتويات التطبيق</p></div>`;return;}
+  res.innerHTML=buildSearchResults(q);
+}
+function buildSearchResults(q){
+  if(!q)return'';
+  const ql=q.toLowerCase();
+  const results=[];
+  DATA.students.forEach(s=>{
+    if(s.name.toLowerCase().includes(ql)||(s.phone||'').includes(ql))
+      results.push({type:'تلميذ',title:s.name,sub:s.phone||clsById(s.cls).label,nav:`navigate('student-detail','${s.id}')`});
+  });
+  DATA.lessons.forEach(l=>{
+    if(l.title.toLowerCase().includes(ql)||(l.summary||'').toLowerCase().includes(ql)||(l.content||'').toLowerCase().includes(ql))
+      results.push({type:'درس',title:l.title,sub:subjById(l.subj).label,nav:`navigate('lessons')`});
+  });
+  DATA.exercises.forEach(e=>{
+    if(e.title.toLowerCase().includes(ql)||(e.content||'').toLowerCase().includes(ql))
+      results.push({type:'تمرين',title:e.title,sub:subjById(e.subj).label+' · '+(e.level||''),nav:`navigate('exercises')`});
+  });
+  DATA.homework.forEach(h=>{
+    if(h.title.toLowerCase().includes(ql)||(h.content||'').toLowerCase().includes(ql))
+      results.push({type:'فرض',title:h.title,sub:fdate(h.dueDate||''),nav:`navigate('homework')`});
+  });
+  DATA.glossary.forEach(t=>{
+    if(t.word.toLowerCase().includes(ql)||(t.definition||'').toLowerCase().includes(ql))
+      results.push({type:'مصطلح',title:t.word,sub:t.definition?t.definition.slice(0,50):'',nav:`navigate('glossary')`});
+  });
+  DATA.sessions.forEach(x=>{
+    if(x.title.toLowerCase().includes(ql)||(x.lesson||'').toLowerCase().includes(ql))
+      results.push({type:'حصة',title:x.title,sub:fdate(x.date),nav:`navigate('sessions')`});
+  });
+  if(results.length===0)
+    return `<div class="empty"><h4>لا توجد نتائج</h4><p>جرب كلمة بحث أخرى</p></div>`;
+  return `<div style="font-size:12px;color:var(--text-3);margin-bottom:8px;font-weight:700">${results.length} نتيجة</div>
+    <div class="panel">
+      ${results.slice(0,30).map(r=>`
+        <div class="search-result-item" onclick="${r.nav}">
+          <span class="search-result-type">${r.type}</span>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:13px;font-weight:700">${esc(r.title)}</div>
+            <div style="font-size:11px;color:var(--text-3)">${esc(r.sub)}</div>
+          </div>
+          <span style="color:var(--text-3)">${IC.chev}</span>
+        </div>`).join('')}
+    </div>`;
 }
 
 /* =================================================================
@@ -1672,14 +2547,11 @@ function studentPerformanceRows(cls){
 ================================================================= */
 function renderData(){
   const counts={
-    students:DATA.students.length,
-    sessions:DATA.sessions.length,
-    grades:DATA.grades.length,
-    attendance:DATA.attendance.length,
-    lessons:DATA.lessons.length,
-    exercises:DATA.exercises.length,
-    homework:DATA.homework.length,
-    payments:DATA.payments.length,
+    students:DATA.students.length,sessions:DATA.sessions.length,
+    grades:DATA.grades.length,attendance:DATA.attendance.length,
+    lessons:DATA.lessons.length,exercises:DATA.exercises.length,
+    homework:DATA.homework.length,payments:DATA.payments.length,
+    glossary:DATA.glossary.length,
   };
   const total=JSON.stringify(DATA).length;
   const sec=document.getElementById('sec-data');
@@ -1688,8 +2560,8 @@ function renderData(){
       <div class="panel-title">ملخص البيانات</div>
       ${Object.entries({
         'التلاميذ':counts.students,'الحصص':counts.sessions,'النقاط':counts.grades,
-        'الحضور':counts.attendance,'الدروس':counts.lessons,'التمارين':counts.exercises,
-        'الفروض':counts.homework,'الأداءات':counts.payments
+        'سجلات الحضور':counts.attendance,'الدروس':counts.lessons,'التمارين':counts.exercises,
+        'الفروض':counts.homework,'الأداءات':counts.payments,'المصطلحات':counts.glossary
       }).map(([k,v])=>`<div class="data-row"><span class="key">${k}</span><span class="val">${v}</span></div>`).join('')}
       <div class="data-row"><span class="key">حجم البيانات</span><span class="val" style="font-family:var(--mono)">${(total/1024).toFixed(1)} KB</span></div>
     </div>
@@ -1700,11 +2572,10 @@ function renderData(){
       </button>
       <button class="btn btn-outline btn-full" onclick="document.getElementById('import-input').click()">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-        استيراد من ملف
+        استيراد من ملف JSON
       </button>
       <button class="btn btn-danger btn-full" onclick="resetData()">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
-        حذف جميع البيانات
+        ${IC.trash} حذف جميع البيانات
       </button>
     </div>`;
 }
@@ -1714,7 +2585,7 @@ function exportData(){
   a.href=URL.createObjectURL(blob);
   a.download=`tutor-backup-${today()}.json`;
   a.click();
-  toast('تم التصدير','success');
+  toast('تم التصدير بنجاح','success');
 }
 document.getElementById('import-input').addEventListener('change',function(){
   const f=this.files[0];if(!f)return;
@@ -1723,8 +2594,8 @@ document.getElementById('import-input').addEventListener('change',function(){
     try{
       const parsed=JSON.parse(e.target.result);
       if(!parsed.students)throw new Error('ملف غير صالح');
-      DATA={...defaultData(),...parsed};
-      save();toast('تم الاستيراد','success');renderData();
+      DATA={...defaultData(),...parsed,settings:{...defaultData().settings,...(parsed.settings||{})}};
+      save();applySettings();toast('تم الاستيراد بنجاح','success');navigate('dashboard');
     }catch(err){toast('خطأ في الملف: '+err.message,'error');}
   };
   reader.readAsText(f);
@@ -1732,10 +2603,11 @@ document.getElementById('import-input').addEventListener('change',function(){
 });
 function resetData(){
   if(!confirm('هذا سيحذف جميع البيانات نهائياً. هل أنت متأكد؟'))return;
-  if(!confirm('تأكيد ثانٍ: حذف كل البيانات؟'))return;
-  DATA=defaultData();save();
-  toast('تم حذف البيانات');
-  navigate('dashboard');
+  if(!confirm('تأكيد ثانٍ: سيتم حذف كل البيانات بشكل دائم؟'))return;
+  const settings=DATA.settings;
+  DATA=defaultData();
+  DATA.settings=settings;
+  save();toast('تم مسح البيانات');navigate('dashboard');
 }
 
 /* =================================================================
@@ -1745,8 +2617,14 @@ function renderDashboard(){
   const t=today();
   const todaySess=DATA.sessions.filter(s=>s.date===t);
   const upcomingSess=DATA.sessions.filter(s=>s.date>t).sort((a,b)=>a.date>b.date?1:-1).slice(0,3);
-  const pendingHW=DATA.homework.filter(h=>h.dueDate>=t);
-  const totalPaid=DATA.payments.reduce((a,p)=>a+Number(p.amount||0),0);
+  const pendingHW=DATA.homework.filter(h=>h.dueDate&&h.dueDate>=t);
+  // Today attendance
+  const todayAtt=DATA.attendance.filter(a=>a.date===t);
+  const todayPresent=todayAtt.filter(a=>a.status==='present').length;
+  const todayAbsent=todayAtt.filter(a=>a.status==='absent').length;
+  const todayLate=todayAtt.filter(a=>a.status==='late').length;
+  const totalStud=DATA.students.length;
+  const activeStud=DATA.students.filter(s=>s.status==='نشط'||!s.status).length;
   const sec=document.getElementById('sec-dashboard');
   sec.innerHTML=`
     <!-- Quick class overview -->
@@ -1754,56 +2632,23 @@ function renderDashboard(){
       ${CLASSES.map(c=>{
         const n=studentsOf(c.id).length;
         const nextSess=DATA.sessions.filter(s=>s.cls===c.id&&s.date>=t).sort((a,b)=>a.date>b.date?1:-1)[0];
-        return `<div class="stat-card" style="flex:1;border-color:${c.color};border-width:2px">
-          <div style="font-size:11px;font-weight:700;color:${c.color};margin-bottom:4px">${c.label}</div>
-          <div style="font-size:22px;font-weight:800;font-family:var(--mono)">${n}</div>
-          <div style="font-size:11px;color:var(--text-3)">تلاميذ</div>
-          ${nextSess?`<div style="font-size:11px;margin-top:8px;padding:4px 8px;border-radius:6px;background:${c.bg};color:${c.color};font-weight:600">${IC.clock} ${fdate(nextSess.date)}</div>`:''}
-        </div>`;
-      }).join('')}
+        return `<div class="stat-card" style="flex:1;border-top:3px solid ${c.color}">
+          <div style="font-size:11px;font-weight:800;color:${c.color}">${c.short}</div>
+          <div style="font-size:24px;font-weight:800;font-family:var(--mono);margin-top:4px">${n}</div>
+          <div style="font-size:11px;color:var(--text-3)">تلميذ</div>
+          ${nextSess?`<div style="font-size:10px;margin-top:6px;padding:3px 7px;border-radius:5px;background:${c.bg};color:${c.color};font-weight:700">⏰ ${fdate(nextSess.date)}</div>`:''}
+        </div>`;}).join('')}
     </div>
 
-    ${todaySess.length>0?`
-      <div class="panel" style="margin-bottom:12px">
-        <div class="panel-title">حصص اليوم</div>
-        ${todaySess.map(s=>{
-          const sj=subjById(s.subj);
-          const cl=clsById(s.cls);
-          return `<div class="card-item" onclick="navigate('sessions')">
-            <div class="card-item-icon" style="background:${sj.bg};color:${sj.color}">${IC.clock}</div>
-            <div class="card-item-body">
-              <div class="card-item-title">${esc(s.title)}</div>
-              <div class="card-item-sub">${cl.label} · ${sj.label}${s.time?' · '+s.time:''}</div>
-            </div>
-            <span class="badge badge-blue">اليوم</span>
-          </div>`;}).join('')}
-      </div>`:'' }
-
-    ${upcomingSess.length>0?`
-      <div class="panel" style="margin-bottom:12px">
-        <div class="panel-title">الحصص القادمة</div>
-        ${upcomingSess.map(s=>{
-          const sj=subjById(s.subj);
-          const cl=clsById(s.cls);
-          return `<div class="card-item" onclick="navigate('sessions')">
-            <div class="card-item-icon" style="background:${sj.bg};color:${sj.color}">${IC.clock}</div>
-            <div class="card-item-body">
-              <div class="card-item-title">${esc(s.title)}</div>
-              <div class="card-item-sub">${fdate(s.date)} · ${cl.label} · ${sj.label}</div>
-            </div>
-          </div>`;}).join('')}
-      </div>`:'' }
-
-    <div class="stat-grid">
+    <!-- Stats Grid -->
+    <div class="stat-grid" style="margin-bottom:12px">
       <div class="stat-card">
-        <div class="s-label">الدروس</div>
+        <div class="s-label">الدروس المسجلة</div>
         <div class="s-val">${DATA.lessons.length}</div>
-        <div class="s-sub">مسجلة</div>
       </div>
       <div class="stat-card">
         <div class="s-label">التمارين</div>
         <div class="s-val">${DATA.exercises.length}</div>
-        <div class="s-sub">في البنك</div>
       </div>
       <div class="stat-card">
         <div class="s-label">الفروض</div>
@@ -1811,47 +2656,311 @@ function renderDashboard(){
         <div class="s-sub">${pendingHW.length} قيد التنفيذ</div>
       </div>
       <div class="stat-card">
-        <div class="s-label">المداخيل</div>
-        <div class="s-val" style="font-size:20px">${totalPaid}</div>
-        <div class="s-sub">درهم</div>
+        <div class="s-label">المصطلحات</div>
+        <div class="s-val">${DATA.glossary.length}</div>
       </div>
     </div>
 
-    <!-- Quick nav buttons -->
-    <div class="panel" style="margin-top:4px">
+    <!-- Today Attendance -->
+    ${todayAtt.length>0?`
+    <div class="panel" style="margin-bottom:12px">
+      <div class="panel-title">حضور اليوم</div>
+      <div style="display:flex;gap:0">
+        <div style="flex:1;padding:12px;text-align:center;border-left:1px solid var(--border)">
+          <div style="font-size:22px;font-weight:800;color:var(--green)">${todayPresent}</div>
+          <div style="font-size:11px;color:var(--text-3);font-weight:700">حاضر</div>
+        </div>
+        <div style="flex:1;padding:12px;text-align:center;border-left:1px solid var(--border)">
+          <div style="font-size:22px;font-weight:800;color:var(--danger)">${todayAbsent}</div>
+          <div style="font-size:11px;color:var(--text-3);font-weight:700">غائب</div>
+        </div>
+        <div style="flex:1;padding:12px;text-align:center">
+          <div style="font-size:22px;font-weight:800;color:var(--amber)">${todayLate}</div>
+          <div style="font-size:11px;color:var(--text-3);font-weight:700">متأخر</div>
+        </div>
+      </div>
+    </div>`:''}
+
+    <!-- Chart -->
+    <div class="panel" style="margin-bottom:12px">
+      <div class="panel-title">نسب الحضور والأداء</div>
+      <div class="chart-wrap">
+        <canvas id="dash-chart" height="150"></canvas>
+      </div>
+    </div>
+
+    ${todaySess.length>0?`
+    <div class="panel" style="margin-bottom:12px">
+      <div class="panel-title">حصص اليوم</div>
+      ${todaySess.map(s=>{
+        const sj=subjById(s.subj);
+        const cl=clsById(s.cls);
+        return `<div class="card-item" onclick="navigate('sessions')">
+          <div class="card-item-icon" style="background:${sj.bg};color:${sj.color}">${IC.clock}</div>
+          <div class="card-item-body">
+            <div class="card-item-title">${esc(s.title)}</div>
+            <div class="card-item-sub">${cl.label} · ${sj.label}${s.time?' · '+s.time:''}</div>
+          </div>
+          <span class="badge badge-blue">اليوم</span>
+        </div>`;}).join('')}
+    </div>`:''}
+
+    ${upcomingSess.length>0?`
+    <div class="panel" style="margin-bottom:12px">
+      <div class="panel-title">الحصص القادمة</div>
+      ${upcomingSess.map(s=>{
+        const sj=subjById(s.subj);
+        const cl=clsById(s.cls);
+        return `<div class="card-item" onclick="navigate('sessions')">
+          <div class="card-item-icon" style="background:${sj.bg};color:${sj.color}">${IC.clock}</div>
+          <div class="card-item-body">
+            <div class="card-item-title">${esc(s.title)}</div>
+            <div class="card-item-sub">${fdate(s.date)} · ${cl.label}</div>
+          </div>
+        </div>`;}).join('')}
+    </div>`:''}
+
+    <!-- Quick Nav -->
+    <div class="panel">
       <div class="panel-title">وصول سريع</div>
-      <div style="display:flex;flex-wrap:wrap;gap:8px;padding:12px 14px">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:12px">
         ${[
-          ['sessions','جدول الحصص','var(--accent)','var(--accent-light)'],
-          ['lessons','الدروس','var(--math)','var(--math-bg)'],
-          ['exercises','التمارين','var(--phy)','var(--phy-bg)'],
-          ['grades','النقاط','var(--svt)','var(--svt-bg)'],
-          ['attendance','الحضور','var(--amber)','var(--amber-light)'],
-          ['payments','الأداءات','var(--green)','var(--green-light)'],
-        ].map(([k,l,c,b])=>`
+          ['lessons','الدروس','var(--math)','var(--math-bg)',IC.book],
+          ['exercises','التمارين','var(--phy)','var(--phy-bg)',IC.pen],
+          ['homework','الفروض','var(--danger)','var(--danger-light)',IC.clip],
+          ['attendance','الحضور','var(--green)','var(--green-light)',IC.check],
+          ['sessions','الحصص','var(--accent)','var(--accent-light)',IC.clock],
+          ['glossary','المصطلحات','var(--purple)','var(--purple-light)',IC.book2],
+        ].map(([k,l,c,b,icon])=>`
           <button onclick="navigate('${k}')" style="
-            padding:8px 14px;border-radius:10px;font-size:12px;font-weight:700;
+            display:flex;flex-direction:column;align-items:center;gap:6px;
+            padding:12px 6px;border-radius:12px;font-size:11px;font-weight:700;
             background:${b};color:${c};border:1.5px solid ${b};
-          ">${l}</button>`).join('')}
+          ">
+            ${icon}<span>${l}</span>
+          </button>`).join('')}
       </div>
     </div>`;
+  setTimeout(()=>drawDashChart(),0);
 }
 
 /* =================================================================
-   HELPERS
+   CHARTS (Canvas only — no external libs)
 ================================================================= */
-function emptyHtml(title,sub){
-  return `<div class="empty">
-    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12" opacity=".4"/></svg>
-    <h4>${title}</h4><p>${sub}</p>
-  </div>`;
+function drawDashChart(){
+  const canvas=document.getElementById('dash-chart');
+  if(!canvas)return;
+  const ctx=canvas.getContext('2d');
+  const W=canvas.offsetWidth;canvas.width=W;canvas.height=160;
+  const isDark=document.body.classList.contains('dark');
+  const gridColor=isDark?'rgba(255,255,255,.08)':'rgba(0,0,0,.06)';
+  const textColor=isDark?'#5A6490':'#8892B0';
+  ctx.clearRect(0,0,W,160);
+
+  // Two sections: attendance (%) left, grades (/20) right
+  // Section 1: Attendance by class (0–100%)
+  const attBars=CLASSES.map(c=>{
+    const total=DATA.attendance.filter(a=>a.cls===c.id).length;
+    const present=DATA.attendance.filter(a=>a.cls===c.id&&a.status==='present').length;
+    return {label:c.short,val:total>0?Math.round(present/total*100):0,color:c.id==='1ere'?'#3B82F6':'#E55B20',unit:'%',max:100};
+  });
+  // Section 2: Grade averages by subject (0–20)
+  const gradeBars=SUBJECTS.map(s=>{
+    const gs=DATA.grades.filter(g=>g.subj===s.id&&g.max>0);
+    const avg=gs.length>0?gs.reduce((a,g)=>a+g.score/g.max,0)/gs.length*20:0;
+    return {label:s.short,val:+avg.toFixed(1),color:s.id==='math'?'#3B4FC0':s.id==='phy'?'#E09B2F':'#178A6F',unit:'/20',max:20};
+  });
+
+  const allBars=[...attBars,...gradeBars];
+  const barW=Math.max(18,Math.floor((W-50)/allBars.length)-8);
+  const chartH=115;const topPad=16;const leftPad=38;
+
+  // Grid for attendance side (left, 0-100%)
+  [0,50,100].forEach(v=>{
+    const y=topPad+chartH*(1-v/100);
+    ctx.strokeStyle=gridColor;ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(leftPad,y);ctx.lineTo(W-10,y);ctx.stroke();
+    ctx.fillStyle=textColor;ctx.font='9px sans-serif';ctx.textAlign='right';
+    ctx.fillText(v+'%',leftPad-3,y+3);
+  });
+
+  // Divider between sections
+  const divX=leftPad+(attBars.length*(barW+8));
+  ctx.strokeStyle=gridColor;ctx.lineWidth=1.5;ctx.setLineDash([4,3]);
+  ctx.beginPath();ctx.moveTo(divX,topPad);ctx.lineTo(divX,topPad+chartH);ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Grade axis labels (right side)
+  [0,10,20].forEach(v=>{
+    const y=topPad+chartH*(1-v/20);
+    ctx.fillStyle=textColor;ctx.font='9px sans-serif';ctx.textAlign='left';
+    ctx.fillText(v,W-18,y+3);
+  });
+
+  // Draw bars
+  allBars.forEach((b,i)=>{
+    const pct=b.val/b.max;
+    const x=leftPad+i*(barW+8);
+    const h=Math.max(2,chartH*pct);
+    const y=topPad+chartH-h;
+    ctx.fillStyle=b.color+'CC';
+    roundRect(ctx,x,y,barW,h,4);ctx.fill();
+    // Label below
+    ctx.fillStyle=textColor;ctx.font='9px sans-serif';ctx.textAlign='center';
+    ctx.fillText(b.label,x+barW/2,155);
+    // Value above bar
+    ctx.fillStyle=b.color;ctx.font='bold 9px sans-serif';
+    const valTxt=b.unit==='%'?b.val+'%':b.val.toString();
+    ctx.fillText(valTxt,x+barW/2,Math.max(y-3,topPad+2));
+  });
+
+  // Section labels
+  ctx.fillStyle=textColor;ctx.font='bold 9px sans-serif';ctx.textAlign='center';
+  ctx.fillText('الحضور',leftPad+attBars.length*(barW+8)/2-4,11);
+  ctx.fillText('المعدلات',divX+(gradeBars.length*(barW+8))/2-4,11);
+}
+function drawStudentGradeChart(sid,grades){
+  const canvas=document.getElementById('grade-chart-'+sid);
+  if(!canvas||grades.length===0)return;
+  const W=canvas.offsetWidth;canvas.width=W;canvas.height=140;
+  const ctx=canvas.getContext('2d');
+  const isDark=document.body.classList.contains('dark');
+  const textColor=isDark?'#5A6490':'#8892B0';
+  const accentColor=getComputedStyle(document.documentElement).getPropertyValue('--accent').trim()||'#3B4FC0';
+  const sorted=grades.filter(g=>g.max>0).slice().sort((a,b)=>a.date>b.date?1:-1).slice(-8);
+  if(sorted.length===0)return;
+  const maxV=20;const points=sorted.map(g=>({y:g.score/g.max*20,label:g.title.slice(0,8)}));
+  const W2=W-40;const H=110;const top=16;const left=36;
+  ctx.clearRect(0,0,W,140);
+  // Grid
+  [0,5,10,15,20].forEach(v=>{
+    const y=top+H*(1-v/maxV);
+    ctx.strokeStyle=isDark?'rgba(255,255,255,.06)':'rgba(0,0,0,.05)';
+    ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(left,y);ctx.lineTo(W-8,y);ctx.stroke();
+    ctx.fillStyle=textColor;ctx.font='9px sans-serif';ctx.textAlign='right';
+    ctx.fillText(v,left-3,y+3);
+  });
+  // Line
+  const step=points.length>1?W2/(points.length-1):W2;
+  ctx.strokeStyle=accentColor;ctx.lineWidth=2;ctx.lineJoin='round';
+  ctx.beginPath();
+  points.forEach((p,i)=>{
+    const x=left+i*step;const y=top+H*(1-p.y/maxV);
+    i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+  });
+  ctx.stroke();
+  // Points
+  points.forEach((p,i)=>{
+    const x=left+i*step;const y=top+H*(1-p.y/maxV);
+    ctx.beginPath();ctx.arc(x,y,4,0,Math.PI*2);
+    ctx.fillStyle=p.y>=10?'#178A6F':p.y>=7?'#E09B2F':'#D04040';
+    ctx.fill();
+    ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke();
+    ctx.fillStyle=textColor;ctx.font='8px sans-serif';ctx.textAlign='center';
+    ctx.fillText(p.label,x,140-2);
+    ctx.fillStyle=p.y>=10?'#178A6F':p.y>=7?'#E09B2F':'#D04040';
+    ctx.fillText(p.y.toFixed(1),x,y-8);
+  });
+}
+function drawGradeBarChart(grades,stds,subj){
+  const canvas=document.getElementById('grade-bar-chart');
+  if(!canvas||grades.length===0||stds.length===0)return;
+  const W=canvas.offsetWidth;canvas.width=W;canvas.height=150;
+  const ctx=canvas.getContext('2d');
+  const isDark=document.body.classList.contains('dark');
+  const textColor=isDark?'#5A6490':'#8892B0';
+  const s=subjById(subj);
+  const data=stds.map(st=>{
+    const gs=grades.filter(g=>g.sid===st.id&&g.max>0);
+    const avg=gs.length>0?gs.reduce((a,g)=>a+g.score/g.max,0)/gs.length*20:null;
+    return {name:st.name.split(' ')[0],avg};
+  }).filter(d=>d.avg!=null).slice(0,8);
+  if(data.length===0)return;
+  const barW=Math.floor((W-50)/data.length)-6;
+  const chartH=110;const top=10;const left=40;
+  ctx.clearRect(0,0,W,150);
+  [0,5,10,15,20].forEach(v=>{
+    const y=top+chartH*(1-v/20);
+    ctx.strokeStyle=isDark?'rgba(255,255,255,.06)':'rgba(0,0,0,.05)';
+    ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(left,y);ctx.lineTo(W-4,y);ctx.stroke();
+    ctx.fillStyle=textColor;ctx.font='9px sans-serif';ctx.textAlign='right';
+    ctx.fillText(v,left-3,y+3);
+  });
+  data.forEach((d,i)=>{
+    const x=left+i*(barW+6);
+    const h=chartH*(d.avg/20);
+    const y=top+chartH-h;
+    const col=d.avg>=14?'#178A6F':d.avg>=10?getComputedStyle(document.documentElement).getPropertyValue('--accent').trim()||s.color:d.avg>=7?'#E09B2F':'#D04040';
+    ctx.fillStyle=col+'CC';
+    roundRect(ctx,x,y,barW,h,4);ctx.fill();
+    ctx.fillStyle=textColor;ctx.font='9px sans-serif';ctx.textAlign='center';
+    ctx.fillText(d.name.slice(0,6),x+barW/2,148);
+    ctx.fillStyle=col;ctx.font='bold 10px sans-serif';
+    ctx.fillText(d.avg.toFixed(1),x+barW/2,y-4);
+  });
+}
+function drawReportsChart(){
+  const canvas=document.getElementById('reports-chart');
+  if(!canvas)return;
+  const W=canvas.offsetWidth;canvas.width=W;canvas.height=180;
+  const ctx=canvas.getContext('2d');
+  const isDark=document.body.classList.contains('dark');
+  const textColor=isDark?'#5A6490':'#8892B0';
+  // Donut chart: students by class
+  const cx=W/2,cy=90,R=60,r=35;
+  const total=DATA.students.length;
+  if(total===0){
+    ctx.fillStyle=textColor;ctx.font='13px sans-serif';ctx.textAlign='center';
+    ctx.fillText('لا يوجد تلاميذ',cx,cy);return;
+  }
+  let startAngle=-Math.PI/2;
+  CLASSES.forEach((c,i)=>{
+    const n=studentsOf(c.id).length;
+    const angle=n/total*Math.PI*2;
+    const col=c.id==='1ere'?'#3B82F6':'#E55B20';
+    ctx.beginPath();
+    ctx.moveTo(cx,cy);
+    ctx.arc(cx,cy,R,startAngle,startAngle+angle);
+    ctx.closePath();
+    ctx.fillStyle=col;ctx.fill();
+    startAngle+=angle;
+  });
+  // Inner circle (donut hole)
+  ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);
+  ctx.fillStyle=isDark?'#131729':'#F0F2F8';ctx.fill();
+  // Center text
+  ctx.fillStyle=isDark?'#E8EAF6':'#1C2340';
+  ctx.font='bold 18px sans-serif';ctx.textAlign='center';
+  ctx.fillText(total,cx,cy+6);
+  ctx.fillStyle=textColor;ctx.font='11px sans-serif';
+  ctx.fillText('تلميذ',cx,cy+20);
+  // Legend
+  let lx=10;
+  CLASSES.forEach((c,i)=>{
+    const n=studentsOf(c.id).length;
+    const col=c.id==='1ere'?'#3B82F6':'#E55B20';
+    const ly=160+i*16;
+    ctx.fillStyle=col;ctx.fillRect(10,ly-8,10,10);
+    ctx.fillStyle=textColor;ctx.font='11px sans-serif';ctx.textAlign='right';
+    ctx.fillText(`${c.short}: ${n}`,W-10,ly+2);
+  });
+}
+function roundRect(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+  ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+  ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+  ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);
+  ctx.closePath();
 }
 
 /* =================================================================
    INIT
 ================================================================= */
 function init(){
-  document.getElementById('today-badge').textContent=today();
+  applySettings();
+  document.getElementById('today-badge').textContent=today().slice(5).replace('-','/');
   updateBadges();
   const last=localStorage.getItem('lastNav')||'dashboard';
   const [k,e]=last.split('|');
