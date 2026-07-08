@@ -1,0 +1,1864 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>مساعد الأستاذ</title>
+<style>
+/* ===== RESET & BASE ===== */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{font-size:15px;-webkit-text-size-adjust:100%}
+body{
+  font-family:'Segoe UI',Tahoma,Arial,sans-serif;
+  background:#F0F2F8;color:#1C2340;
+  min-height:100vh;min-height:100dvh;
+  overscroll-behavior:none;
+}
+button{font-family:inherit;font-size:inherit;border:none;background:none;cursor:pointer;color:inherit}
+input,textarea,select{font-family:inherit;font-size:inherit;border:none;outline:none;background:none;color:inherit}
+a{color:inherit;text-decoration:none}
+ul,ol{list-style:none}
+
+/* ===== CSS VARIABLES ===== */
+:root{
+  --accent:#3B4FC0;
+  --accent-dark:#2D3D9E;
+  --accent-light:#EBF0FB;
+  --surface:#FFFFFF;
+  --surface-2:#F7F8FC;
+  --bg:#F0F2F8;
+  --border:#E5E8F2;
+  --border-2:#CDD2E8;
+  --text:#1C2340;
+  --text-2:#4B5572;
+  --text-3:#8892B0;
+  --danger:#D04040;
+  --danger-light:#FDEAEA;
+  --amber:#E09B2F;
+  --amber-light:#FEF3DC;
+  --green:#178A6F;
+  --green-light:#E0F5EE;
+  --purple:#8E44AD;
+  --purple-light:#F5EEF8;
+  --radius:10px;
+  --radius-lg:14px;
+  --radius-xl:20px;
+  --mono:'SF Mono','Fira Code',monospace;
+  --nav-h:64px;
+  --topbar-h:56px;
+  /* class colors */
+  --c1:#3B82F6;
+  --c1-bg:#EBF5FB;
+  --c2:#E55B20;
+  --c2-bg:#FEF0E8;
+  /* subject colors */
+  --math:#3B4FC0;
+  --math-bg:#EBF0FB;
+  --phy:#E09B2F;
+  --phy-bg:#FEF3DC;
+  --svt:#178A6F;
+  --svt-bg:#E0F5EE;
+}
+
+/* ===== LAYOUT ===== */
+#app{
+  display:flex;flex-direction:column;
+  min-height:100vh;min-height:100dvh;
+  max-width:520px;margin:0 auto;
+  background:var(--bg);
+  position:relative;
+}
+
+/* ===== TOPBAR ===== */
+.topbar{
+  position:sticky;top:0;z-index:40;
+  height:var(--topbar-h);
+  background:var(--surface);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;
+  padding:0 12px;gap:8px;
+  box-shadow:0 1px 8px rgba(28,35,64,.06);
+}
+.topbar-title{font-size:17px;font-weight:700;flex:1;text-align:center}
+.back-btn{
+  width:36px;height:36px;display:flex;align-items:center;justify-content:center;
+  border-radius:10px;color:var(--accent);background:var(--accent-light);
+}
+.topbar-right{display:flex;align-items:center;gap:6px}
+
+/* ===== PAGE CONTENT ===== */
+#page-content{
+  flex:1;overflow-y:auto;overflow-x:hidden;
+  padding-bottom:calc(var(--nav-h) + 12px + env(safe-area-inset-bottom));
+  -webkit-overflow-scrolling:touch;
+}
+.section{display:none;padding:14px 14px 4px}
+.section.active{display:block}
+
+/* ===== BOTTOM NAV ===== */
+.bottom-nav{
+  position:fixed;bottom:0;left:50%;transform:translateX(-50%);
+  width:100%;max-width:520px;
+  height:calc(var(--nav-h) + env(safe-area-inset-bottom));
+  padding-bottom:env(safe-area-inset-bottom);
+  background:var(--surface);
+  border-top:1px solid var(--border);
+  display:flex;align-items:stretch;
+  z-index:50;
+  box-shadow:0 -2px 16px rgba(28,35,64,.08);
+}
+.nav-btn{
+  flex:1;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:3px;
+  font-size:11px;font-weight:600;color:var(--text-3);
+  transition:color .15s;
+  position:relative;
+}
+.nav-btn svg{width:22px;height:22px;transition:transform .15s}
+.nav-btn.active{color:var(--accent)}
+.nav-btn.active svg{transform:scale(1.1)}
+.nav-dot{
+  position:absolute;top:8px;right:calc(50% - 14px);
+  min-width:16px;height:16px;border-radius:10px;
+  background:var(--danger);color:#fff;font-size:10px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+  padding:0 4px;display:none;
+}
+
+/* ===== FAB ===== */
+.fab{
+  position:fixed;
+  bottom:calc(var(--nav-h) + 14px + env(safe-area-inset-bottom));
+  left:16px;
+  width:52px;height:52px;border-radius:16px;
+  background:var(--accent);color:#fff;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 18px rgba(59,79,192,.35);
+  z-index:45;
+  transition:transform .15s,box-shadow .15s;
+}
+.fab:active{transform:scale(.93);box-shadow:0 2px 8px rgba(59,79,192,.25)}
+
+/* ===== CARDS & PANELS ===== */
+.panel{
+  background:var(--surface);border-radius:var(--radius-lg);
+  border:1px solid var(--border);margin-bottom:12px;
+  overflow:hidden;
+}
+.panel-title{
+  font-size:13px;font-weight:700;color:var(--text-3);
+  padding:12px 16px 0;letter-spacing:.4px;text-transform:uppercase;
+}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.stat-card{
+  background:var(--surface);border-radius:var(--radius-lg);
+  border:1px solid var(--border);padding:14px;
+  display:flex;flex-direction:column;gap:4px;
+}
+.stat-card .s-label{font-size:12px;color:var(--text-3);font-weight:600}
+.stat-card .s-val{font-size:26px;font-weight:800;color:var(--text);font-family:var(--mono)}
+.stat-card .s-sub{font-size:11px;color:var(--text-3);margin-top:2px}
+.stat-card.accent{background:var(--accent);border-color:var(--accent)}
+.stat-card.accent .s-label,.stat-card.accent .s-val,.stat-card.accent .s-sub{color:#fff}
+
+/* ===== CLASS PILLS ===== */
+.class-tabs{
+  display:flex;gap:8px;margin-bottom:14px;
+}
+.class-tab{
+  flex:1;padding:9px 8px;border-radius:10px;
+  font-size:13px;font-weight:700;
+  border:2px solid var(--border);
+  background:var(--surface);color:var(--text-3);
+  text-align:center;transition:all .15s;
+}
+.class-tab.active-1{background:var(--c1-bg);border-color:var(--c1);color:var(--c1)}
+.class-tab.active-2{background:var(--c2-bg);border-color:var(--c2);color:var(--c2)}
+
+/* ===== SUBJECT PILLS ===== */
+.subj-row{
+  display:flex;gap:6px;margin-bottom:12px;
+  overflow-x:auto;-webkit-overflow-scrolling:touch;
+  scrollbar-width:none;padding-bottom:2px;
+}
+.subj-row::-webkit-scrollbar{display:none}
+.subj-pill{
+  padding:6px 12px;border-radius:20px;
+  font-size:12px;font-weight:700;white-space:nowrap;
+  border:1.5px solid var(--border);
+  background:var(--surface);color:var(--text-3);
+  transition:all .15s;
+}
+.subj-pill.math{background:var(--math-bg);border-color:var(--math);color:var(--math)}
+.subj-pill.phy{background:var(--phy-bg);border-color:var(--phy);color:var(--phy)}
+.subj-pill.svt{background:var(--svt-bg);border-color:var(--svt);color:var(--svt)}
+
+/* ===== CARD ITEMS ===== */
+.card-item{
+  display:flex;align-items:center;gap:12px;
+  padding:12px 14px;border-bottom:1px solid var(--border);
+}
+.card-item:last-child{border-bottom:none}
+.card-item-icon{
+  width:40px;height:40px;border-radius:12px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+}
+.card-item-body{flex:1;min-width:0}
+.card-item-title{font-size:14px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card-item-sub{font-size:12px;color:var(--text-3);margin-top:2px}
+.card-item-actions{display:flex;gap:6px;align-items:center;flex-shrink:0}
+
+/* ===== BUTTONS ===== */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  padding:10px 18px;border-radius:10px;font-size:14px;font-weight:700;
+  transition:opacity .15s,transform .1s;
+}
+.btn:active{opacity:.8;transform:scale(.97)}
+.btn-accent{background:var(--accent);color:#fff}
+.btn-outline{background:var(--surface);border:1.5px solid var(--border-2);color:var(--text-2)}
+.btn-danger{background:var(--danger-light);color:var(--danger)}
+.btn-full{width:100%}
+.btn-icon{
+  width:34px;height:34px;display:flex;align-items:center;justify-content:center;
+  border-radius:9px;background:var(--surface-2);color:var(--text-3);
+}
+.btn-icon.accent{background:var(--accent-light);color:var(--accent)}
+.btn-icon.danger{background:var(--danger-light);color:var(--danger)}
+
+/* ===== BADGE ===== */
+.badge{
+  display:inline-flex;align-items:center;
+  padding:3px 9px;border-radius:20px;
+  font-size:11px;font-weight:700;white-space:nowrap;
+}
+.badge-green{background:var(--green-light);color:var(--green)}
+.badge-amber{background:var(--amber-light);color:#A0711F}
+.badge-red{background:var(--danger-light);color:var(--danger)}
+.badge-gray{background:#EEF0F5;color:var(--text-3)}
+.badge-blue{background:var(--accent-light);color:var(--accent)}
+.badge-math{background:var(--math-bg);color:var(--math)}
+.badge-phy{background:var(--phy-bg);color:var(--phy)}
+.badge-svt{background:var(--svt-bg);color:var(--svt)}
+.badge-c1{background:var(--c1-bg);color:var(--c1)}
+.badge-c2{background:var(--c2-bg);color:var(--c2)}
+
+/* ===== FORM FIELDS ===== */
+.field-row{margin-bottom:12px}
+.field-row label{display:block;font-size:12px;font-weight:700;color:var(--text-3);margin-bottom:5px;letter-spacing:.3px}
+.field{
+  width:100%;padding:11px 13px;
+  border-radius:10px;border:1.5px solid var(--border);
+  background:var(--surface-2);font-size:14px;color:var(--text);
+  transition:border-color .15s;
+}
+.field:focus{border-color:var(--accent);background:#fff}
+textarea.field{resize:vertical;min-height:80px;line-height:1.5}
+select.field{-webkit-appearance:none;appearance:none}
+.req{color:var(--danger)}
+.field-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.field-note{font-size:12px;color:var(--text-3);margin-top:4px;padding:8px 12px;background:var(--accent-light);border-radius:8px;border-right:3px solid var(--accent)}
+
+/* ===== TABS (inside sections) ===== */
+.tabs-scroll{
+  display:flex;gap:2px;overflow-x:auto;
+  padding:0 0 0;border-bottom:1px solid var(--border);
+  -webkit-overflow-scrolling:touch;scrollbar-width:none;
+  margin:0 -14px 14px;padding:0 14px;
+}
+.tabs-scroll::-webkit-scrollbar{display:none}
+.tab-btn{
+  padding:10px 14px;font-size:13px;font-weight:700;
+  color:var(--text-3);border-bottom:2.5px solid transparent;
+  white-space:nowrap;transition:color .15s;
+}
+.tab-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
+
+/* ===== SECTION HEADER ===== */
+.section-header{
+  display:flex;align-items:center;gap:10px;
+  padding:0 0 12px;
+}
+.section-header h2{font-size:16px;font-weight:700;flex:1}
+.count-badge{
+  background:var(--accent-light);color:var(--accent);
+  border-radius:20px;padding:2px 10px;
+  font-size:12px;font-weight:700;font-family:var(--mono);
+}
+
+/* ===== PROGRESS BAR ===== */
+.progress-bar{height:7px;border-radius:6px;background:var(--bg);overflow:hidden}
+.progress-fill{height:100%;border-radius:6px;background:var(--accent);transition:width .4s}
+
+/* ===== QUICK MARK ===== */
+.quick-mark-row{display:flex;gap:6px}
+.qm-btn{
+  flex:1;padding:8px 4px;border-radius:9px;font-size:12px;font-weight:700;
+  border:1.5px solid var(--border);background:var(--surface);color:var(--text-2);
+  transition:all .1s;
+}
+.qm-btn.present{background:var(--green-light);color:var(--green);border-color:#b2e8d7}
+.qm-btn.absent{background:var(--danger-light);color:var(--danger);border-color:#f7c5c5}
+.qm-btn.late{background:var(--amber-light);color:#A0711F;border-color:#f5d98a}
+
+/* ===== DATA ROW ===== */
+.data-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:11px 16px;border-bottom:1px solid var(--border);font-size:14px;
+}
+.data-row:last-child{border-bottom:none}
+.data-row .key{color:var(--text-3);font-size:13px}
+.data-row .val{font-weight:700;color:var(--text)}
+
+/* ===== OVERLAY / SHEET ===== */
+.overlay{
+  position:fixed;inset:0;z-index:100;
+  background:rgba(15,20,40,.5);
+  display:none;align-items:flex-end;
+  backdrop-filter:blur(2px);
+}
+.overlay.show{display:flex}
+.sheet{
+  background:var(--surface);width:100%;
+  border-radius:var(--radius-xl) var(--radius-xl) 0 0;
+  max-height:92vh;max-height:92dvh;
+  overflow-y:auto;
+  animation:sheetUp .28s cubic-bezier(.32,.72,0,1);
+}
+@keyframes sheetUp{from{transform:translateY(100%)}to{transform:none}}
+.sheet-handle{display:flex;justify-content:center;padding:10px 0 6px}
+.sheet-handle span{width:36px;height:4px;border-radius:3px;background:var(--border-2)}
+.sheet-head{
+  padding:4px 16px 14px;
+  display:flex;align-items:center;justify-content:space-between;
+  border-bottom:1px solid var(--border);
+}
+.sheet-head h3{font-size:16px;font-weight:800}
+.sheet-body{padding:16px}
+.sheet-foot{
+  display:flex;gap:10px;
+  padding:12px 16px calc(12px + env(safe-area-inset-bottom));
+  border-top:1px solid var(--border);
+}
+.sheet-foot .btn{flex:1}
+
+/* ===== TOAST ===== */
+#toast-area{
+  position:fixed;top:70px;right:0;left:0;
+  display:flex;flex-direction:column;align-items:center;
+  z-index:200;gap:6px;pointer-events:none;
+}
+.toast{
+  background:#1C2340;color:#fff;
+  padding:10px 20px;border-radius:12px;
+  font-size:13px;font-weight:600;
+  box-shadow:0 4px 20px rgba(0,0,0,.25);
+  max-width:90%;text-align:center;
+}
+.toast.success{background:var(--green)}
+.toast.error{background:var(--danger)}
+
+/* ===== EMPTY STATE ===== */
+.empty{
+  text-align:center;padding:48px 16px;
+  display:flex;flex-direction:column;align-items:center;gap:10px;
+}
+.empty svg{color:var(--border-2)}
+.empty h4{font-size:15px;font-weight:700;color:var(--text-2)}
+.empty p{font-size:13px;color:var(--text-3)}
+
+/* ===== MORE GRID ===== */
+.more-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:10px;
+  margin-bottom:12px;
+}
+.more-card{
+  background:var(--surface);border-radius:var(--radius-lg);
+  border:1px solid var(--border);padding:14px 8px;
+  display:flex;flex-direction:column;align-items:center;gap:8px;
+  text-align:center;transition:transform .12s,box-shadow .12s;
+  position:relative;
+}
+.more-card:active{transform:scale(.95)}
+.more-card-icon{
+  width:44px;height:44px;border-radius:14px;
+  display:flex;align-items:center;justify-content:center;
+}
+.more-card-label{font-size:12px;font-weight:700;color:var(--text-2);line-height:1.2}
+.more-card .badge{position:absolute;top:6px;left:6px}
+
+/* ===== SESSION CARDS ===== */
+.session-card{
+  background:var(--surface);border-radius:var(--radius-lg);
+  border:1px solid var(--border);margin-bottom:10px;
+  overflow:hidden;
+}
+.session-card-head{
+  display:flex;align-items:center;gap:10px;
+  padding:12px 14px;cursor:pointer;
+}
+.session-card-body{
+  padding:0 14px 12px;border-top:1px solid var(--border);
+  display:none;
+}
+.session-card.open .session-card-body{display:block}
+.session-date-badge{
+  padding:4px 10px;border-radius:8px;
+  font-size:11px;font-weight:700;font-family:var(--mono);
+  background:var(--surface-2);color:var(--text-3);
+}
+
+/* ===== ATTENDANCE TABLE ===== */
+.att-row{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 0;border-bottom:1px solid var(--border);
+}
+.att-row:last-child{border-bottom:none}
+.att-name{flex:1;font-size:14px;font-weight:600}
+
+/* ===== GRADE CARD ===== */
+.grade-item{
+  display:flex;align-items:center;gap:12px;
+  padding:11px 14px;border-bottom:1px solid var(--border);
+}
+.grade-item:last-child{border-bottom:none}
+.grade-score{
+  font-size:20px;font-weight:800;font-family:var(--mono);
+  color:var(--accent);min-width:44px;text-align:center;
+}
+.grade-score.pass{color:var(--green)}
+.grade-score.fail{color:var(--danger)}
+.grade-score.avg{color:var(--amber)}
+
+/* ===== DIVIDER ===== */
+.divider{height:1px;background:var(--border);margin:6px 0}
+
+/* ===== CHART ===== */
+canvas{display:block;max-width:100%}
+.chart-wrap{padding:14px 16px}
+
+/* ===== PRINT ===== */
+#print-area{display:none}
+@media print{
+  body>*:not(#print-area){display:none!important}
+  #print-area{display:block!important}
+}
+
+/* ===== DESKTOP ===== */
+@media(min-width:640px){
+  .stat-grid{grid-template-columns:repeat(4,1fr)}
+  .more-grid{grid-template-columns:repeat(4,1fr)}
+  .field-grid-2{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<div id="app">
+  <!-- TOP BAR -->
+  <header class="topbar" id="topbar">
+    <div id="topbar-left" style="width:40px"></div>
+    <div class="topbar-title" id="topbar-title">مساعد الأستاذ</div>
+    <div class="topbar-right" id="topbar-right">
+      <div id="today-badge" style="font-size:11px;font-weight:700;color:var(--text-3);font-family:var(--mono)"></div>
+    </div>
+  </header>
+
+  <!-- PAGE CONTENT -->
+  <div id="page-content">
+    <div class="section active" id="sec-dashboard"></div>
+    <div class="section" id="sec-students"></div>
+    <div class="section" id="sec-attendance"></div>
+    <div class="section" id="sec-grades"></div>
+    <div class="section" id="sec-more"></div>
+    <div class="section" id="sec-sessions"></div>
+    <div class="section" id="sec-lessons"></div>
+    <div class="section" id="sec-exercises"></div>
+    <div class="section" id="sec-homework"></div>
+    <div class="section" id="sec-payments"></div>
+    <div class="section" id="sec-data"></div>
+    <div class="section" id="sec-student-detail"></div>
+    <div class="section" id="sec-performance"></div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <button class="nav-btn active" data-nav="dashboard" onclick="navigate('dashboard')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/>
+        <rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>
+      </svg>
+      الرئيسية
+    </button>
+    <button class="nav-btn" data-nav="students" onclick="navigate('students')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+        <circle cx="9" cy="7" r="4"/>
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+      </svg>
+      التلاميذ
+      <span class="nav-dot" id="nd-students"></span>
+    </button>
+    <button class="nav-btn" data-nav="attendance" onclick="navigate('attendance')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 11l3 3L22 4"/>
+        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+      </svg>
+      الحضور
+    </button>
+    <button class="nav-btn" data-nav="grades" onclick="navigate('grades')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+      </svg>
+      النقاط
+    </button>
+    <button class="nav-btn" data-nav="more" onclick="navigate('more')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+      المزيد
+    </button>
+  </nav>
+
+  <!-- FAB -->
+  <button class="fab" id="main-fab" onclick="handleFab()">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+      <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+    </svg>
+  </button>
+</div>
+
+<!-- OVERLAY -->
+<div class="overlay" id="overlay" onclick="overlayClick(event)">
+  <div class="sheet" id="sheet" onclick="event.stopPropagation()"></div>
+</div>
+
+<!-- TOAST -->
+<div id="toast-area"></div>
+<div id="print-area"></div>
+<input type="file" id="import-input" accept="application/json" style="display:none">
+
+<script>
+/* =================================================================
+   CONSTANTS
+================================================================= */
+const SK = 'tutorV3';
+const CLASSES = [
+  { id:'1ere', label:'1ère Collège', color:'var(--c1)', bg:'var(--c1-bg)', short:'1ère' },
+  { id:'2eme', label:'2ème Collège', color:'var(--c2)', bg:'var(--c2-bg)', short:'2ème' }
+];
+const SUBJECTS = [
+  { id:'math', label:'Mathématiques', short:'Maths', color:'var(--math)', bg:'var(--math-bg)', cls:'math' },
+  { id:'phy',  label:'Physique-Chimie', short:'Physique', color:'var(--phy)',  bg:'var(--phy-bg)',  cls:'phy'  },
+  { id:'svt',  label:'SVT',            short:'SVT',     color:'var(--svt)',  bg:'var(--svt-bg)',  cls:'svt'  }
+];
+const GRADE_TYPES = ['فرض محروس','اختبار','مشاركة','ملاحظة'];
+const ATT_STATUS  = { present:'حاضر', absent:'غائب', late:'متأخر' };
+
+function subjById(id){ return SUBJECTS.find(s=>s.id===id)||SUBJECTS[0] }
+function clsById(id){  return CLASSES.find(c=>c.id===id)||CLASSES[0]  }
+
+/* =================================================================
+   DATA
+================================================================= */
+function defaultData(){
+  return {
+    students:[],
+    sessions:[],
+    attendance:[],
+    grades:[],
+    payments:[],
+    lessons:[],
+    exercises:[],
+    homework:[],
+    settings:{ defaultFee:200 }
+  };
+}
+let DATA = (function(){
+  try{
+    const r=localStorage.getItem(SK);
+    if(!r)return defaultData();
+    const p=JSON.parse(r);
+    return {...defaultData(),...p};
+  }catch(e){return defaultData();}
+})();
+
+function save(){ localStorage.setItem(SK,JSON.stringify(DATA)); updateBadges(); }
+function uid(){ return '_'+Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
+function esc(s){ if(s==null)return''; return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]); }
+function today(){ return new Date().toISOString().slice(0,10); }
+function fdate(d){ if(!d)return'—'; const p=d.split('-'); return `${p[2]}/${p[1]}/${p[0]}`; }
+function monthLabel(ym){ const [y,m]=ym.split('-'); const ms=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليوز','غشت','شتنبر','أكتوبر','نونبر','دجنبر']; return ms[+m-1]+' '+y; }
+
+/* =================================================================
+   TOAST
+================================================================= */
+function toast(msg,type=''){
+  const el=document.createElement('div');
+  el.className='toast'+(type?' '+type:'');
+  el.textContent=msg;
+  document.getElementById('toast-area').appendChild(el);
+  setTimeout(()=>{el.style.transition='opacity .3s';el.style.opacity='0';setTimeout(()=>el.remove(),300);},2600);
+}
+
+/* =================================================================
+   SHEET (MODAL)
+================================================================= */
+function showSheet(title,bodyHtml,actions=[]){
+  const actHtml=actions.map(a=>`<button class="btn ${a.cls||'btn-outline'}" onclick="${a.fn}">${a.label}</button>`).join('');
+  document.getElementById('sheet').innerHTML=`
+    <div class="sheet-handle"><span></span></div>
+    <div class="sheet-head">
+      <h3>${title}</h3>
+      <button class="btn-icon" onclick="closeSheet()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="sheet-body">${bodyHtml}</div>
+    ${actHtml?`<div class="sheet-foot">${actHtml}</div>`:''}
+  `;
+  document.getElementById('overlay').classList.add('show');
+}
+function closeSheet(){
+  document.getElementById('overlay').classList.remove('show');
+}
+function overlayClick(e){
+  if(e.target===document.getElementById('overlay')) closeSheet();
+}
+
+/* =================================================================
+   NAVIGATION
+================================================================= */
+let currentSection='dashboard';
+let currentStudentId=null;
+let navHistory=['dashboard'];
+let filterClass='1ere';
+let filterSubj='math';
+
+// Sub-filters per section (persisted in JS state)
+let filAtt   ={cls:'1ere', date:today()};
+let filGrades={cls:'1ere', subj:'math'};
+let filSess  ={cls:'1ere', subj:'math'};
+let filLess  ={cls:'1ere', subj:'math'};
+let filExer  ={cls:'1ere', subj:'math'};
+let filHW    ={cls:'1ere', subj:'math'};
+let filPay   ={cls:'1ere'};
+let filStud  ={cls:'1ere'};
+
+const SECTION_TITLES={
+  dashboard:'مساعد الأستاذ',
+  students:'التلاميذ',
+  attendance:'سجل الحضور',
+  grades:'النقاط',
+  more:'المزيد',
+  sessions:'جدول الحصص',
+  lessons:'الدروس',
+  exercises:'التمارين',
+  homework:'الفروض',
+  payments:'الأداءات',
+  data:'البيانات',
+  'student-detail':'بطاقة التلميذ',
+  performance:'الأداء والإحصاء',
+};
+const MAIN_NAVS=['dashboard','students','attendance','grades','more'];
+const NO_FAB   =['more','data','performance'];
+
+function _nav(key,extra){
+  document.querySelectorAll('.section').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(btn=>{
+    const isMain=MAIN_NAVS.includes(key)?btn.dataset.nav===key:btn.dataset.nav==='more';
+    btn.classList.toggle('active',isMain);
+  });
+  document.getElementById('main-fab').style.display=NO_FAB.includes(key)?'none':'';
+  const tl=document.getElementById('topbar-left');
+  if(!MAIN_NAVS.includes(key)){
+    tl.innerHTML=`<button class="back-btn" onclick="goBack()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </button>`;
+  } else { tl.innerHTML=''; }
+  currentSection=key;
+  document.getElementById('topbar-title').textContent=SECTION_TITLES[key]||'';
+  const sec=document.getElementById('sec-'+key);
+  if(sec){ sec.classList.add('active'); document.getElementById('page-content').scrollTop=0; }
+  // Render
+  if(key==='dashboard')      renderDashboard();
+  else if(key==='students')  renderStudents();
+  else if(key==='attendance')renderAttendance();
+  else if(key==='grades')    renderGrades();
+  else if(key==='more')      renderMore();
+  else if(key==='sessions')  renderSessions();
+  else if(key==='lessons')   renderLessons();
+  else if(key==='exercises') renderExercises();
+  else if(key==='homework')  renderHomework();
+  else if(key==='payments')  renderPayments();
+  else if(key==='data')      renderData();
+  else if(key==='performance') renderPerformance();
+  else if(key==='student-detail') renderStudentDetail(extra);
+}
+function navigate(key,extra,noHistory){
+  if(!noHistory) navHistory.push(key+(extra?'|'+extra:''));
+  _nav(key,extra);
+  localStorage.setItem('lastNav',key+'|'+(extra||''));
+}
+function goBack(){
+  navHistory.pop();
+  const prev=navHistory[navHistory.length-1]||'dashboard';
+  const [k,e]=prev.split('|');
+  _nav(k,e);
+}
+function updateBadges(){
+  const nd=document.getElementById('nd-students');
+  if(nd){nd.textContent=DATA.students.length;nd.style.display=DATA.students.length>0?'':'none';}
+}
+
+/* =================================================================
+   FAB
+================================================================= */
+function handleFab(){
+  const s=currentSection;
+  if(s==='students')    openStudentForm();
+  else if(s==='attendance') openAttForm();
+  else if(s==='grades') openGradeForm();
+  else if(s==='sessions') openSessionForm();
+  else if(s==='lessons')  openLessonForm();
+  else if(s==='exercises') openExerciseForm();
+  else if(s==='homework') openHomeworkForm();
+  else if(s==='payments') openPaymentForm();
+  else openStudentForm();
+}
+
+/* =================================================================
+   SVG ICONS (inline helpers)
+================================================================= */
+const IC={
+  user:   `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`,
+  edit:   `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`,
+  trash:  `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>`,
+  plus:   `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`,
+  book:   `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>`,
+  pen:    `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>`,
+  clock:  `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`,
+  star:   `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`,
+  money:  `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>`,
+  chart:  `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/></svg>`,
+  db:     `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>`,
+  home:   `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`,
+  chev:   `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>`,
+  chevDown:`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>`,
+  check:  `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>`,
+};
+
+/* =================================================================
+   CLASS / SUBJECT SELECTORS (HTML helpers)
+================================================================= */
+function classTabsHtml(active,fn){
+  return `<div class="class-tabs">
+    ${CLASSES.map(c=>`<button class="class-tab ${active===c.id?'active-'+c.id.replace('ere','1').replace('eme','2'):''}" onclick="${fn}('${c.id}')">${c.label}</button>`).join('')}
+  </div>`;
+}
+function subjPillsHtml(active,fn){
+  return `<div class="subj-row">
+    ${SUBJECTS.map(s=>`<button class="subj-pill ${active===s.id?s.cls:''}" onclick="${fn}('${s.id}')">${s.label}</button>`).join('')}
+  </div>`;
+}
+function classColor(cls){ return cls==='1ere'?'var(--c1)':'var(--c2)'; }
+function classBg(cls){    return cls==='1ere'?'var(--c1-bg)':'var(--c2-bg)'; }
+function classBadge(cls){ return cls==='1ere'?'badge-c1':'badge-c2'; }
+function subjShort(id){   return subjById(id).short; }
+
+/* =================================================================
+   STUDENTS
+================================================================= */
+function studentsOf(cls){ return DATA.students.filter(s=>s.cls===cls); }
+
+function renderStudents(){
+  const cls=filStud.cls;
+  const list=studentsOf(cls);
+  const sec=document.getElementById('sec-students');
+  sec.innerHTML=`
+    ${classTabsHtml(cls,"setStudCls")}
+    <div class="section-header">
+      <h2>تلاميذ ${clsById(cls).label}</h2>
+      <span class="count-badge">${list.length}</span>
+    </div>
+    <div class="panel">
+      ${list.length===0
+        ? emptyHtml('لا يوجد تلاميذ','أضف تلميذاً باستخدام الزر أسفله')
+        : list.map(s=>`
+          <div class="card-item" onclick="navigate('student-detail','${s.id}')">
+            <div class="card-item-icon" style="background:${classBg(s.cls)};color:${classColor(s.cls)}">${IC.user}</div>
+            <div class="card-item-body">
+              <div class="card-item-title">${esc(s.name)}</div>
+              <div class="card-item-sub">${esc(s.phone||'')} ${s.notes?'· '+esc(s.notes.slice(0,30)):''}</div>
+            </div>
+            <div class="card-item-actions">
+              <button class="btn-icon accent" onclick="event.stopPropagation();openStudentForm('${s.id}')">${IC.edit}</button>
+              <button class="btn-icon danger" onclick="event.stopPropagation();deleteStudent('${s.id}')">${IC.trash}</button>
+              ${IC.chev}
+            </div>
+          </div>`).join('')}
+    </div>`;
+}
+function setStudCls(cls){ filStud.cls=cls; renderStudents(); }
+
+function openStudentForm(id){
+  const s=id?DATA.students.find(x=>x.id===id):{};
+  const clsOpts=CLASSES.map(c=>`<option value="${c.id}" ${(s.cls||filStud.cls)===c.id?'selected':''}>${c.label}</option>`).join('');
+  showSheet(id?'تعديل التلميذ':'إضافة تلميذ',`
+    <div class="field-row"><label>الاسم الكامل <span class="req">*</span></label>
+      <input class="field" id="sf-name" value="${esc(s.name||'')}"></div>
+    <div class="field-row"><label>القسم <span class="req">*</span></label>
+      <select class="field" id="sf-cls">${clsOpts}</select></div>
+    <div class="field-row"><label>رقم الهاتف (أولياء)</label>
+      <input class="field" id="sf-phone" value="${esc(s.phone||'')}"></div>
+    <div class="field-row"><label>ملاحظة</label>
+      <textarea class="field" id="sf-notes">${esc(s.notes||'')}</textarea></div>
+    <input type="hidden" id="sf-id" value="${id||''}">
+  `,[
+    {label:'إلغاء',cls:'btn-outline',fn:'closeSheet()'},
+    {label:'حفظ',cls:'btn-accent',fn:'saveStudent()'}
+  ]);
+}
+function saveStudent(){
+  const id=document.getElementById('sf-id').value;
+  const name=document.getElementById('sf-name').value.trim();
+  const cls=document.getElementById('sf-cls').value;
+  if(!name){toast('أدخل اسم التلميذ','error');return;}
+  if(id){
+    const s=DATA.students.find(x=>x.id===id);
+    s.name=name;s.cls=cls;
+    s.phone=document.getElementById('sf-phone').value.trim();
+    s.notes=document.getElementById('sf-notes').value.trim();
+  } else {
+    DATA.students.push({id:uid(),name,cls,
+      phone:document.getElementById('sf-phone').value.trim(),
+      notes:document.getElementById('sf-notes').value.trim()
+    });
+  }
+  save();closeSheet();toast('تم الحفظ','success');renderStudents();
+}
+function deleteStudent(id){
+  if(!confirm('حذف هذا التلميذ؟'))return;
+  DATA.students=DATA.students.filter(s=>s.id!==id);
+  DATA.attendance=DATA.attendance.filter(a=>a.sid!==id);
+  DATA.grades=DATA.grades.filter(g=>g.sid!==id);
+  DATA.payments=DATA.payments.filter(p=>p.sid!==id);
+  save();toast('تم الحذف');renderStudents();
+}
+
+/* =================================================================
+   STUDENT DETAIL
+================================================================= */
+function renderStudentDetail(id){
+  const s=DATA.students.find(x=>x.id===id);
+  if(!s){navigate('students');return;}
+  document.getElementById('topbar-title').textContent=s.name;
+  const atts=DATA.attendance.filter(a=>a.sid===id);
+  const present=atts.filter(a=>a.status==='present').length;
+  const total=atts.length;
+  const grades=DATA.grades.filter(g=>g.sid===id);
+  const pays=DATA.payments.filter(p=>p.sid===id);
+  const paid=pays.reduce((acc,p)=>acc+Number(p.amount||0),0);
+  const cls=clsById(s.cls);
+  const sec=document.getElementById('sec-student-detail');
+  sec.innerHTML=`
+    <div class="panel" style="padding:16px">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px">
+        <div style="width:56px;height:56px;border-radius:18px;background:${classBg(s.cls)};color:${classColor(s.cls)};display:flex;align-items:center;justify-content:center">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
+        <div>
+          <div style="font-size:18px;font-weight:800">${esc(s.name)}</div>
+          <span class="badge ${classBadge(s.cls)}">${cls.label}</span>
+        </div>
+      </div>
+      ${s.phone?`<div class="data-row"><span class="key">الهاتف</span><span class="val" style="font-family:var(--mono)">${esc(s.phone)}</span></div>`:''}
+      ${s.notes?`<div class="data-row"><span class="key">ملاحظة</span><span class="val">${esc(s.notes)}</span></div>`:''}
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="s-label">الحضور</div>
+        <div class="s-val">${present}/${total}</div>
+        <div class="s-sub">${total>0?Math.round(present/total*100):0}% نسبة الحضور</div>
+      </div>
+      <div class="stat-card">
+        <div class="s-label">النقاط المسجلة</div>
+        <div class="s-val">${grades.length}</div>
+        <div class="s-sub">في جميع المواد</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">آخر النقاط</div>
+      ${grades.length===0
+        ? `<div style="padding:16px;text-align:center;color:var(--text-3);font-size:13px">لا توجد نقاط</div>`
+        : grades.slice(-6).reverse().map(g=>{
+            const subj=subjById(g.subj);
+            const pct=g.max>0?g.score/g.max:0;
+            const sc=pct>=0.7?'pass':pct>=0.5?'avg':'fail';
+            return `<div class="grade-item">
+              <div class="grade-score ${sc}">${g.score}<span style="font-size:12px;opacity:.6">/${g.max}</span></div>
+              <div style="flex:1">
+                <div style="font-size:13px;font-weight:600">${esc(g.title)}</div>
+                <div style="font-size:11px;color:var(--text-3)">${subj.label} · ${fdate(g.date)}</div>
+              </div>
+              <span class="badge badge-${subj.cls}">${subj.short}</span>
+            </div>`;
+          }).join('')}
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">الأداءات</div>
+      ${pays.length===0
+        ? `<div style="padding:16px;text-align:center;color:var(--text-3);font-size:13px">لا توجد مدفوعات</div>`
+        : `<div class="data-row"><span class="key">إجمالي المدفوع</span><span class="val" style="color:var(--green)">${paid} د.م</span></div>`
+          +pays.slice(-5).reverse().map(p=>`<div class="data-row"><span class="key">${esc(p.month||p.note||'')}</span><span class="val">${p.amount} د.م</span></div>`).join('')}
+    </div>`;
+}
+
+/* =================================================================
+   ATTENDANCE
+================================================================= */
+function renderAttendance(){
+  const cls=filAtt.cls;
+  const date=filAtt.date;
+  const stds=studentsOf(cls);
+  const todayAtts=DATA.attendance.filter(a=>a.date===date&&a.cls===cls);
+  const getStatus=sid=>{ const r=todayAtts.find(a=>a.sid===sid); return r?r.status:''; };
+  const sec=document.getElementById('sec-attendance');
+  const attStats=stds.map(s=>getStatus(s.id));
+  const nP=attStats.filter(x=>x==='present').length;
+  const nA=attStats.filter(x=>x==='absent').length;
+  const nL=attStats.filter(x=>x==='late').length;
+  sec.innerHTML=`
+    ${classTabsHtml(cls,"setAttCls")}
+    <div class="panel" style="padding:12px 14px;margin-bottom:12px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <label style="font-size:13px;font-weight:700;color:var(--text-3);white-space:nowrap">التاريخ</label>
+        <input class="field" type="date" id="att-date" value="${date}" onchange="setAttDate(this.value)" style="flex:1;padding:8px 10px">
+      </div>
+    </div>
+    ${stds.length===0
+      ? `<div class="panel">${emptyHtml('لا يوجد تلاميذ','أضف تلاميذ أولاً في قسم التلاميذ')}</div>`
+      : `<div style="display:flex;gap:8px;margin-bottom:12px">
+          <div class="stat-card" style="flex:1;padding:10px"><div class="s-label">حاضر</div><div class="s-val" style="color:var(--green)">${nP}</div></div>
+          <div class="stat-card" style="flex:1;padding:10px"><div class="s-label">غائب</div><div class="s-val" style="color:var(--danger)">${nA}</div></div>
+          <div class="stat-card" style="flex:1;padding:10px"><div class="s-label">متأخر</div><div class="s-val" style="color:var(--amber)">${nL}</div></div>
+        </div>
+        <div class="panel" style="padding:0 14px">
+          ${stds.map(s=>{
+            const st=getStatus(s.id);
+            return `<div class="att-row">
+              <div class="att-name">${esc(s.name)}</div>
+              <div class="quick-mark-row">
+                <button class="qm-btn ${st==='present'?'present':''}" onclick="quickMark('${s.id}','present','${cls}','${date}')">حاضر</button>
+                <button class="qm-btn ${st==='absent'?'absent':''}"  onclick="quickMark('${s.id}','absent','${cls}','${date}')">غائب</button>
+                <button class="qm-btn ${st==='late'?'late':''}"    onclick="quickMark('${s.id}','late','${cls}','${date}')">متأخر</button>
+              </div>
+            </div>`;
+          }).join('')}
+        </div>`}
+
+    <div class="panel" style="margin-top:12px">
+      <div class="panel-title">السجل الأخير</div>
+      ${DATA.attendance.filter(a=>a.cls===cls).slice(-20).reverse().map(a=>{
+        const st=DATA.students.find(s=>s.id===a.sid);
+        const sc=a.status==='present'?'badge-green':a.status==='absent'?'badge-red':'badge-amber';
+        return `<div class="data-row">
+          <span class="key">${fdate(a.date)} · ${esc(st?.name||'—')}</span>
+          <span class="badge ${sc}">${ATT_STATUS[a.status]||a.status}</span>
+        </div>`;
+      }).join('')||`<div style="padding:14px;text-align:center;color:var(--text-3);font-size:13px">لا توجد سجلات</div>`}
+    </div>`;
+}
+function setAttCls(cls){ filAtt.cls=cls; renderAttendance(); }
+function setAttDate(d){ filAtt.date=d; renderAttendance(); }
+function quickMark(sid,status,cls,date){
+  const idx=DATA.attendance.findIndex(a=>a.sid===sid&&a.date===date&&a.cls===cls);
+  if(idx>=0){
+    if(DATA.attendance[idx].status===status) DATA.attendance.splice(idx,1);
+    else DATA.attendance[idx].status=status;
+  } else {
+    DATA.attendance.push({id:uid(),sid,cls,date,status});
+  }
+  save();renderAttendance();
+}
+function openAttForm(){
+  // Quick shortcut: just scroll to date and prompt
+  toast('اختر التاريخ وانقر على حالة كل تلميذ');
+}
+
+/* =================================================================
+   GRADES
+================================================================= */
+function renderGrades(){
+  const cls=filGrades.cls;
+  const subj=filGrades.subj;
+  const s=subjById(subj);
+  const stds=studentsOf(cls);
+  const grades=DATA.grades.filter(g=>g.cls===cls&&g.subj===subj);
+  const avg=grades.length>0?grades.reduce((a,g)=>a+(g.max>0?g.score/g.max:0),0)/grades.length*20:null;
+  const sec=document.getElementById('sec-grades');
+  sec.innerHTML=`
+    ${classTabsHtml(cls,"setGradeCls")}
+    ${subjPillsHtml(subj,"setGradeSubj")}
+    ${avg!==null?`<div class="panel" style="padding:14px;margin-bottom:12px;display:flex;align-items:center;gap:12px">
+      <div style="width:48px;height:48px;border-radius:14px;background:${s.bg};color:${s.color};display:flex;align-items:center;justify-content:center">${IC.star}</div>
+      <div>
+        <div style="font-size:12px;color:var(--text-3);font-weight:600">المعدل العام</div>
+        <div style="font-size:24px;font-weight:800;font-family:var(--mono);color:${s.color}">${avg.toFixed(2)}/20</div>
+      </div>
+      <div style="flex:1;text-align:left"><span class="badge badge-${s.cls}">${s.label}</span></div>
+    </div>`:''}
+    <div class="panel">
+      <div style="padding:12px 14px 8px;display:flex;align-items:center;justify-content:space-between">
+        <span style="font-size:13px;font-weight:700;color:var(--text-3)">النقاط المسجلة</span>
+        <span class="count-badge">${grades.length}</span>
+      </div>
+      ${grades.length===0
+        ? emptyHtml('لا توجد نقاط','أضف نقطة باستخدام الزر أسفله')
+        : grades.slice().reverse().map(g=>{
+            const std=stds.find(s=>s.id===g.sid);
+            const pct=g.max>0?g.score/g.max:0;
+            const sc=pct>=0.7?'pass':pct>=0.5?'avg':'fail';
+            return `<div class="grade-item">
+              <div class="grade-score ${sc}">${g.score}<span style="font-size:12px;opacity:.55">/${g.max}</span></div>
+              <div style="flex:1;min-width:0">
+                <div style="font-size:13px;font-weight:600">${esc(g.title)}</div>
+                <div style="font-size:11px;color:var(--text-3)">${esc(std?.name||'—')} · ${fdate(g.date)}</div>
+                ${g.type?`<span class="badge badge-gray" style="margin-top:3px">${esc(g.type)}</span>`:''}
+              </div>
+              <div style="display:flex;gap:5px">
+                <button class="btn-icon accent" onclick="openGradeForm('${g.id}')">${IC.edit}</button>
+                <button class="btn-icon danger" onclick="deleteGrade('${g.id}')">${IC.trash}</button>
+              </div>
+            </div>`;
+          }).join('')}
+    </div>`;
+}
+function setGradeCls(cls){ filGrades.cls=cls; renderGrades(); }
+function setGradeSubj(subj){ filGrades.subj=subj; renderGrades(); }
+
+function openGradeForm(id){
+  const g=id?DATA.grades.find(x=>x.id===id):{};
+  const cls=g.cls||filGrades.cls;
+  const subj=g.subj||filGrades.subj;
+  const stds=studentsOf(cls);
+  const clsOpts=CLASSES.map(c=>`<option value="${c.id}" ${cls===c.id?'selected':''}>${c.label}</option>`).join('');
+  const subjOpts=SUBJECTS.map(s=>`<option value="${s.id}" ${subj===s.id?'selected':''}>${s.label}</option>`).join('');
+  const stdOpts=stds.map(s=>`<option value="${s.id}" ${g.sid===s.id?'selected':''}>${esc(s.name)}</option>`).join('');
+  const typeOpts=GRADE_TYPES.map(t=>`<option value="${t}" ${g.type===t?'selected':''}>${t}</option>`).join('');
+  showSheet(id?'تعديل نقطة':'إضافة نقطة',`
+    <div class="field-grid-2">
+      <div class="field-row"><label>القسم</label><select class="field" id="gf-cls" onchange="reloadGradeStd(this.value)">${clsOpts}</select></div>
+      <div class="field-row"><label>المادة</label><select class="field" id="gf-subj">${subjOpts}</select></div>
+    </div>
+    <div class="field-row"><label>التلميذ <span class="req">*</span></label>
+      <select class="field" id="gf-sid"><option value="">-- اختر --</option>${stdOpts}</select></div>
+    <div class="field-row"><label>عنوان التقييم <span class="req">*</span></label>
+      <input class="field" id="gf-title" value="${esc(g.title||'')}"></div>
+    <div class="field-grid-2">
+      <div class="field-row"><label>النقطة</label><input class="field" type="number" id="gf-score" min="0" value="${g.score||0}"></div>
+      <div class="field-row"><label>من</label><input class="field" type="number" id="gf-max" min="1" value="${g.max||20}"></div>
+    </div>
+    <div class="field-grid-2">
+      <div class="field-row"><label>النوع</label><select class="field" id="gf-type">${typeOpts}</select></div>
+      <div class="field-row"><label>التاريخ</label><input class="field" type="date" id="gf-date" value="${g.date||today()}"></div>
+    </div>
+    <div class="field-row"><label>ملاحظة</label><textarea class="field" id="gf-note" style="min-height:60px">${esc(g.note||'')}</textarea></div>
+    <input type="hidden" id="gf-id" value="${id||''}">
+  `,[
+    {label:'إلغاء',cls:'btn-outline',fn:'closeSheet()'},
+    {label:'حفظ',cls:'btn-accent',fn:'saveGrade()'}
+  ]);
+}
+function reloadGradeStd(cls){
+  const stds=studentsOf(cls);
+  const sel=document.getElementById('gf-sid');
+  if(!sel)return;
+  sel.innerHTML='<option value="">-- اختر --</option>'+stds.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join('');
+}
+function saveGrade(){
+  const id=document.getElementById('gf-id').value;
+  const sid=document.getElementById('gf-sid').value;
+  const title=document.getElementById('gf-title').value.trim();
+  if(!sid||!title){toast('اختر التلميذ وأدخل العنوان','error');return;}
+  const obj={
+    cls:document.getElementById('gf-cls').value,
+    subj:document.getElementById('gf-subj').value,
+    sid,title,
+    score:+document.getElementById('gf-score').value,
+    max:+document.getElementById('gf-max').value||20,
+    type:document.getElementById('gf-type').value,
+    date:document.getElementById('gf-date').value,
+    note:document.getElementById('gf-note').value.trim()
+  };
+  if(id){ Object.assign(DATA.grades.find(x=>x.id===id),obj); }
+  else { DATA.grades.push({id:uid(),...obj}); }
+  save();closeSheet();toast('تم الحفظ','success');renderGrades();
+}
+function deleteGrade(id){
+  if(!confirm('حذف هذه النقطة؟'))return;
+  DATA.grades=DATA.grades.filter(g=>g.id!==id);
+  save();toast('تم الحذف');renderGrades();
+}
+
+/* =================================================================
+   SESSIONS (جدول الحصص)
+================================================================= */
+function renderSessions(){
+  const cls=filSess.cls;
+  const subj=filSess.subj;
+  const s=subjById(subj);
+  const sessions=DATA.sessions.filter(x=>x.cls===cls&&x.subj===subj).sort((a,b)=>a.date>b.date?1:-1);
+  const upcoming=sessions.filter(x=>x.date>=today());
+  const past=sessions.filter(x=>x.date<today());
+  const sec=document.getElementById('sec-sessions');
+  sec.innerHTML=`
+    ${classTabsHtml(cls,"setSessCls")}
+    ${subjPillsHtml(subj,"setSessSubj")}
+    ${upcoming.length>0?`
+      <div class="section-header"><h2>الحصص القادمة</h2><span class="count-badge">${upcoming.length}</span></div>
+      ${upcoming.map(x=>sessionCardHtml(x,s)).join('')}`:''}
+    ${past.length>0?`
+      <div class="section-header" style="margin-top:6px"><h2>الحصص الماضية</h2><span class="count-badge">${past.length}</span></div>
+      ${past.slice().reverse().map(x=>sessionCardHtml(x,s)).join('')}`:''}
+    ${sessions.length===0?`<div class="panel">${emptyHtml('لا توجد حصص','خطط لحصتك القادمة باستخدام الزر أسفله')}</div>`:''}
+  `;
+  // Bind toggles
+  sec.querySelectorAll('.session-card-head').forEach(h=>{
+    h.addEventListener('click',()=>h.parentElement.classList.toggle('open'));
+  });
+}
+function sessionCardHtml(x,s){
+  const isPast=x.date<today();
+  return `<div class="session-card" data-id="${x.id}">
+    <div class="session-card-head">
+      <div class="session-date-badge">${fdate(x.date)} ${x.time||''}</div>
+      <div style="flex:1;margin:0 8px">
+        <div style="font-size:14px;font-weight:700">${esc(x.title)}</div>
+        <div style="font-size:11px;color:var(--text-3)">${esc(x.lesson||'')}</div>
+      </div>
+      <span class="badge ${isPast?'badge-gray':'badge-blue'}">${isPast?'منتهية':'قادمة'}</span>
+      <span style="margin-right:6px;color:var(--text-3)">${IC.chevDown}</span>
+    </div>
+    <div class="session-card-body">
+      ${x.lesson?`<div style="margin:10px 0 6px"><span class="badge badge-${s.cls}">الدرس</span> <span style="font-size:13px;margin-right:6px">${esc(x.lesson)}</span></div>`:''}
+      ${x.exercises?`<div style="margin-bottom:6px"><span class="badge badge-amber">التمارين</span> <span style="font-size:13px;margin-right:6px">${esc(x.exercises)}</span></div>`:''}
+      ${x.homework?`<div style="margin-bottom:6px"><span class="badge badge-red">الفرض</span> <span style="font-size:13px;margin-right:6px">${esc(x.homework)}</span></div>`:''}
+      ${x.notes?`<div style="font-size:12px;color:var(--text-3);margin-top:8px;padding:8px;background:var(--surface-2);border-radius:8px">${esc(x.notes)}</div>`:''}
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <button class="btn btn-outline" style="flex:1;font-size:13px" onclick="openSessionForm('${x.id}')">${IC.edit} تعديل</button>
+        <button class="btn btn-danger" style="padding:10px 14px" onclick="deleteSession('${x.id}')">${IC.trash}</button>
+      </div>
+    </div>
+  </div>`;
+}
+function setSessCls(cls){ filSess.cls=cls; renderSessions(); }
+function setSessSubj(subj){ filSess.subj=subj; renderSessions(); }
+
+function openSessionForm(id){
+  const x=id?DATA.sessions.find(s=>s.id===id):{};
+  const cls=x.cls||filSess.cls;
+  const subj=x.subj||filSess.subj;
+  const clsOpts=CLASSES.map(c=>`<option value="${c.id}" ${cls===c.id?'selected':''}>${c.label}</option>`).join('');
+  const subjOpts=SUBJECTS.map(s=>`<option value="${s.id}" ${subj===s.id?'selected':''}>${s.label}</option>`).join('');
+  showSheet(id?'تعديل حصة':'تخطيط حصة',`
+    <div class="field-grid-2">
+      <div class="field-row"><label>القسم <span class="req">*</span></label><select class="field" id="xf-cls">${clsOpts}</select></div>
+      <div class="field-row"><label>المادة <span class="req">*</span></label><select class="field" id="xf-subj">${subjOpts}</select></div>
+    </div>
+    <div class="field-row"><label>عنوان الحصة <span class="req">*</span></label>
+      <input class="field" id="xf-title" value="${esc(x.title||'')}"></div>
+    <div class="field-grid-2">
+      <div class="field-row"><label>التاريخ</label><input class="field" type="date" id="xf-date" value="${x.date||today()}"></div>
+      <div class="field-row"><label>الوقت</label><input class="field" type="time" id="xf-time" value="${x.time||''}"></div>
+    </div>
+    <div class="field-row"><label>الدرس المقرر تدريسه</label>
+      <input class="field" id="xf-lesson" value="${esc(x.lesson||'')}"></div>
+    <div class="field-row"><label>التمارين المخططة</label>
+      <textarea class="field" id="xf-exercises" style="min-height:70px">${esc(x.exercises||'')}</textarea></div>
+    <div class="field-row"><label>الفرض (إن وجد)</label>
+      <input class="field" id="xf-homework" value="${esc(x.homework||'')}"></div>
+    <div class="field-row"><label>ملاحظات</label>
+      <textarea class="field" id="xf-notes" style="min-height:60px">${esc(x.notes||'')}</textarea></div>
+    <input type="hidden" id="xf-id" value="${id||''}">
+  `,[
+    {label:'إلغاء',cls:'btn-outline',fn:'closeSheet()'},
+    {label:'حفظ',cls:'btn-accent',fn:'saveSession()'}
+  ]);
+}
+function saveSession(){
+  const id=document.getElementById('xf-id').value;
+  const title=document.getElementById('xf-title').value.trim();
+  if(!title){toast('أدخل عنوان الحصة','error');return;}
+  const obj={
+    cls:document.getElementById('xf-cls').value,
+    subj:document.getElementById('xf-subj').value,
+    title,
+    date:document.getElementById('xf-date').value,
+    time:document.getElementById('xf-time').value,
+    lesson:document.getElementById('xf-lesson').value.trim(),
+    exercises:document.getElementById('xf-exercises').value.trim(),
+    homework:document.getElementById('xf-homework').value.trim(),
+    notes:document.getElementById('xf-notes').value.trim()
+  };
+  if(id){ Object.assign(DATA.sessions.find(s=>s.id===id),obj); }
+  else { DATA.sessions.push({id:uid(),...obj}); }
+  save();closeSheet();toast('تم الحفظ','success');renderSessions();
+}
+function deleteSession(id){
+  if(!confirm('حذف هذه الحصة؟'))return;
+  DATA.sessions=DATA.sessions.filter(s=>s.id!==id);
+  save();toast('تم الحذف');renderSessions();
+}
+
+/* =================================================================
+   LESSONS (الدروس)
+================================================================= */
+function renderLessons(){
+  const cls=filLess.cls;
+  const subj=filLess.subj;
+  const items=DATA.lessons.filter(l=>l.cls===cls&&l.subj===subj).slice().reverse();
+  const s=subjById(subj);
+  const sec=document.getElementById('sec-lessons');
+  sec.innerHTML=`
+    ${classTabsHtml(cls,"setLessCls")}
+    ${subjPillsHtml(subj,"setLessSubj")}
+    <div class="section-header">
+      <h2>دروس ${s.label}</h2>
+      <span class="count-badge">${items.length}</span>
+    </div>
+    <div class="panel">
+      ${items.length===0
+        ? emptyHtml('لا توجد دروس','أضف درساً باستخدام الزر أسفله')
+        : items.map(l=>`
+          <div class="card-item">
+            <div class="card-item-icon" style="background:${s.bg};color:${s.color}">${IC.book}</div>
+            <div class="card-item-body">
+              <div class="card-item-title">${esc(l.title)}</div>
+              <div class="card-item-sub">${fdate(l.date)}${l.chapter?' · '+esc(l.chapter):''}</div>
+              ${l.content?`<div style="font-size:12px;color:var(--text-3);margin-top:4px">${esc(l.content.slice(0,80))}${l.content.length>80?'…':''}</div>`:''}
+            </div>
+            <div class="card-item-actions">
+              <button class="btn-icon accent" onclick="openLessonForm('${l.id}')">${IC.edit}</button>
+              <button class="btn-icon danger"  onclick="deleteLesson('${l.id}')">${IC.trash}</button>
+            </div>
+          </div>`).join('')}
+    </div>`;
+}
+function setLessCls(cls){ filLess.cls=cls; renderLessons(); }
+function setLessSubj(subj){ filLess.subj=subj; renderLessons(); }
+function openLessonForm(id){
+  const l=id?DATA.lessons.find(x=>x.id===id):{};
+  const cls=l.cls||filLess.cls;
+  const subj=l.subj||filLess.subj;
+  const clsOpts=CLASSES.map(c=>`<option value="${c.id}" ${cls===c.id?'selected':''}>${c.label}</option>`).join('');
+  const subjOpts=SUBJECTS.map(s=>`<option value="${s.id}" ${subj===s.id?'selected':''}>${s.label}</option>`).join('');
+  showSheet(id?'تعديل درس':'إضافة درس',`
+    <div class="field-grid-2">
+      <div class="field-row"><label>القسم</label><select class="field" id="lf-cls">${clsOpts}</select></div>
+      <div class="field-row"><label>المادة</label><select class="field" id="lf-subj">${subjOpts}</select></div>
+    </div>
+    <div class="field-row"><label>عنوان الدرس <span class="req">*</span></label><input class="field" id="lf-title" value="${esc(l.title||'')}"></div>
+    <div class="field-grid-2">
+      <div class="field-row"><label>الفصل/الوحدة</label><input class="field" id="lf-chapter" value="${esc(l.chapter||'')}"></div>
+      <div class="field-row"><label>التاريخ</label><input class="field" type="date" id="lf-date" value="${l.date||today()}"></div>
+    </div>
+    <div class="field-row"><label>محتوى الدرس</label><textarea class="field" id="lf-content">${esc(l.content||'')}</textarea></div>
+    <div class="field-row"><label>أهداف الدرس</label><textarea class="field" id="lf-goals" style="min-height:60px">${esc(l.goals||'')}</textarea></div>
+    <input type="hidden" id="lf-id" value="${id||''}">
+  `,[
+    {label:'إلغاء',cls:'btn-outline',fn:'closeSheet()'},
+    {label:'حفظ',cls:'btn-accent',fn:'saveLesson()'}
+  ]);
+}
+function saveLesson(){
+  const id=document.getElementById('lf-id').value;
+  const title=document.getElementById('lf-title').value.trim();
+  if(!title){toast('أدخل عنوان الدرس','error');return;}
+  const obj={
+    cls:document.getElementById('lf-cls').value,
+    subj:document.getElementById('lf-subj').value,
+    title,
+    chapter:document.getElementById('lf-chapter').value.trim(),
+    date:document.getElementById('lf-date').value,
+    content:document.getElementById('lf-content').value.trim(),
+    goals:document.getElementById('lf-goals').value.trim()
+  };
+  if(id){ Object.assign(DATA.lessons.find(x=>x.id===id),obj); }
+  else { DATA.lessons.push({id:uid(),...obj}); }
+  save();closeSheet();toast('تم الحفظ','success');renderLessons();
+}
+function deleteLesson(id){
+  if(!confirm('حذف هذا الدرس؟'))return;
+  DATA.lessons=DATA.lessons.filter(l=>l.id!==id);
+  save();toast('تم الحذف');renderLessons();
+}
+
+/* =================================================================
+   EXERCISES (التمارين)
+================================================================= */
+function renderExercises(){
+  const cls=filExer.cls;
+  const subj=filExer.subj;
+  const items=DATA.exercises.filter(e=>e.cls===cls&&e.subj===subj).slice().reverse();
+  const s=subjById(subj);
+  const sec=document.getElementById('sec-exercises');
+  sec.innerHTML=`
+    ${classTabsHtml(cls,"setExerCls")}
+    ${subjPillsHtml(subj,"setExerSubj")}
+    <div class="section-header">
+      <h2>تمارين ${s.label}</h2>
+      <span class="count-badge">${items.length}</span>
+    </div>
+    <div class="panel">
+      ${items.length===0
+        ? emptyHtml('لا توجد تمارين','أضف تمريناً باستخدام الزر أسفله')
+        : items.map(e=>`
+          <div class="card-item">
+            <div class="card-item-icon" style="background:${s.bg};color:${s.color}">${IC.pen}</div>
+            <div class="card-item-body">
+              <div class="card-item-title">${esc(e.title)}</div>
+              <div class="card-item-sub">${fdate(e.date)}${e.level?' · '+esc(e.level):''}</div>
+              ${e.content?`<div style="font-size:12px;color:var(--text-3);margin-top:4px">${esc(e.content.slice(0,80))}${e.content.length>80?'…':''}</div>`:''}
+            </div>
+            <div class="card-item-actions">
+              <button class="btn-icon accent" onclick="openExerciseForm('${e.id}')">${IC.edit}</button>
+              <button class="btn-icon danger"  onclick="deleteExercise('${e.id}')">${IC.trash}</button>
+            </div>
+          </div>`).join('')}
+    </div>`;
+}
+function setExerCls(cls){ filExer.cls=cls; renderExercises(); }
+function setExerSubj(subj){ filExer.subj=subj; renderExercises(); }
+function openExerciseForm(id){
+  const e=id?DATA.exercises.find(x=>x.id===id):{};
+  const cls=e.cls||filExer.cls;
+  const subj=e.subj||filExer.subj;
+  const clsOpts=CLASSES.map(c=>`<option value="${c.id}" ${cls===c.id?'selected':''}>${c.label}</option>`).join('');
+  const subjOpts=SUBJECTS.map(s=>`<option value="${s.id}" ${subj===s.id?'selected':''}>${s.label}</option>`).join('');
+  const levOpts=['سهل','متوسط','صعب','تحدٍّ'].map(l=>`<option value="${l}" ${e.level===l?'selected':''}>${l}</option>`).join('');
+  showSheet(id?'تعديل تمرين':'إضافة تمرين',`
+    <div class="field-grid-2">
+      <div class="field-row"><label>القسم</label><select class="field" id="ef-cls">${clsOpts}</select></div>
+      <div class="field-row"><label>المادة</label><select class="field" id="ef-subj">${subjOpts}</select></div>
+    </div>
+    <div class="field-row"><label>عنوان التمرين <span class="req">*</span></label><input class="field" id="ef-title" value="${esc(e.title||'')}"></div>
+    <div class="field-grid-2">
+      <div class="field-row"><label>المستوى</label><select class="field" id="ef-level">${levOpts}</select></div>
+      <div class="field-row"><label>التاريخ</label><input class="field" type="date" id="ef-date" value="${e.date||today()}"></div>
+    </div>
+    <div class="field-row"><label>نص التمرين / الوصف</label><textarea class="field" id="ef-content">${esc(e.content||'')}</textarea></div>
+    <div class="field-row"><label>الحل (اختياري)</label><textarea class="field" id="ef-solution" style="min-height:60px">${esc(e.solution||'')}</textarea></div>
+    <input type="hidden" id="ef-id" value="${id||''}">
+  `,[
+    {label:'إلغاء',cls:'btn-outline',fn:'closeSheet()'},
+    {label:'حفظ',cls:'btn-accent',fn:'saveExercise()'}
+  ]);
+}
+function saveExercise(){
+  const id=document.getElementById('ef-id').value;
+  const title=document.getElementById('ef-title').value.trim();
+  if(!title){toast('أدخل عنوان التمرين','error');return;}
+  const obj={
+    cls:document.getElementById('ef-cls').value,
+    subj:document.getElementById('ef-subj').value,
+    title,
+    level:document.getElementById('ef-level').value,
+    date:document.getElementById('ef-date').value,
+    content:document.getElementById('ef-content').value.trim(),
+    solution:document.getElementById('ef-solution').value.trim()
+  };
+  if(id){ Object.assign(DATA.exercises.find(x=>x.id===id),obj); }
+  else { DATA.exercises.push({id:uid(),...obj}); }
+  save();closeSheet();toast('تم الحفظ','success');renderExercises();
+}
+function deleteExercise(id){
+  if(!confirm('حذف هذا التمرين؟'))return;
+  DATA.exercises=DATA.exercises.filter(e=>e.id!==id);
+  save();toast('تم الحذف');renderExercises();
+}
+
+/* =================================================================
+   HOMEWORK (الفروض)
+================================================================= */
+function renderHomework(){
+  const cls=filHW.cls;
+  const subj=filHW.subj;
+  const items=DATA.homework.filter(h=>h.cls===cls&&h.subj===subj).sort((a,b)=>a.dueDate>b.dueDate?1:-1);
+  const s=subjById(subj);
+  const sec=document.getElementById('sec-homework');
+  sec.innerHTML=`
+    ${classTabsHtml(cls,"setHWCls")}
+    ${subjPillsHtml(subj,"setHWSubj")}
+    <div class="section-header">
+      <h2>فروض ${s.label}</h2>
+      <span class="count-badge">${items.length}</span>
+    </div>
+    <div class="panel">
+      ${items.length===0
+        ? emptyHtml('لا توجد فروض','أضف فرضاً باستخدام الزر أسفله')
+        : items.map(h=>{
+            const overdue=h.dueDate&&h.dueDate<today();
+            return `<div class="card-item">
+              <div class="card-item-icon" style="background:${s.bg};color:${s.color}">${IC.book}</div>
+              <div class="card-item-body">
+                <div class="card-item-title">${esc(h.title)}</div>
+                <div class="card-item-sub">تسليم: ${fdate(h.dueDate||'')} ${overdue?'<span class="badge badge-red">متأخر</span>':''}</div>
+                ${h.content?`<div style="font-size:12px;color:var(--text-3);margin-top:4px">${esc(h.content.slice(0,80))}${h.content.length>80?'…':''}</div>`:''}
+              </div>
+              <div class="card-item-actions">
+                <button class="btn-icon accent" onclick="openHomeworkForm('${h.id}')">${IC.edit}</button>
+                <button class="btn-icon danger"  onclick="deleteHomework('${h.id}')">${IC.trash}</button>
+              </div>
+            </div>`;}).join('')}
+    </div>`;
+}
+function setHWCls(cls){ filHW.cls=cls; renderHomework(); }
+function setHWSubj(subj){ filHW.subj=subj; renderHomework(); }
+function openHomeworkForm(id){
+  const h=id?DATA.homework.find(x=>x.id===id):{};
+  const cls=h.cls||filHW.cls;
+  const subj=h.subj||filHW.subj;
+  const clsOpts=CLASSES.map(c=>`<option value="${c.id}" ${cls===c.id?'selected':''}>${c.label}</option>`).join('');
+  const subjOpts=SUBJECTS.map(s=>`<option value="${s.id}" ${subj===s.id?'selected':''}>${s.label}</option>`).join('');
+  showSheet(id?'تعديل فرض':'إضافة فرض',`
+    <div class="field-grid-2">
+      <div class="field-row"><label>القسم</label><select class="field" id="hf-cls">${clsOpts}</select></div>
+      <div class="field-row"><label>المادة</label><select class="field" id="hf-subj">${subjOpts}</select></div>
+    </div>
+    <div class="field-row"><label>عنوان الفرض <span class="req">*</span></label><input class="field" id="hf-title" value="${esc(h.title||'')}"></div>
+    <div class="field-grid-2">
+      <div class="field-row"><label>تاريخ الإعطاء</label><input class="field" type="date" id="hf-date" value="${h.date||today()}"></div>
+      <div class="field-row"><label>تاريخ التسليم</label><input class="field" type="date" id="hf-due" value="${h.dueDate||''}"></div>
+    </div>
+    <div class="field-row"><label>وصف الفرض</label><textarea class="field" id="hf-content">${esc(h.content||'')}</textarea></div>
+    <input type="hidden" id="hf-id" value="${id||''}">
+  `,[
+    {label:'إلغاء',cls:'btn-outline',fn:'closeSheet()'},
+    {label:'حفظ',cls:'btn-accent',fn:'saveHomework()'}
+  ]);
+}
+function saveHomework(){
+  const id=document.getElementById('hf-id').value;
+  const title=document.getElementById('hf-title').value.trim();
+  if(!title){toast('أدخل عنوان الفرض','error');return;}
+  const obj={
+    cls:document.getElementById('hf-cls').value,
+    subj:document.getElementById('hf-subj').value,
+    title,
+    date:document.getElementById('hf-date').value,
+    dueDate:document.getElementById('hf-due').value,
+    content:document.getElementById('hf-content').value.trim()
+  };
+  if(id){ Object.assign(DATA.homework.find(x=>x.id===id),obj); }
+  else { DATA.homework.push({id:uid(),...obj}); }
+  save();closeSheet();toast('تم الحفظ','success');renderHomework();
+}
+function deleteHomework(id){
+  if(!confirm('حذف هذا الفرض؟'))return;
+  DATA.homework=DATA.homework.filter(h=>h.id!==id);
+  save();toast('تم الحذف');renderHomework();
+}
+
+/* =================================================================
+   PAYMENTS (الأداءات)
+================================================================= */
+function renderPayments(){
+  const cls=filPay.cls;
+  const stds=studentsOf(cls);
+  const pays=DATA.payments.filter(p=>stds.some(s=>s.id===p.sid));
+  const totalPaid=pays.reduce((a,p)=>a+Number(p.amount||0),0);
+  const sec=document.getElementById('sec-payments');
+  sec.innerHTML=`
+    ${classTabsHtml(cls,"setPayCls")}
+    <div class="stat-grid" style="margin-bottom:12px">
+      <div class="stat-card accent">
+        <div class="s-label">إجمالي المدفوع</div>
+        <div class="s-val">${totalPaid}</div>
+        <div class="s-sub">درهم مغربي</div>
+      </div>
+      <div class="stat-card">
+        <div class="s-label">عدد الأداءات</div>
+        <div class="s-val">${pays.length}</div>
+        <div class="s-sub">في ${clsById(cls).label}</div>
+      </div>
+    </div>
+    <div class="panel">
+      ${pays.length===0
+        ? emptyHtml('لا توجد أداءات','أضف أداءً باستخدام الزر أسفله')
+        : pays.slice().reverse().map(p=>{
+            const s=DATA.students.find(x=>x.id===p.sid);
+            return `<div class="card-item">
+              <div class="card-item-icon" style="background:var(--green-light);color:var(--green)">${IC.money}</div>
+              <div class="card-item-body">
+                <div class="card-item-title">${esc(s?.name||'—')}</div>
+                <div class="card-item-sub">${esc(p.month||'')} · ${fdate(p.date)}</div>
+                ${p.note?`<div style="font-size:12px;color:var(--text-3)">${esc(p.note)}</div>`:''}
+              </div>
+              <div class="card-item-actions">
+                <span style="font-size:16px;font-weight:800;font-family:var(--mono);color:var(--green)">${p.amount}</span>
+                <button class="btn-icon danger" onclick="deletePayment('${p.id}')">${IC.trash}</button>
+              </div>
+            </div>`;}).join('')}
+    </div>`;
+}
+function setPayCls(cls){ filPay.cls=cls; renderPayments(); }
+function openPaymentForm(){
+  const cls=filPay.cls;
+  const stds=studentsOf(cls);
+  if(stds.length===0){toast('لا يوجد تلاميذ في هذا القسم','error');return;}
+  const stdOpts=stds.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join('');
+  const ym=new Date().toISOString().slice(0,7);
+  showSheet('تسجيل أداء',`
+    <div class="field-row"><label>التلميذ <span class="req">*</span></label>
+      <select class="field" id="pf-sid"><option value="">-- اختر --</option>${stdOpts}</select></div>
+    <div class="field-grid-2">
+      <div class="field-row"><label>المبلغ (د.م) <span class="req">*</span></label>
+        <input class="field" type="number" id="pf-amount" value="${DATA.settings.defaultFee||200}"></div>
+      <div class="field-row"><label>الشهر</label>
+        <input class="field" type="month" id="pf-month" value="${ym}"></div>
+    </div>
+    <div class="field-row"><label>التاريخ</label>
+      <input class="field" type="date" id="pf-date" value="${today()}"></div>
+    <div class="field-row"><label>ملاحظة</label>
+      <input class="field" id="pf-note" value=""></div>
+  `,[
+    {label:'إلغاء',cls:'btn-outline',fn:'closeSheet()'},
+    {label:'حفظ',cls:'btn-accent',fn:'savePayment()'}
+  ]);
+}
+function savePayment(){
+  const sid=document.getElementById('pf-sid').value;
+  const amount=document.getElementById('pf-amount').value;
+  if(!sid||!amount){toast('اختر التلميذ وأدخل المبلغ','error');return;}
+  DATA.payments.push({id:uid(),sid,amount:+amount,
+    month:document.getElementById('pf-month').value,
+    date:document.getElementById('pf-date').value,
+    note:document.getElementById('pf-note').value.trim()
+  });
+  save();closeSheet();toast('تم التسجيل','success');renderPayments();
+}
+function deletePayment(id){
+  if(!confirm('حذف هذا الأداء؟'))return;
+  DATA.payments=DATA.payments.filter(p=>p.id!==id);
+  save();toast('تم الحذف');renderPayments();
+}
+
+/* =================================================================
+   MORE
+================================================================= */
+function renderMore(){
+  const items=[
+    {key:'sessions',icon:IC.clock,color:'var(--accent)',bg:'var(--accent-light)',label:'جدول الحصص',count:DATA.sessions.length},
+    {key:'lessons',icon:IC.book,color:'var(--math)',bg:'var(--math-bg)',label:'الدروس',count:DATA.lessons.length},
+    {key:'exercises',icon:IC.pen,color:'var(--phy)',bg:'var(--phy-bg)',label:'التمارين',count:DATA.exercises.length},
+    {key:'homework',icon:IC.book,color:'var(--danger)',bg:'var(--danger-light)',label:'الفروض',count:DATA.homework.length},
+    {key:'payments',icon:IC.money,color:'var(--green)',bg:'var(--green-light)',label:'الأداءات',count:DATA.payments.length},
+    {key:'performance',icon:IC.chart,color:'var(--purple)',bg:'var(--purple-light)',label:'الإحصاء',count:null},
+    {key:'data',icon:IC.db,color:'var(--text-3)',bg:'#EEF0F5',label:'البيانات',count:null},
+  ];
+  const sec=document.getElementById('sec-more');
+  sec.innerHTML=`
+    <div class="more-grid">
+      ${items.map(it=>`
+        <button class="more-card" onclick="navigate('${it.key}')">
+          <div class="more-card-icon" style="background:${it.bg};color:${it.color}">${it.icon}</div>
+          <div class="more-card-label">${it.label}</div>
+          ${it.count!=null?`<span class="badge badge-gray" style="position:absolute;top:6px;left:6px;font-size:10px">${it.count}</span>`:''}
+        </button>`).join('')}
+    </div>
+
+    <div class="panel" style="margin-top:4px">
+      <div class="panel-title">إعدادات</div>
+      <div class="data-row">
+        <span class="key">الأجر الشهري الافتراضي</span>
+        <div style="display:flex;align-items:center;gap:8px">
+          <input id="set-fee" type="number" class="field" style="width:90px;padding:6px 10px;text-align:center" value="${DATA.settings.defaultFee||200}">
+          <span style="font-size:13px;color:var(--text-3)">د.م</span>
+          <button class="btn btn-accent" style="padding:7px 12px;font-size:12px" onclick="saveFee()">حفظ</button>
+        </div>
+      </div>
+    </div>`;
+}
+function saveFee(){
+  DATA.settings.defaultFee=+document.getElementById('set-fee').value;
+  save();toast('تم الحفظ','success');
+}
+
+/* =================================================================
+   PERFORMANCE
+================================================================= */
+function renderPerformance(){
+  const sec=document.getElementById('sec-performance');
+  const totalSt=DATA.students.length;
+  const totalSess=DATA.sessions.length;
+  const totalGr=DATA.grades.length;
+  const avgBySubj=SUBJECTS.map(s=>{
+    const gs=DATA.grades.filter(g=>g.subj===s.id&&g.max>0);
+    const avg=gs.length>0?gs.reduce((a,g)=>a+g.score/g.max,0)/gs.length*20:null;
+    return {s,avg};
+  });
+  const attByClass=CLASSES.map(c=>{
+    const total=DATA.attendance.filter(a=>a.cls===c.id).length;
+    const present=DATA.attendance.filter(a=>a.cls===c.id&&a.status==='present').length;
+    return {c,total,present};
+  });
+  sec.innerHTML=`
+    <div class="stat-grid">
+      <div class="stat-card"><div class="s-label">إجمالي التلاميذ</div><div class="s-val">${totalSt}</div></div>
+      <div class="stat-card"><div class="s-label">الحصص المخططة</div><div class="s-val">${totalSess}</div></div>
+      <div class="stat-card"><div class="s-label">النقاط المسجلة</div><div class="s-val">${totalGr}</div></div>
+      <div class="stat-card"><div class="s-label">سجلات الحضور</div><div class="s-val">${DATA.attendance.length}</div></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">المعدل العام حسب المادة</div>
+      ${avgBySubj.map(({s,avg})=>`
+        <div class="data-row">
+          <div style="display:flex;align-items:center;gap:8px">
+            <span class="badge badge-${s.cls}">${s.label}</span>
+          </div>
+          <span style="font-size:16px;font-weight:800;font-family:var(--mono);color:${s.color}">
+            ${avg!=null?avg.toFixed(2)+'/20':'—'}
+          </span>
+        </div>`).join('')}
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">الحضور حسب القسم</div>
+      ${attByClass.map(({c,total,present})=>`
+        <div style="padding:12px 14px;border-bottom:1px solid var(--border)">
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+            <span style="font-weight:700;color:${c.color}">${c.label}</span>
+            <span style="font-size:13px;color:var(--text-3)">${present}/${total} حاضر</span>
+          </div>
+          <div class="progress-bar"><div class="progress-fill" style="width:${total>0?Math.round(present/total*100):0}%;background:${c.color}"></div></div>
+        </div>`).join('')}
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">تلاميذ القسم الأول</div>
+      ${studentPerformanceRows('1ere')}
+    </div>
+    <div class="panel">
+      <div class="panel-title">تلاميذ القسم الثاني</div>
+      ${studentPerformanceRows('2eme')}
+    </div>`;
+}
+function studentPerformanceRows(cls){
+  const stds=studentsOf(cls);
+  if(stds.length===0) return `<div style="padding:14px;text-align:center;color:var(--text-3);font-size:13px">لا يوجد تلاميذ</div>`;
+  return stds.map(s=>{
+    const gs=DATA.grades.filter(g=>g.sid===s.id&&g.max>0);
+    const avg=gs.length>0?gs.reduce((a,g)=>a+g.score/g.max,0)/gs.length*20:null;
+    const atts=DATA.attendance.filter(a=>a.sid===s.id);
+    const pct=atts.length>0?Math.round(DATA.attendance.filter(a=>a.sid===s.id&&a.status==='present').length/atts.length*100):null;
+    return `<div class="data-row">
+      <span class="key">${esc(s.name)}</span>
+      <div style="display:flex;gap:8px;align-items:center">
+        ${pct!=null?`<span class="badge badge-gray">${pct}%</span>`:''}
+        <span style="font-size:15px;font-weight:800;font-family:var(--mono);color:var(--accent)">${avg!=null?avg.toFixed(1):' —'}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* =================================================================
+   DATA MANAGEMENT
+================================================================= */
+function renderData(){
+  const counts={
+    students:DATA.students.length,
+    sessions:DATA.sessions.length,
+    grades:DATA.grades.length,
+    attendance:DATA.attendance.length,
+    lessons:DATA.lessons.length,
+    exercises:DATA.exercises.length,
+    homework:DATA.homework.length,
+    payments:DATA.payments.length,
+  };
+  const total=JSON.stringify(DATA).length;
+  const sec=document.getElementById('sec-data');
+  sec.innerHTML=`
+    <div class="panel" style="margin-bottom:12px">
+      <div class="panel-title">ملخص البيانات</div>
+      ${Object.entries({
+        'التلاميذ':counts.students,'الحصص':counts.sessions,'النقاط':counts.grades,
+        'الحضور':counts.attendance,'الدروس':counts.lessons,'التمارين':counts.exercises,
+        'الفروض':counts.homework,'الأداءات':counts.payments
+      }).map(([k,v])=>`<div class="data-row"><span class="key">${k}</span><span class="val">${v}</span></div>`).join('')}
+      <div class="data-row"><span class="key">حجم البيانات</span><span class="val" style="font-family:var(--mono)">${(total/1024).toFixed(1)} KB</span></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <button class="btn btn-accent btn-full" onclick="exportData()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        تصدير البيانات (JSON)
+      </button>
+      <button class="btn btn-outline btn-full" onclick="document.getElementById('import-input').click()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        استيراد من ملف
+      </button>
+      <button class="btn btn-danger btn-full" onclick="resetData()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+        حذف جميع البيانات
+      </button>
+    </div>`;
+}
+function exportData(){
+  const blob=new Blob([JSON.stringify(DATA,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=`tutor-backup-${today()}.json`;
+  a.click();
+  toast('تم التصدير','success');
+}
+document.getElementById('import-input').addEventListener('change',function(){
+  const f=this.files[0];if(!f)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const parsed=JSON.parse(e.target.result);
+      if(!parsed.students)throw new Error('ملف غير صالح');
+      DATA={...defaultData(),...parsed};
+      save();toast('تم الاستيراد','success');renderData();
+    }catch(err){toast('خطأ في الملف: '+err.message,'error');}
+  };
+  reader.readAsText(f);
+  this.value='';
+});
+function resetData(){
+  if(!confirm('هذا سيحذف جميع البيانات نهائياً. هل أنت متأكد؟'))return;
+  if(!confirm('تأكيد ثانٍ: حذف كل البيانات؟'))return;
+  DATA=defaultData();save();
+  toast('تم حذف البيانات');
+  navigate('dashboard');
+}
+
+/* =================================================================
+   DASHBOARD
+================================================================= */
+function renderDashboard(){
+  const t=today();
+  const todaySess=DATA.sessions.filter(s=>s.date===t);
+  const upcomingSess=DATA.sessions.filter(s=>s.date>t).sort((a,b)=>a.date>b.date?1:-1).slice(0,3);
+  const pendingHW=DATA.homework.filter(h=>h.dueDate>=t);
+  const totalPaid=DATA.payments.reduce((a,p)=>a+Number(p.amount||0),0);
+  const sec=document.getElementById('sec-dashboard');
+  sec.innerHTML=`
+    <!-- Quick class overview -->
+    <div style="display:flex;gap:10px;margin-bottom:12px">
+      ${CLASSES.map(c=>{
+        const n=studentsOf(c.id).length;
+        const nextSess=DATA.sessions.filter(s=>s.cls===c.id&&s.date>=t).sort((a,b)=>a.date>b.date?1:-1)[0];
+        return `<div class="stat-card" style="flex:1;border-color:${c.color};border-width:2px">
+          <div style="font-size:11px;font-weight:700;color:${c.color};margin-bottom:4px">${c.label}</div>
+          <div style="font-size:22px;font-weight:800;font-family:var(--mono)">${n}</div>
+          <div style="font-size:11px;color:var(--text-3)">تلاميذ</div>
+          ${nextSess?`<div style="font-size:11px;margin-top:8px;padding:4px 8px;border-radius:6px;background:${c.bg};color:${c.color};font-weight:600">${IC.clock} ${fdate(nextSess.date)}</div>`:''}
+        </div>`;
+      }).join('')}
+    </div>
+
+    ${todaySess.length>0?`
+      <div class="panel" style="margin-bottom:12px">
+        <div class="panel-title">حصص اليوم</div>
+        ${todaySess.map(s=>{
+          const sj=subjById(s.subj);
+          const cl=clsById(s.cls);
+          return `<div class="card-item" onclick="navigate('sessions')">
+            <div class="card-item-icon" style="background:${sj.bg};color:${sj.color}">${IC.clock}</div>
+            <div class="card-item-body">
+              <div class="card-item-title">${esc(s.title)}</div>
+              <div class="card-item-sub">${cl.label} · ${sj.label}${s.time?' · '+s.time:''}</div>
+            </div>
+            <span class="badge badge-blue">اليوم</span>
+          </div>`;}).join('')}
+      </div>`:'' }
+
+    ${upcomingSess.length>0?`
+      <div class="panel" style="margin-bottom:12px">
+        <div class="panel-title">الحصص القادمة</div>
+        ${upcomingSess.map(s=>{
+          const sj=subjById(s.subj);
+          const cl=clsById(s.cls);
+          return `<div class="card-item" onclick="navigate('sessions')">
+            <div class="card-item-icon" style="background:${sj.bg};color:${sj.color}">${IC.clock}</div>
+            <div class="card-item-body">
+              <div class="card-item-title">${esc(s.title)}</div>
+              <div class="card-item-sub">${fdate(s.date)} · ${cl.label} · ${sj.label}</div>
+            </div>
+          </div>`;}).join('')}
+      </div>`:'' }
+
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="s-label">الدروس</div>
+        <div class="s-val">${DATA.lessons.length}</div>
+        <div class="s-sub">مسجلة</div>
+      </div>
+      <div class="stat-card">
+        <div class="s-label">التمارين</div>
+        <div class="s-val">${DATA.exercises.length}</div>
+        <div class="s-sub">في البنك</div>
+      </div>
+      <div class="stat-card">
+        <div class="s-label">الفروض</div>
+        <div class="s-val">${DATA.homework.length}</div>
+        <div class="s-sub">${pendingHW.length} قيد التنفيذ</div>
+      </div>
+      <div class="stat-card">
+        <div class="s-label">المداخيل</div>
+        <div class="s-val" style="font-size:20px">${totalPaid}</div>
+        <div class="s-sub">درهم</div>
+      </div>
+    </div>
+
+    <!-- Quick nav buttons -->
+    <div class="panel" style="margin-top:4px">
+      <div class="panel-title">وصول سريع</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;padding:12px 14px">
+        ${[
+          ['sessions','جدول الحصص','var(--accent)','var(--accent-light)'],
+          ['lessons','الدروس','var(--math)','var(--math-bg)'],
+          ['exercises','التمارين','var(--phy)','var(--phy-bg)'],
+          ['grades','النقاط','var(--svt)','var(--svt-bg)'],
+          ['attendance','الحضور','var(--amber)','var(--amber-light)'],
+          ['payments','الأداءات','var(--green)','var(--green-light)'],
+        ].map(([k,l,c,b])=>`
+          <button onclick="navigate('${k}')" style="
+            padding:8px 14px;border-radius:10px;font-size:12px;font-weight:700;
+            background:${b};color:${c};border:1.5px solid ${b};
+          ">${l}</button>`).join('')}
+      </div>
+    </div>`;
+}
+
+/* =================================================================
+   HELPERS
+================================================================= */
+function emptyHtml(title,sub){
+  return `<div class="empty">
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12" opacity=".4"/></svg>
+    <h4>${title}</h4><p>${sub}</p>
+  </div>`;
+}
+
+/* =================================================================
+   INIT
+================================================================= */
+function init(){
+  document.getElementById('today-badge').textContent=today();
+  updateBadges();
+  const last=localStorage.getItem('lastNav')||'dashboard';
+  const [k,e]=last.split('|');
+  navHistory=[];
+  navigate(k||'dashboard',e||undefined);
+}
+init();
+</script>
+</body>
+</html>
