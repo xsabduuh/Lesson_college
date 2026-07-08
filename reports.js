@@ -1,71 +1,95 @@
 /* =================================================================
-   GLOSSARY (المصطلحات)
+   REPORTS (التقارير)
 ================================================================= */
-function renderGlossary(){
-  const subj=filGloss.subj;
-  const items=DATA.glossary.filter(t=>t.subj===subj||!subj).slice().reverse();
-  const sec=document.getElementById('sec-glossary');
+function renderReports(){
+  const totalSt=DATA.students.length;
+  const totalSess=DATA.sessions.length;
+  const totalGr=DATA.grades.length;
+  const totalAtt=DATA.attendance.length;
+  const presentAtt=DATA.attendance.filter(a=>a.status==='present').length;
+  const attRate=totalAtt>0?Math.round(presentAtt/totalAtt*100):0;
+  const avgBySubj=SUBJECTS.map(s=>{
+    const gs=DATA.grades.filter(g=>g.subj===s.id&&g.max>0);
+    const avg=gs.length>0?gs.reduce((a,g)=>a+g.score/g.max,0)/gs.length*20:null;
+    return {s,avg};
+  });
+  const sec=document.getElementById('sec-reports');
   sec.innerHTML=`
-    ${subjPillsHtml(subj,"setGlossSubj",true)}
-    <div class="section-header">
-      <h2>المصطلحات</h2>
-      <span class="count-badge">${items.length}</span>
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="s-label">إجمالي التلاميذ</div>
+        <div class="s-val">${totalSt}</div>
+        <div class="s-sub">مسجلون</div>
+      </div>
+      <div class="stat-card">
+        <div class="s-label">الحصص المخططة</div>
+        <div class="s-val">${totalSess}</div>
+      </div>
+      <div class="stat-card">
+        <div class="s-label">النقاط المسجلة</div>
+        <div class="s-val">${totalGr}</div>
+      </div>
+      <div class="stat-card">
+        <div class="s-label">نسبة الحضور</div>
+        <div class="s-val" style="color:${attRate>=75?'var(--green)':attRate>=50?'var(--amber)':'var(--danger)'}">${attRate}%</div>
+      </div>
     </div>
-    ${items.length===0?`<div class="panel">${emptyHtml('لا توجد مصطلحات','أضف مصطلحاً باستخدام الزر أسفله')}</div>`
-    :items.map(t=>{
-        const s=subjById(t.subj);
-        return `<div class="term-card">
-          <div style="display:flex;justify-content:space-between;align-items:flex-start">
-            <div class="term-word">${esc(t.word)}</div>
-            <div class="admin-actions">
-              <button class="btn-icon accent" onclick="openGlossaryForm('${t.id}')">${IC.edit}</button>
-              <button class="btn-icon danger"  onclick="deleteGlossary('${t.id}')">${IC.trash}</button>
-            </div>
+
+    <div class="panel" style="margin-bottom:12px">
+      <div class="panel-title">المعدل العام حسب المادة</div>
+      ${avgBySubj.map(({s,avg})=>`
+        <div class="data-row">
+          <div style="display:flex;align-items:center;gap:8px">
+            <span class="badge badge-${s.cls}">${s.label}</span>
           </div>
-          ${t.wordFr?`<div style="font-size:13px;color:var(--accent);font-style:italic;margin-bottom:4px">${esc(t.wordFr)}</div>`:''}
-          <div class="term-def">${esc(t.definition)}</div>
-          <div class="term-tags">
-            <span class="badge badge-${s.cls}">${s.short}</span>
-            ${t.unit?`<span class="badge badge-gray">${esc(t.unit)}</span>`:''}
-          </div>
-        </div>`;}).join('')}`;
-}
-function setGlossSubj(subj){ filGloss.subj=subj; renderGlossary(); }
-function openGlossaryForm(id){
-  const t=id?DATA.glossary.find(x=>x.id===id):{};
-  const subjOpts=SUBJECTS.map(s=>`<option value="${s.id}" ${(t.subj||'math')===s.id?'selected':''}>${s.label}</option>`).join('');
-  showSheet(id?'تعديل مصطلح':'إضافة مصطلح جديد',`
-    <div class="field-row"><label>المصطلح بالعربية <span class="req">*</span></label>
-      <input class="field" id="tf-word" value="${esc(t.word||'')}"></div>
-    <div class="field-row"><label>المصطلح بالفرنسية</label>
-      <input class="field" id="tf-wordfr" value="${esc(t.wordFr||'')}"></div>
-    <div class="field-row"><label>التعريف <span class="req">*</span></label>
-      <textarea class="field" id="tf-def" style="min-height:80px">${esc(t.definition||'')}</textarea></div>
-    <div class="field-grid-2">
-      <div class="field-row"><label>المادة</label><select class="field" id="tf-subj">${subjOpts}</select></div>
-      <div class="field-row"><label>الوحدة</label><input class="field" id="tf-unit" value="${esc(t.unit||'')}"></div>
+          <span style="font-size:18px;font-weight:800;font-family:var(--mono);color:${s.color}">
+            ${avg!=null?avg.toFixed(2)+'/20':'—'}
+          </span>
+        </div>`).join('')}
     </div>
-    <input type="hidden" id="tf-id" value="${id||''}">
-  `,[
-    {label:'إلغاء',cls:'btn-outline',fn:'closeSheet()'},
-    {label:'حفظ',cls:'btn-accent',fn:'saveGlossary()'}
-  ]);
+
+    <div class="panel" style="margin-bottom:12px">
+      <div class="panel-title">الحضور حسب القسم</div>
+      ${CLASSES.map(c=>{
+        const total=DATA.attendance.filter(a=>a.cls===c.id).length;
+        const present=DATA.attendance.filter(a=>a.cls===c.id&&a.status==='present').length;
+        const pct=total>0?Math.round(present/total*100):0;
+        return `<div style="padding:12px 14px;border-bottom:1px solid var(--border)">
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+            <span style="font-weight:700;color:${c.color}">${c.label}</span>
+            <span style="font-size:13px;color:var(--text-3)">${present}/${total} · ${pct}%</span>
+          </div>
+          <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${c.color}"></div></div>
+        </div>`;}).join('')}
+    </div>
+
+    <div class="chart-wrap" style="padding:8px 0">
+      <canvas id="reports-chart" height="180"></canvas>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">أداء التلاميذ</div>
+      ${studentPerformanceRows()}
+    </div>`;
+  setTimeout(()=>drawReportsChart(),0);
 }
-function saveGlossary(){
-  const id=document.getElementById('tf-id').value;
-  const word=document.getElementById('tf-word').value.trim();
-  const def=document.getElementById('tf-def').value.trim();
-  if(!word||!def){toast('أدخل المصطلح والتعريف','error');return;}
-  const obj={word,wordFr:document.getElementById('tf-wordfr').value.trim(),
-    definition:def,
-    subj:document.getElementById('tf-subj').value,
-    unit:document.getElementById('tf-unit').value.trim()};
-  if(id){ Object.assign(DATA.glossary.find(x=>x.id===id),obj); }
-  else { DATA.glossary.push({id:uid(),...obj}); }
-  save();closeSheet();toast('تم الحفظ','success');renderGlossary();
-}
-function deleteGlossary(id){
-  if(!confirm('حذف هذا المصطلح؟'))return;
-  DATA.glossary=DATA.glossary.filter(t=>t.id!==id);
-  save();toast('تم الحذف');renderGlossary();
+function studentPerformanceRows(){
+  const allStds=DATA.students;
+  if(allStds.length===0) return `<div style="padding:14px;text-align:center;color:var(--text-3);font-size:13px">لا يوجد تلاميذ</div>`;
+  return allStds.map(s=>{
+    const gs=DATA.grades.filter(g=>g.sid===s.id&&g.max>0);
+    const avg=gs.length>0?gs.reduce((a,g)=>a+g.score/g.max,0)/gs.length*20:null;
+    const atts=DATA.attendance.filter(a=>a.sid===s.id);
+    const pct=atts.length>0?Math.round(DATA.attendance.filter(a=>a.sid===s.id&&a.status==='present').length/atts.length*100):null;
+    return `<div class="data-row">
+      <div>
+        <div style="font-size:13px;font-weight:700">${esc(s.name)}</div>
+        <span class="badge ${classBadge(s.cls)}" style="margin-top:3px">${clsById(s.cls).short}</span>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        ${pct!=null?`<span class="badge badge-gray">${pct}% حضور</span>`:''}
+        <span style="font-size:17px;font-weight:800;font-family:var(--mono);color:var(--accent)">${avg!=null?avg.toFixed(1):'—'}</span>
+      </div>
+    </div>`;
+  }).join('');
 }
