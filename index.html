@@ -115,7 +115,7 @@
 <div id="print-area"></div>
 <input type="file" id="import-input" accept="application/json" style="display:none">
 
-<!-- ===== SCRIPTS (المسارات الصحيحة) ===== -->
+<!-- ===== SCRIPTS ===== -->
 <script src="icons.js"></script>
 <script src="data.js"></script>
 <script src="helpers.js"></script>
@@ -148,7 +148,15 @@
     navHistory=[];
     navigate(k||'dashboard',e||undefined);
   }
-  init();
+
+  try {
+    init();
+  } catch (e) {
+    document.body.innerHTML =
+      "<pre style='padding:20px;color:red;white-space:pre-wrap;background:#fff;direction:ltr;text-align:left;'>" +
+      e.stack +
+      "</pre>";
+  }
 </script>
 </body>
 </html>
