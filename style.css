@@ -352,8 +352,11 @@ body.dark{
 .field{
   width:100%;padding:11px 13px;
   border-radius:10px;border:1.5px solid var(--border);
-  background:var(--surface-2);font-size:14px;color:var(--text);
+  background:var(--surface-2);font-size:16px;color:var(--text);
   transition:border-color .15s,background .15s;
+}
+@media(min-width:480px){
+  .field{font-size:14px}
 }
 .field:focus{border-color:var(--accent);background:var(--surface)}
 textarea.field{resize:vertical;min-height:80px;line-height:1.5}
