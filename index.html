@@ -153,7 +153,9 @@
     init();
   } catch (e) {
     document.body.innerHTML =
-      "<pre style='padding:20px;color:red;white-space:pre-wrap;background:#fff;direction:ltr;text-align:left;'>" +
+      "<pre style='padding:20px;color:red;white-space:pre-wrap;background:#fff;'>" +
+      e.name + "\n\n" +
+      e.message + "\n\n" +
       e.stack +
       "</pre>";
   }
