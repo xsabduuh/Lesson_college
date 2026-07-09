@@ -14,46 +14,51 @@ const LEVEL_COLORS = {
 };
 
 function renderExercises(){
-  const cls = filExer.cls;
-  const subj = filExer.subj;
-  // تصفية أي بيانات تالفة قد تكون مخزنة
-  const items = DATA.exercises.filter(e => e && e.cls === cls && e.subj === subj).slice().reverse();
-  const s = subjById(subj);
-  
-  const byLevel = {
-    'سهل': items.filter(e => e.level === 'سهل'),
-    'متوسط': items.filter(e => e.level === 'متوسط'),
-    'صعب': items.filter(e => e.level === 'صعب'),
-    'تحدٍّ': items.filter(e => e.level === 'تحدٍّ'),
-    'أخرى': items.filter(e => !['سهل','متوسط','صعب','تحدٍّ'].includes(e.level))
-  };
-
   const sec = document.getElementById('sec-exercises');
   if (!sec) return;
-  
-  let num = 0;
-  sec.innerHTML = `
-    ${classTabsHtml(cls, "setExerCls")}
-    ${subjPillsHtml(subj, "setExerSubj")}
-    <div class="section-header">
-      <h2>${IC.pen || IC.edit} تمارين ${s.label}</h2>
-      <span class="count-badge">${items.length}</span>
-    </div>
-    ${items.length === 0 
-      ? `<div class="panel">${emptyHtml('لا توجد تمارين', 'أضف تمريناً جديداً')}</div>`
-      : Object.entries(byLevel).filter(([, arr]) => arr.length > 0).map(([level, exs]) => `
-        <div style="margin-bottom:12px;">
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-            <span class="badge ${LEVEL_COLORS[level] || 'badge-gray'}" style="font-size:12px;padding:4px 12px;">${level}</span>
-            <span class="count-badge">${exs.length}</span>
+
+  try {
+    const cls = filExer.cls;
+    const subj = filExer.subj;
+    // تصفية أي بيانات تالفة قد تكون مخزنة
+    const items = (DATA.exercises || []).filter(e => e && e.cls === cls && e.subj === subj).slice().reverse();
+    const s = subjById(subj) || { label: subj || 'غير محدد' };
+
+    const byLevel = {
+      'سهل': items.filter(e => e.level === 'سهل'),
+      'متوسط': items.filter(e => e.level === 'متوسط'),
+      'صعب': items.filter(e => e.level === 'صعب'),
+      'تحدٍّ': items.filter(e => e.level === 'تحدٍّ'),
+      'أخرى': items.filter(e => !['سهل','متوسط','صعب','تحدٍّ'].includes(e.level))
+    };
+
+    let num = 0;
+    sec.innerHTML = `
+      ${classTabsHtml(cls, "setExerCls")}
+      ${subjPillsHtml(subj, "setExerSubj")}
+      <div class="section-header">
+        <h2>${IC.pen || IC.edit} تمارين ${s.label}</h2>
+        <span class="count-badge">${items.length}</span>
+      </div>
+      ${items.length === 0
+        ? `<div class="panel">${emptyHtml('لا توجد تمارين', 'أضف تمريناً جديداً')}</div>`
+        : Object.entries(byLevel).filter(([, arr]) => arr.length > 0).map(([level, exs]) => `
+          <div style="margin-bottom:12px;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+              <span class="badge ${LEVEL_COLORS[level] || 'badge-gray'}" style="font-size:12px;padding:4px 12px;">${level}</span>
+              <span class="count-badge">${exs.length}</span>
+            </div>
+            ${exs.map(e => {
+              num++;
+              return exerciseCardHtml(e, s, num);
+            }).join('')}
           </div>
-          ${exs.map(e => {
-            num++;
-            return exerciseCardHtml(e, s, num);
-          }).join('')}
-        </div>
-      `).join('')}
-  `;
+        `).join('')}
+    `;
+  } catch (err) {
+    console.error('renderExercises error:', err);
+    sec.innerHTML = `<div class="panel">حدث خطأ في عرض التمارين: ${esc(err.message)}</div>`;
+  }
 }
 
 function exerciseCardHtml(e, s, num){
@@ -114,11 +119,12 @@ function setExerCls(cls){ filExer.cls = cls; renderExercises(); }
 function setExerSubj(subj){ filExer.subj = subj; renderExercises(); }
 
 function openExerciseForm(id){
-  const e = id ? DATA.exercises.find(x => x.id === id) : {};
-  if (e && e.obj) e = e.obj; // إصلاح البيانات التالفة مؤقتًا
+  let e = id ? DATA.exercises.find(x => x.id === id) : {};
+  e = e || {}; // ← حماية: لو id غير موجود بالبيانات، لا تكسر الدالة
+  if (e.obj) e = e.obj; // إصلاح البيانات التالفة مؤقتًا
 
-  const cls = (e ? e.cls : null) || filExer.cls;
-  const subj = (e ? e.subj : null) || filExer.subj;
+  const cls = e.cls || filExer.cls;
+  const subj = e.subj || filExer.subj;
   const clsOpts = CLASSES.map(c => `<option value="${c.id}" ${cls === c.id ? 'selected' : ''}>${c.label}</option>`).join('');
   const subjOpts = SUBJECTS.map(s => `<option value="${s.id}" ${subj === s.id ? 'selected' : ''}>${s.label}</option>`).join('');
   const levOpts = ['','سهل','متوسط','صعب','تحدٍّ'].map(l => `<option value="${l}" ${(e.level || '') === l ? 'selected' : ''}>${l || 'غير محدد'}</option>`).join('');
