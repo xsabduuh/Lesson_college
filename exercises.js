@@ -1,5 +1,5 @@
 /* =================================================================
-   EXERCISES (التمارين) – نسخة متكاملة مع الملفات
+   EXERCISES (التمارين) – نسخة متوافقة
 ================================================================= */
 const LEVEL_COLORS = {
   'سهل': 'badge-green',
@@ -21,6 +21,7 @@ function renderExercises(){
     'أخرى':items.filter(e=>!['سهل','متوسط','صعب','تحدٍّ'].includes(e.level))
   };
   const sec=document.getElementById('sec-exercises');
+  if(!sec) return;
   let num=0;
   sec.innerHTML=`
     ${classTabsHtml(cls,"setExerCls")}
@@ -29,7 +30,7 @@ function renderExercises(){
       <h2>${IC.pen} تمارين ${s.label}</h2>
       <span class="count-badge">${items.length}</span>
     </div>
-    ${items.length===0?`<div class="panel">${emptyHtml('لا توجد تمارين','أضف تمريناً باستخدام الزر أسفله')}</div>`
+    ${items.length===0?`<div class="panel">${emptyHtml('لا توجد تمارين','أضف تمريناً')}</div>`
     :Object.entries(byLevel).filter(([,v])=>v.length>0).map(([level,exs])=>`
       <div style="margin-bottom:8px;">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
@@ -45,19 +46,18 @@ function renderExercises(){
 }
 
 function exerciseCardHtml(e, s, num){
-  // أيقونة الملف المرفق (للسؤال أو الحل)
   const questionFileLink = e.questionFileData
-    ? `<div class="homework-file" onclick="event.stopPropagation();downloadHWFile('${e.id}','question')" style="margin-top:8px;display:flex;align-items:center;gap:6px;background:var(--surface-2);padding:6px 10px;border-radius:8px;cursor:pointer;">
+    ? `<div onclick="event.stopPropagation();downloadExerciseFile('${e.id}','question')" style="margin-top:8px;display:flex;align-items:center;gap:6px;background:var(--surface-2);padding:6px 10px;border-radius:8px;cursor:pointer;">
          <span style="display:flex;color:var(--accent);">${IC.file}</span>
-         <span style="font-size:11px;color:var(--accent);font-weight:600;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(e.questionFileName || 'ملف السؤال')}</span>
+         <span style="font-size:11px;color:var(--accent);font-weight:600;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(e.questionFileName||'ملف السؤال')}</span>
          <span style="display:flex;color:var(--accent);">${IC.download}</span>
        </div>`
     : '';
 
   const solutionFileLink = e.solutionFileData
-    ? `<div class="homework-file" onclick="event.stopPropagation();downloadHWFile('${e.id}','solution')" style="margin-top:6px;display:flex;align-items:center;gap:6px;background:var(--surface-2);padding:6px 10px;border-radius:8px;cursor:pointer;">
+    ? `<div onclick="event.stopPropagation();downloadExerciseFile('${e.id}','solution')" style="margin-top:6px;display:flex;align-items:center;gap:6px;background:var(--surface-2);padding:6px 10px;border-radius:8px;cursor:pointer;">
          <span style="display:flex;color:var(--green);">${IC.file}</span>
-         <span style="font-size:11px;color:var(--green);font-weight:600;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(e.solutionFileName || 'ملف الحل')}</span>
+         <span style="font-size:11px;color:var(--green);font-weight:600;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(e.solutionFileName||'ملف الحل')}</span>
          <span style="display:flex;color:var(--green);">${IC.download}</span>
        </div>`
     : '';
@@ -85,7 +85,7 @@ function exerciseCardHtml(e, s, num){
       </div>
       ${(e.solution || e.solutionFileData) ? `
       <div class="ex-solution" id="sol-${e.id}">
-        <div style="font-size:11px;font-weight:800;color:var(--green);margin-bottom:6px;text-transform:uppercase;letter-spacing:.4px;">الحل</div>
+        <div style="font-size:11px;font-weight:800;color:var(--green);margin-bottom:6px;">الحل</div>
         ${e.solution ? `<div style="font-size:13px;color:var(--text-2);line-height:1.7;margin-bottom:8px;">${esc(e.solution)}</div>` : ''}
         ${solutionFileLink}
       </div>` : ''}
@@ -124,7 +124,7 @@ function openExerciseForm(id){
       <div class="field-row"><label>التاريخ</label><input class="field" type="date" id="ef-date" value="${e.date||today()}"></div>
     </div>
     <div class="field-row"><label>نص التمرين</label>
-      <textarea class="field" id="ef-content" style="min-height:100px" placeholder="نص التمرين أو السؤال...">${esc(e.content||'')}</textarea></div>
+      <textarea class="field" id="ef-content" style="min-height:100px" placeholder="نص التمرين...">${esc(e.content||'')}</textarea></div>
     <div class="field-row">
       <label>ملف السؤال (صورة أو PDF)</label>
       <input type="file" id="ef-question-file" accept="image/*,.pdf" style="display:block;margin-top:4px;">
@@ -163,7 +163,6 @@ function saveExercise(){
     solution: document.getElementById('ef-solution').value.trim()
   };
 
-  // الاحتفاظ بالملفات القديمة إن لم تُرفع جديدة
   if (existing) {
     if (!questionFile) {
       obj.questionFileData = existing.questionFileData;
@@ -186,9 +185,9 @@ function saveExercise(){
     save(); closeSheet(); toast('تم الحفظ','success'); renderExercises();
   };
 
-  // قراءة الملفات إن وجدت
-  const readers = [];
+  let readersToWait = 0;
   if (questionFile) {
+    readersToWait++;
     const reader = new FileReader();
     reader.onload = e => {
       obj.questionFileData = e.target.result;
@@ -196,10 +195,10 @@ function saveExercise(){
       obj.questionFileType = questionFile.type;
       if (--readersToWait === 0) finalize();
     };
-    readers.push(reader);
     reader.readAsDataURL(questionFile);
   }
   if (solutionFile) {
+    readersToWait++;
     const reader = new FileReader();
     reader.onload = e => {
       obj.solutionFileData = e.target.result;
@@ -207,11 +206,9 @@ function saveExercise(){
       obj.solutionFileType = solutionFile.type;
       if (--readersToWait === 0) finalize();
     };
-    readers.push(reader);
     reader.readAsDataURL(solutionFile);
   }
 
-  const readersToWait = readers.length;
   if (readersToWait === 0) finalize();
 }
 
@@ -221,8 +218,8 @@ function deleteExercise(id){
   save();toast('تم الحذف');renderExercises();
 }
 
-// دالة تحميل/معاينة الملف المرفق (تستخدم في كل من السؤال والحل)
-function downloadHWFile(exerciseId, type) {
+/* دالة تحميل ملف التمرين – تم تغيير الاسم لتجنب التعارض */
+function downloadExerciseFile(exerciseId, type) {
   const ex = DATA.exercises.find(e => e.id === exerciseId);
   if (!ex) return;
   const data = type === 'question' ? ex.questionFileData : ex.solutionFileData;
@@ -233,7 +230,7 @@ function downloadHWFile(exerciseId, type) {
   if (mime && mime.startsWith('image/')) {
     const win = window.open('', '_blank');
     if (win) {
-      win.document.write(`<img src="${data}" style="max-width:100%;height:auto;display:block;margin:auto;">`);
+      win.document.write(`<img src="${data}" style="max-width:100%;height:auto;">`);
       win.document.title = name || 'صورة';
     } else {
       downloadFallback(data, name, mime);
