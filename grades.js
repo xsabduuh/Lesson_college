@@ -1,5 +1,5 @@
 /* =================================================================
-   GRADES (النقاط والأداء) – مع إصلاح حقل التاريخ الفارغ
+   GRADES (النقاط والأداء) – نسخة مستقرة
 ================================================================= */
 
 if (typeof filGrade === 'undefined') {
@@ -30,16 +30,13 @@ function renderGrades() {
     ${classTabsHtml(cls, "setGradeCls")}
     ${subjPillsHtml(subj, "setGradeSubj")}
 
-    <!-- أدوات التصفية – تم استبدال حقل التاريخ بزر أنيق -->
-    <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center;">
+    <!-- أدوات التصفية (النسخة الأصلية بحقل تاريخ عادي) -->
+    <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
       <select class="field" style="width:auto;padding:6px 10px;font-size:13px;" id="grade-type-filter" onchange="setGradeFilterType(this.value)">
         <option value="">كل الأنواع</option>
         ${GRADES_TYPES.map(t => `<option value="${t}" ${filGrade.filterType === t ? 'selected' : ''}>${t}</option>`).join('')}
       </select>
-      <button class="btn btn-outline btn-sm" onclick="showGradeDatePicker()" style="display:flex;align-items:center;gap:4px;">
-        ${IC.calendar || '📅'} ${filGrade.filterDate ? fdate(filGrade.filterDate) : 'كل التواريخ'}
-        ${filGrade.filterDate ? `<span style="margin-left:4px;cursor:pointer;" onclick="event.stopPropagation();clearGradeFilterDate()">✕</span>` : ''}
-      </button>
+      <input type="date" class="field" style="width:auto;padding:6px 10px;font-size:13px;" id="grade-date-filter" value="${filGrade.filterDate}" onchange="setGradeFilterDate(this.value)">
       <button class="btn btn-sm btn-outline" onclick="clearGradeFilters()">مسح التصفية</button>
     </div>
 
@@ -85,44 +82,12 @@ function renderGrades() {
   `;
 }
 
-// دوال الفلترة
-function setGradeFilterType(type) { filGrade.filterType = type; renderGrades(); }
+function setGradeFilterType(t) { filGrade.filterType = t; renderGrades(); }
+function setGradeFilterDate(d) { filGrade.filterDate = d; renderGrades(); }
 function clearGradeFilters() { filGrade.filterType = ''; filGrade.filterDate = ''; renderGrades(); }
-
-// فتح نافذة صغيرة لاختيار التاريخ (بدلاً من حقل فارغ)
-function showGradeDatePicker() {
-  const input = document.createElement('input');
-  input.type = 'date';
-  input.value = filGrade.filterDate || today();
-  input.style.position = 'absolute';
-  input.style.left = '-9999px';
-  document.body.appendChild(input);
-  input.onchange = () => {
-    filGrade.filterDate = input.value;
-    renderGrades();
-    document.body.removeChild(input);
-  };
-  input.onblur = () => {
-    // إذا أغلق بدون اختيار، نحذف الحقل فقط
-    setTimeout(() => {
-      if (document.body.contains(input)) {
-        document.body.removeChild(input);
-      }
-    }, 500);
-  };
-  input.showPicker(); // يظهر نافذة اختيار التاريخ (مدعوم في المتصفحات الحديثة)
-}
-
-// إلغاء فلتر التاريخ فقط
-function clearGradeFilterDate() {
-  filGrade.filterDate = '';
-  renderGrades();
-}
-
 function setGradeCls(cls)   { filGrade.cls = cls; renderGrades(); }
 function setGradeSubj(subj) { filGrade.subj = subj; renderGrades(); }
 
-/* نموذج إضافة / تعديل نقطة – مع ضمان ظهور التاريخ الافتراضي */
 function openGradeForm(id) {
   const g    = id ? DATA.grades.find(x => x.id === id) : {};
   const cls  = g.cls || filGrade.cls;
@@ -150,7 +115,7 @@ function openGradeForm(id) {
         <input class="field" type="number" id="gf-max" min="1" step="1" value="${g.max||20}"></div>
     </div>
     <div class="field-row"><label>التاريخ</label>
-      <input class="field" type="date" id="gf-date" value="${g.date||today()}" onclick="this.showPicker()"></div>
+      <input class="field" type="date" id="gf-date" value="${g.date||today()}"></div>
     <div class="field-row"><label>ملاحظة</label>
       <input class="field" id="gf-note" placeholder="ملاحظة" value="${esc(g.note||'')}"></div>
     <div class="field-row">
