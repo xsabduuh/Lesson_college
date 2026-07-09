@@ -45,7 +45,7 @@ function renderSettings(){
       <div class="setting-row">
         <div class="setting-label">الأجر الشهري الافتراضي</div>
         <div style="display:flex;align-items:center;gap:8px">
-          <input id="set-fee" type="number" class="field" style="width:90px;padding:7px 10px;text-align:center" value="${s.defaultFee||200}">
+          <input id="set-fee" type="number" class="field" style="width:90px;padding:7px 10px;text-align:center" value="${s.defaultFee||150}">
           <span style="font-size:13px;color:var(--text-3)">د.م</span>
           <button class="btn btn-accent btn-sm" onclick="saveFee()">حفظ</button>
         </div>
