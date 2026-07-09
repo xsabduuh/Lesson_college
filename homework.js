@@ -1,5 +1,5 @@
 /* =================================================================
-   HOMEWORK (الفروض) – مع الملفات وحالة الإنجاز
+   HOMEWORK (الفروض) – تصميم رائع مع الملفات وحالة الإنجاز
 ================================================================= */
 function renderHomework(){
   const cls=filHW.cls;
@@ -8,37 +8,73 @@ function renderHomework(){
     .sort((a,b)=>a.dueDate>b.dueDate?1:-1);
   const s=subjById(subj);
   const sec=document.getElementById('sec-homework');
+
   sec.innerHTML=`
     ${classTabsHtml(cls,"setHWCls")}
     ${subjPillsHtml(subj,"setHWSubj")}
+
     <div class="section-header">
-      <h2>فروض ${s.label}</h2>
+      <h2>📋 فروض ${s.label}</h2>
       <span class="count-badge">${items.length}</span>
     </div>
-    <div class="panel">
+
+    <div id="homework-container" style="display:flex;flex-direction:column;gap:12px;margin-top:8px;">
       ${items.length===0
         ? emptyHtml('لا توجد فروض','أضف فرضاً باستخدام الزر أسفله')
-        : items.map(h=>{
-            const overdue=h.dueDate&&h.dueDate<today();
-            return `<div class="card-item">
-              <div class="card-item-icon" style="background:${s.bg};color:${s.color}">${IC.clip}</div>
-              <div class="card-item-body">
-                <div class="card-item-title">${esc(h.title)} ${h.completed?'<span class="badge badge-green" style="font-size:10px;margin-right:6px">✓ تم</span>':''}</div>
-                <div class="card-item-sub">تسليم: ${fdate(h.dueDate||'')} ${overdue?'<span class="badge badge-red" style="font-size:10px">متأخر</span>':''}</div>
-                ${h.content?`<div style="font-size:12px;color:var(--text-3);margin-top:3px">${esc(h.content.slice(0,80))}${h.content.length>80?'…':''}</div>`:''}
-                ${h.fileName?`<div style="font-size:11px;margin-top:4px"><span style="color:var(--accent);cursor:pointer" onclick="event.stopPropagation();downloadHWFile('${h.id}')">📎 ${esc(h.fileName)}</span></div>`:''}
-              </div>
-              <div class="card-item-actions" style="display:flex;gap:6px;align-items:center">
-                <button class="btn-icon ${h.completed?'green':''}" onclick="event.stopPropagation();toggleHomeworkComplete('${h.id}')" title="${h.completed?'إلغاء الإنجاز':'تعليم كمنجز'}">${IC.check}</button>
-                <div class="admin-actions">
-                  <button class="btn-icon accent" onclick="event.stopPropagation();openHomeworkForm('${h.id}')">${IC.edit}</button>
-                  <button class="btn-icon danger"  onclick="event.stopPropagation();deleteHomework('${h.id}')">${IC.trash}</button>
-                </div>
-              </div>
-            </div>`;}).join('')}
-    </div>`;
+        : items.map(h=>renderHomeworkCard(h,s)).join('')}
+    </div>
+  `;
 }
 
+function renderHomeworkCard(h, s){
+  const overdue = h.dueDate && h.dueDate < today();
+  const statusBadge = h.completed
+    ? '<span class="badge badge-green" style="font-size:11px;margin-right:8px;">✓ أُنجز</span>'
+    : (overdue ? '<span class="badge badge-red" style="font-size:11px;margin-right:8px;">⏳ متأخر</span>' : '');
+
+  const fileLink = h.fileName
+    ? `<div class="homework-file" onclick="event.stopPropagation();downloadHWFile('${h.id}')" style="margin-top:10px;display:flex;align-items:center;gap:6px;background:var(--surface-2);padding:8px 12px;border-radius:8px;cursor:pointer;">
+         <span style="font-size:18px;">📎</span>
+         <span style="font-size:12px;color:var(--accent);font-weight:600;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(h.fileName)}</span>
+         <span style="font-size:16px;color:var(--accent);">↓</span>
+       </div>`
+    : '';
+
+  return `
+    <div class="homework-card" style="background:var(--surface);border-radius:var(--radius-lg);border:1px solid var(--border);overflow:hidden;box-shadow:var(--shadow);transition:all 0.2s;">
+      <div style="display:flex;align-items:stretch;">
+        <!-- أيقونة المادة -->
+        <div style="background:${s.bg};color:${s.color};display:flex;align-items:center;justify-content:center;min-width:60px;font-size:24px;">
+          ${IC.clip}
+        </div>
+        <!-- المحتوى -->
+        <div style="flex:1;padding:14px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+            <h3 style="font-size:15px;font-weight:800;color:var(--text);margin:0;">${esc(h.title)}</h3>
+            <div style="display:flex;align-items:center;gap:8px;">
+              ${statusBadge}
+              <button class="btn-icon ${h.completed?'green':''}" style="width:32px;height:32px;border-radius:8px;" onclick="event.stopPropagation();toggleHomeworkComplete('${h.id}')" title="${h.completed?'إلغاء الإنجاز':'تعليم كمنجز'}">
+                ${IC.check}
+              </button>
+              <div class="admin-actions" style="margin:0;">
+                <button class="btn-icon accent" style="width:32px;height:32px;border-radius:8px;" onclick="event.stopPropagation();openHomeworkForm('${h.id}')">${IC.edit}</button>
+                <button class="btn-icon danger" style="width:32px;height:32px;border-radius:8px;" onclick="event.stopPropagation();deleteHomework('${h.id}')">${IC.trash}</button>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;font-size:12px;color:var(--text-3);margin-bottom:8px;">
+            <span>📅 تسليم: ${fdate(h.dueDate||'')}</span>
+            ${h.date ? `<span>📅 أعطي: ${fdate(h.date)}</span>` : ''}
+          </div>
+          ${h.content ? `<p style="font-size:13px;color:var(--text-2);line-height:1.5;margin:0 0 8px 0;word-break:break-word;">${esc(h.content.length > 120 ? h.content.slice(0,120)+'…' : h.content)}</p>` : ''}
+          ${fileLink}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ========== الدوال المساعدة (لم تتغير) ==========
 function setHWCls(cls){ filHW.cls=cls; renderHomework(); }
 function setHWSubj(subj){ filHW.subj=subj; renderHomework(); }
 
@@ -63,7 +99,6 @@ function openHomeworkForm(id){
     </div>
     <div class="field-row"><label>وصف الفرض</label>
       <textarea class="field" id="hf-content" style="min-height:80px" placeholder="تعليمات وتفاصيل الفرض">${esc(h.content||'')}</textarea></div>
-    <!-- حقل رفع الملف -->
     <div class="field-row">
       <label>ملف الفرض (صورة أو PDF)</label>
       <input type="file" id="hf-file" accept="image/*,.pdf" style="display:block;margin-top:4px;">
@@ -94,7 +129,6 @@ function saveHomework(){
     completed: existing ? existing.completed : false
   };
 
-  // الاحتفاظ بالملف القديم إذا لم يُرفع ملف جديد
   if (existing && existing.fileData && !fileInput.files[0]) {
     obj.fileData = existing.fileData;
     obj.fileName = existing.fileName;
@@ -114,7 +148,7 @@ function saveHomework(){
   if (fileInput.files[0]) {
     const reader = new FileReader();
     reader.onload = function(e) {
-      obj.fileData = e.target.result; // Base64
+      obj.fileData = e.target.result;
       obj.fileName = fileInput.files[0].name;
       obj.fileType = fileInput.files[0].type;
       processSave();
@@ -131,7 +165,6 @@ function deleteHomework(id){
   save();toast('تم الحذف');renderHomework();
 }
 
-// تبديل حالة الإنجاز
 function toggleHomeworkComplete(id){
   const hw = DATA.homework.find(h=>h.id===id);
   if (!hw) return;
@@ -141,32 +174,26 @@ function toggleHomeworkComplete(id){
   renderHomework();
 }
 
-// فتح أو تحميل الملف المرفق
 function downloadHWFile(id) {
   const hw = DATA.homework.find(h => h.id === id);
   if (!hw || !hw.fileData) return;
 
-  // إذا كان الملف صورة، نفتحه في نافذة جديدة للمعاينة
   if (hw.fileType && hw.fileType.startsWith('image/')) {
     const win = window.open('', '_blank');
     if (win) {
       win.document.write(`<img src="${hw.fileData}" style="max-width:100%;height:auto;display:block;margin:auto;">`);
       win.document.title = hw.fileName || 'صورة الفرض';
     } else {
-      // في حال منع المتصفح النافذة المنبثقة، نلجأ للتحميل
       downloadFallback(hw);
     }
   } else {
-    // لغير الصور (مثلاً PDF) نحمّل الملف
     downloadFallback(hw);
   }
 }
 
-// دالة مساعدة للتحميل القسري
 function downloadFallback(hw) {
   const a = document.createElement('a');
   a.href = hw.fileData;
-  // التأكد من وجود امتداد مناسب في اسم الملف
   let fileName = hw.fileName || 'homework_file';
   if (!fileName.includes('.')) {
     const ext = hw.fileType ? hw.fileType.split('/').pop() : 'bin';
