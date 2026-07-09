@@ -11,7 +11,6 @@ function closeDrawer(){
   document.getElementById('drawer').classList.remove('open');
   document.getElementById('drawer-overlay').classList.remove('show');
   document.body.style.overflow='';
-  // بفضل التعديل على CSS، سيختفي الـ overlay بتلاشي ناعم تلقائياً
 }
 function renderDrawer(){
   const items=[
@@ -49,8 +48,25 @@ function renderDrawer(){
   `;
 }
 function toggleAdminMode(){
-  DATA.settings.adminMode=!DATA.settings.adminMode;
-  save();applySettings();
-  renderDrawer();
-  toast(DATA.settings.adminMode?'وضع الإدارة مفعّل':'وضع الإدارة مُعطَّل','info');
+  DATA.settings.adminMode = !DATA.settings.adminMode;
+  save();
+  applySettings();
+  
+  // تحديث شكل المفتاح في شاشة الإعدادات فوراً (بدون إعادة تحميل الصفحة)
+  const adminToggle = document.getElementById('admin-toggle');
+  if (adminToggle) {
+    if (DATA.settings.adminMode) {
+      adminToggle.classList.add('on');
+    } else {
+      adminToggle.classList.remove('on');
+    }
+  }
+  
+  // إعادة بناء الدرج فقط إذا كان ظاهراً (لتخفيف الحمل)
+  const drawer = document.getElementById('drawer');
+  if (drawer.classList.contains('open')) {
+    renderDrawer();
+  }
+  
+  toast(DATA.settings.adminMode ? 'وضع الإدارة مفعّل' : 'وضع الإدارة مُعطَّل', 'info');
 }
