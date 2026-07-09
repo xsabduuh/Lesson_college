@@ -1,23 +1,21 @@
 /* =================================================================
-   HOMEWORK (الفروض) – تصميم رائع مع الملفات وحالة الإنجاز
+   HOMEWORK (الفروض) – تصميم راقٍ مع ملفات وتاريخ الاجتياز
 ================================================================= */
 function renderHomework(){
   const cls=filHW.cls;
   const subj=filHW.subj;
   const items=DATA.homework.filter(h=>h.cls===cls&&h.subj===subj)
-    .sort((a,b)=>a.dueDate>b.dueDate?1:-1);
+    .sort((a,b)=>a.examDate>b.examDate?1:-1);
   const s=subjById(subj);
   const sec=document.getElementById('sec-homework');
 
   sec.innerHTML=`
     ${classTabsHtml(cls,"setHWCls")}
     ${subjPillsHtml(subj,"setHWSubj")}
-
     <div class="section-header">
-      <h2>📋 فروض ${s.label}</h2>
+      <h2>${IC.clip} فروض ${s.label}</h2>
       <span class="count-badge">${items.length}</span>
     </div>
-
     <div id="homework-container" style="display:flex;flex-direction:column;gap:12px;margin-top:8px;">
       ${items.length===0
         ? emptyHtml('لا توجد فروض','أضف فرضاً باستخدام الزر أسفله')
@@ -26,45 +24,46 @@ function renderHomework(){
   `;
 }
 
+// أيقونات SVG مساعدة
+const calendarIcon = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`;
+const clockIcon = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`;
+const fileIcon = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`;
+const downloadIcon = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`;
+
 function renderHomeworkCard(h, s){
-  const overdue = h.dueDate && h.dueDate < today();
+  const overdue = h.examDate && h.examDate < today();
   const statusBadge = h.completed
-    ? '<span class="badge badge-green" style="font-size:11px;margin-right:8px;">✓ أُنجز</span>'
-    : (overdue ? '<span class="badge badge-red" style="font-size:11px;margin-right:8px;">⏳ متأخر</span>' : '');
+    ? `<span class="badge badge-green" style="font-size:11px;margin-left:auto;">${IC.check} أُنجز</span>`
+    : (overdue ? `<span class="badge badge-red" style="font-size:11px;margin-left:auto;">${clockIcon} متأخر</span>` : '');
 
   const fileLink = h.fileName
-    ? `<div class="homework-file" onclick="event.stopPropagation();downloadHWFile('${h.id}')" style="margin-top:10px;display:flex;align-items:center;gap:6px;background:var(--surface-2);padding:8px 12px;border-radius:8px;cursor:pointer;">
-         <span style="font-size:18px;">📎</span>
+    ? `<div class="homework-file" onclick="event.stopPropagation();downloadHWFile('${h.id}')" style="margin-top:10px;display:flex;align-items:center;gap:8px;background:var(--surface-2);padding:8px 12px;border-radius:8px;cursor:pointer;">
+         <span style="display:flex;color:var(--accent);">${fileIcon}</span>
          <span style="font-size:12px;color:var(--accent);font-weight:600;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(h.fileName)}</span>
-         <span style="font-size:16px;color:var(--accent);">↓</span>
+         <span style="display:flex;color:var(--accent);">${downloadIcon}</span>
        </div>`
     : '';
 
   return `
     <div class="homework-card" style="background:var(--surface);border-radius:var(--radius-lg);border:1px solid var(--border);overflow:hidden;box-shadow:var(--shadow);transition:all 0.2s;">
       <div style="display:flex;align-items:stretch;">
-        <!-- أيقونة المادة -->
         <div style="background:${s.bg};color:${s.color};display:flex;align-items:center;justify-content:center;min-width:60px;font-size:24px;">
           ${IC.clip}
         </div>
-        <!-- المحتوى -->
-        <div style="flex:1;padding:14px;">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-            <h3 style="font-size:15px;font-weight:800;color:var(--text);margin:0;">${esc(h.title)}</h3>
-            <div style="display:flex;align-items:center;gap:8px;">
-              ${statusBadge}
-              <button class="btn-icon ${h.completed?'green':''}" style="width:32px;height:32px;border-radius:8px;" onclick="event.stopPropagation();toggleHomeworkComplete('${h.id}')" title="${h.completed?'إلغاء الإنجاز':'تعليم كمنجز'}">
-                ${IC.check}
-              </button>
-              <div class="admin-actions" style="margin:0;">
-                <button class="btn-icon accent" style="width:32px;height:32px;border-radius:8px;" onclick="event.stopPropagation();openHomeworkForm('${h.id}')">${IC.edit}</button>
-                <button class="btn-icon danger" style="width:32px;height:32px;border-radius:8px;" onclick="event.stopPropagation();deleteHomework('${h.id}')">${IC.trash}</button>
-              </div>
+        <div style="flex:1;padding:14px;display:flex;flex-direction:column;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+            <h3 style="font-size:15px;font-weight:800;color:var(--text);margin:0;flex:1;">${esc(h.title)}</h3>
+            ${statusBadge}
+            <button class="btn-icon ${h.completed?'green':''}" style="width:32px;height:32px;border-radius:8px;" onclick="event.stopPropagation();toggleHomeworkComplete('${h.id}')" title="${h.completed?'إلغاء الإنجاز':'تعليم كمنجز'}">
+              ${IC.check}
+            </button>
+            <div class="admin-actions" style="margin:0;">
+              <button class="btn-icon accent" style="width:32px;height:32px;border-radius:8px;" onclick="event.stopPropagation();openHomeworkForm('${h.id}')">${IC.edit}</button>
+              <button class="btn-icon danger" style="width:32px;height:32px;border-radius:8px;" onclick="event.stopPropagation();deleteHomework('${h.id}')">${IC.trash}</button>
             </div>
           </div>
-          <div style="display:flex;flex-wrap:wrap;gap:8px;font-size:12px;color:var(--text-3);margin-bottom:8px;">
-            <span>📅 تسليم: ${fdate(h.dueDate||'')}</span>
-            ${h.date ? `<span>📅 أعطي: ${fdate(h.date)}</span>` : ''}
+          <div style="font-size:12px;color:var(--text-3);margin-bottom:8px;display:flex;align-items:center;gap:4px;">
+            ${calendarIcon} تاريخ الاجتياز: ${fdate(h.examDate||'')}
           </div>
           ${h.content ? `<p style="font-size:13px;color:var(--text-2);line-height:1.5;margin:0 0 8px 0;word-break:break-word;">${esc(h.content.length > 120 ? h.content.slice(0,120)+'…' : h.content)}</p>` : ''}
           ${fileLink}
@@ -74,7 +73,6 @@ function renderHomeworkCard(h, s){
   `;
 }
 
-// ========== الدوال المساعدة (لم تتغير) ==========
 function setHWCls(cls){ filHW.cls=cls; renderHomework(); }
 function setHWSubj(subj){ filHW.subj=subj; renderHomework(); }
 
@@ -91,12 +89,8 @@ function openHomeworkForm(id){
     </div>
     <div class="field-row"><label>عنوان الفرض <span class="req">*</span></label>
       <input class="field" id="hf-title" placeholder="عنوان الفرض" value="${esc(h.title||'')}"></div>
-    <div class="field-grid-2">
-      <div class="field-row"><label>تاريخ الإعطاء</label>
-        <input class="field" type="date" id="hf-date" value="${h.date||today()}"></div>
-      <div class="field-row"><label>تاريخ التسليم</label>
-        <input class="field" type="date" id="hf-due" value="${h.dueDate||''}"></div>
-    </div>
+    <div class="field-row"><label>تاريخ الاجتياز</label>
+      <input class="field" type="date" id="hf-examDate" value="${h.examDate||today()}"></div>
     <div class="field-row"><label>وصف الفرض</label>
       <textarea class="field" id="hf-content" style="min-height:80px" placeholder="تعليمات وتفاصيل الفرض">${esc(h.content||'')}</textarea></div>
     <div class="field-row">
@@ -123,8 +117,7 @@ function saveHomework(){
     cls: document.getElementById('hf-cls').value,
     subj: document.getElementById('hf-subj').value,
     title,
-    date: document.getElementById('hf-date').value,
-    dueDate: document.getElementById('hf-due').value,
+    examDate: document.getElementById('hf-examDate').value,
     content: document.getElementById('hf-content').value.trim(),
     completed: existing ? existing.completed : false
   };
