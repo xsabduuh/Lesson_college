@@ -1,33 +1,68 @@
 /* =================================================================
-   GRADES (النقاط والأداء)
-   هذا الملف يحتوي على إدارة نقاط التلاميذ
+   GRADES (النقاط والأداء) – نسخة متكاملة
 ================================================================= */
+
+// أنواع التقييم (يمكن تخصيصها)
+const GRADE_TYPES = ['فرض', 'اختبار', 'واجب منزلي', 'مشروع', 'شفوي', 'آخر'];
+
+// متغيرات الفلترة
+const filGrade = { cls: '1ere', subj: 'math', filterType: '', filterDate: '' };
+
 function renderGrades() {
   const cls  = filGrade.cls;
   const subj = filGrade.subj;
   const s    = subjById(subj);
   const students  = studentsOf(cls);
-  const allGrades = DATA.grades.filter(g => g.cls === cls && g.subj === subj);
+  
+  // فلترة النقاط
+  let allGrades = DATA.grades.filter(g => g.cls === cls && g.subj === subj);
+  if (filGrade.filterType) {
+    allGrades = allGrades.filter(g => g.type === filGrade.filterType);
+  }
+  if (filGrade.filterDate) {
+    allGrades = allGrades.filter(g => g.date === filGrade.filterDate);
+  }
+
   const validG    = allGrades.filter(g => g.max > 0);
   const classAvg  = validG.length > 0
     ? validG.reduce((a, g) => a + (g.score / g.max), 0) / validG.length * 20
     : null;
+
+  // إحصائيات إضافية
+  const highest = validG.length > 0 ? Math.max(...validG.map(g => g.score)) : null;
+  const lowest = validG.length > 0 ? Math.min(...validG.map(g => g.score)) : null;
 
   const sec = document.getElementById('sec-grades');
   sec.innerHTML = `
     ${classTabsHtml(cls, "setGradeCls")}
     ${subjPillsHtml(subj, "setGradeSubj")}
 
+    <!-- صف أدوات التصفية -->
+    <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+      <select class="field" style="width:auto;padding:6px 10px;font-size:13px;" id="grade-type-filter" onchange="setGradeFilterType(this.value)">
+        <option value="">كل الأنواع</option>
+        ${GRADE_TYPES.map(t => `<option value="${t}" ${filGrade.filterType === t ? 'selected' : ''}>${t}</option>`).join('')}
+      </select>
+      <input type="date" class="field" style="width:auto;padding:6px 10px;font-size:13px;" id="grade-date-filter" value="${filGrade.filterDate}" onchange="setGradeFilterDate(this.value)">
+      <button class="btn btn-sm btn-outline" onclick="clearGradeFilters()">مسح التصفية</button>
+    </div>
+
     <!-- إحصائيات سريعة -->
-    <div class="stat-grid" style="margin-bottom:12px">
+    <div class="stat-grid stat-grid-3" style="margin-bottom:12px">
       <div class="stat-card">
         <div class="s-label">النقاط المسجلة</div>
         <div class="s-val">${allGrades.length}</div>
       </div>
       <div class="stat-card">
-        <div class="s-label">معدل الفصل</div>
+        <div class="s-label">معدل القسم</div>
         <div class="s-val" style="color:${classAvg!=null?(classAvg>=10?'var(--green)':'var(--danger)'):'var(--text-3)'}">
           ${classAvg != null ? classAvg.toFixed(1) + '/20' : '—'}
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="s-label">أعلى / أدنى نقطة</div>
+        <div class="s-val" style="font-size:16px;">
+          ${highest != null ? highest : '—'} / ${lowest != null ? lowest : '—'}
         </div>
       </div>
     </div>
@@ -36,13 +71,16 @@ function renderGrades() {
     ${students.length === 0
       ? `<div class="panel">${emptyHtml('لا يوجد تلاميذ', 'أضف تلاميذ أولاً في قسم التلاميذ')}</div>`
       : `<div class="panel" style="margin-bottom:12px">
-          <div class="panel-title">أداء التلاميذ — ${s.label}</div>
+          <div class="panel-title" style="display:flex;justify-content:space-between;align-items:center;">
+            <span>أداء التلاميذ — ${s.label}</span>
+            <span style="font-size:11px;color:var(--text-3);">${students.length} تلميذ</span>
+          </div>
           ${students.map(st => {
             const sg  = allGrades.filter(g => g.sid === st.id).filter(g => g.max > 0);
             const avg = sg.length > 0
               ? sg.reduce((a, g) => a + (g.score / g.max), 0) / sg.length * 20
               : null;
-            const cnt = DATA.grades.filter(g => g.sid === st.id && g.cls === cls && g.subj === subj).length;
+            const cnt = sg.length;
             return `<div class="card-item"
               onclick="navigate('student-detail','${st.id}');setTimeout(()=>setDetailTab('grades','${st.id}'),60)">
               <div class="card-item-icon"
@@ -51,7 +89,7 @@ function renderGrades() {
               </div>
               <div class="card-item-body">
                 <div class="card-item-title">${esc(st.name)}</div>
-                <div class="card-item-sub">${cnt} نقطة مسجلة</div>
+                <div class="card-item-sub">${cnt} نقطة</div>
               </div>
               <div style="text-align:center;min-width:52px">
                 <div style="font-size:20px;font-weight:800;font-family:var(--mono);
@@ -68,7 +106,10 @@ function renderGrades() {
     <!-- آخر النقاط المسجلة -->
     ${allGrades.length > 0 ? `
     <div class="panel">
-      <div class="panel-title">آخر النقاط المسجلة</div>
+      <div class="panel-title" style="display:flex;justify-content:space-between;align-items:center;">
+        <span>آخر النقاط المسجلة</span>
+        <button class="btn btn-sm btn-danger" style="font-size:11px;" onclick="deleteAllGrades('${cls}','${subj}')">حذف الكل</button>
+      </div>
       ${allGrades
         .slice()
         .sort((a, b) => (b.date || '') > (a.date || '') ? 1 : -1)
@@ -84,17 +125,35 @@ function renderGrades() {
             <div style="flex:1;min-width:0">
               <div style="font-size:13px;font-weight:600">${esc(g.title || g.type || 'نقطة')}</div>
               <div style="font-size:11px;color:var(--text-3)">
-                ${esc(st ? st.name : '—')} · ${fdate(g.date)}
+                ${esc(st ? st.name : '—')} · ${fdate(g.date)} · ${g.type || ''}
               </div>
             </div>
-            ${adminBtns(`openGradeForm('${g.id}')`, `deleteGrade('${g.id}')`)}
+            <div class="admin-actions">
+              <button class="btn-icon accent" onclick="openGradeForm('${g.id}')">${IC.edit}</button>
+              <button class="btn-icon danger"  onclick="deleteGrade('${g.id}')">${IC.trash}</button>
+            </div>
           </div>`;
         }).join('')}
     </div>` : ''}
   `;
 }
 
-function setGradeCls(cls)  { filGrade.cls  = cls;  renderGrades(); }
+// فلترة
+function setGradeFilterType(type) {
+  filGrade.filterType = type;
+  renderGrades();
+}
+function setGradeFilterDate(date) {
+  filGrade.filterDate = date;
+  renderGrades();
+}
+function clearGradeFilters() {
+  filGrade.filterType = '';
+  filGrade.filterDate = '';
+  renderGrades();
+}
+
+function setGradeCls(cls)  { filGrade.cls = cls; renderGrades(); }
 function setGradeSubj(subj){ filGrade.subj = subj; renderGrades(); }
 
 /* -----------------------------------------------------------------
@@ -151,7 +210,6 @@ function openGradeForm(id) {
   ]);
 }
 
-/* تحديث قائمة التلاميذ عند تغيير القسم */
 function reloadGradeStudents(cls) {
   const sel = document.getElementById('gf-sid');
   if (!sel) return;
@@ -196,4 +254,11 @@ function deleteGrade(id) {
   if (!confirm('سيتم حذف هذه النقطة نهائياً. هل تؤكد؟')) return;
   DATA.grades = DATA.grades.filter(g => g.id !== id);
   save(); toast('تم الحذف'); renderGrades();
+}
+
+// حذف جميع نقاط مادة/قسم معين
+function deleteAllGrades(cls, subj) {
+  if (!confirm(`حذف جميع نقاط ${subjById(subj).label} لقسم ${clsById(cls).label}؟ لا يمكن التراجع.`)) return;
+  DATA.grades = DATA.grades.filter(g => !(g.cls === cls && g.subj === subj));
+  save(); toast('تم حذف جميع النقاط', 'success'); renderGrades();
 }
