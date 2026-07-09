@@ -9,6 +9,11 @@ function renderStudentDetail(id){
   if(!s){navigate('students');return;}
   document.getElementById('topbar-title').textContent=s.name;
   const sec=document.getElementById('sec-student-detail');
+  // إضافة فحص لإنشاء العنصر إذا كان مفقوداً (حل سريع)
+  if(!sec){
+    alert('العنصر sec-student-detail غير موجود! تأكد من إضافته في HTML.');
+    return;
+  }
   sec.innerHTML=`
     <div class="panel" style="padding:16px">
       <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px">
