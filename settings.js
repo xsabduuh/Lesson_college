@@ -35,7 +35,8 @@ function renderSettings(){
           <div class="setting-label">وضع الإدارة</div>
           <div class="setting-sub">إظهار أزرار التعديل والحذف</div>
         </div>
-        <div class="toggle ${s.adminMode?'on':''}" onclick="toggleAdminMode()"></div>
+        <!-- تم إضافة id="admin-toggle" هنا للتحديث المباشر -->
+        <div class="toggle ${s.adminMode?'on':''}" id="admin-toggle" onclick="toggleAdminMode()"></div>
       </div>
     </div>
 
