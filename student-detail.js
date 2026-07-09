@@ -56,7 +56,7 @@ function renderDetailTab(id){
       <div class="panel">
         ${s.phone?`<div class="data-row"><span class="key">هاتف ولي الأمر</span><span class="val" style="font-family:var(--mono)">${esc(s.phone)}</span></div>`:''}
         <div class="data-row"><span class="key">تاريخ التسجيل</span><span class="val">${fdate(s.regDate)}</span></div>
-        <div class="data-row"><span class="key">الأجر الشهري</span><span class="val">${s.fee||DATA.settings.defaultFee||200} د.م</span></div>
+        <div class="data-row"><span class="key">الأجر الشهري</span><span class="val">${s.fee||DATA.settings.defaultFee||150} د.م</span></div>
         <div class="data-row"><span class="key">القسم</span><span class="val">${clsById(s.cls).label}</span></div>
       </div>`;
   } else if(detailTab==='attendance'){
@@ -135,7 +135,7 @@ function renderDetailTab(id){
       </div>`;
     setTimeout(()=>drawStudentGradeChart(id,grades),0);
   } else if(detailTab==='payments'){
-    const fee=s.fee||DATA.settings.defaultFee||200;
+    const fee=s.fee||DATA.settings.defaultFee||150;
     const months=getYearMonths();
     const pays=DATA.payments.filter(p=>p.sid===id);
     const paidTotal=pays.reduce((a,p)=>a+Number(p.paid||0),0);
