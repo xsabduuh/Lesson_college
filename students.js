@@ -61,7 +61,7 @@ function openStudentForm(id){
       <div class="field-row"><label>تاريخ التسجيل</label>
         <input class="field" type="date" id="sf-regdate" value="${s.regDate||today()}"></div>
       <div class="field-row"><label>الأجر الشهري (د.م)</label>
-        <input class="field" type="number" id="sf-fee" value="${s.fee||DATA.settings.defaultFee||200}"></div>
+        <input class="field" type="number" id="sf-fee" value="${s.fee||DATA.settings.defaultFee||150}"></div>
     </div>
     <div class="field-row"><label>ملاحظات</label>
       <textarea class="field" id="sf-notes">${esc(s.notes||'')}</textarea></div>
