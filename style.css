@@ -361,6 +361,39 @@ body.dark{
 .field:focus{border-color:var(--accent);background:var(--surface)}
 textarea.field{resize:vertical;min-height:80px;line-height:1.5}
 select.field{-webkit-appearance:none;appearance:none}
+
+/* ===== DATE INPUT FIX (Safari/iOS) =====
+   المشكلة: input[type=date] بدون ستايل صريح يترك المتصفح
+   يرسم الأيقونة/الخلفية بشكل افتراضي غير مرئي إلى أن يحدث
+   إعادة رسم (repaint) بعد أول لمسة. تحديد color-scheme
+   ولون الأيقونة صراحة يجبر المتصفح يرسمها من أول تحميل. */
+input[type="date"]{
+  -webkit-appearance:none;
+  appearance:none;
+  color-scheme:light;
+  background:var(--surface-2);
+  color:var(--text);
+  min-height:44px;
+}
+body.dark input[type="date"]{
+  color-scheme:dark;
+}
+input[type="date"]::-webkit-date-and-time-value{
+  text-align:right;
+}
+input[type="date"]::-webkit-calendar-picker-indicator{
+  background:transparent;
+  color:var(--text-3);
+  opacity:1;
+  cursor:pointer;
+  filter:none;
+  padding:4px;
+  margin-inline-start:4px;
+}
+body.dark input[type="date"]::-webkit-calendar-picker-indicator{
+  filter:invert(1) brightness(1.4);
+}
+
 .req{color:var(--danger)}
 .field-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 
