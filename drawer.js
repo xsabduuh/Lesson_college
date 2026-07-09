@@ -11,6 +11,7 @@ function closeDrawer(){
   document.getElementById('drawer').classList.remove('open');
   document.getElementById('drawer-overlay').classList.remove('show');
   document.body.style.overflow='';
+  // بفضل التعديل على CSS، سيختفي الـ overlay بتلاشي ناعم تلقائياً
 }
 function renderDrawer(){
   const items=[
