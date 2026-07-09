@@ -161,32 +161,34 @@ body.dark{
 }
 .fab:active{transform:scale(.93);box-shadow:0 2px 8px rgba(59,79,192,.25)}
 
-/* ===== DRAWER (تم تعديل السرعة والمنحنى) ===== */
+/* ===== DRAWER (نسخة محسّنة: حركة سلسة عبر transform) ===== */
 .drawer-overlay{
   position:fixed;inset:0;z-index:60;
   background:rgba(10,15,35,.55);
   opacity:0;
   pointer-events:none;
   backdrop-filter:blur(3px);
-  /* الآن: تلاشي ناعم يستغرق 0.45 ثانية */
-  transition:opacity 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+  transition:opacity .35s ease;
 }
 .drawer-overlay.show{
   opacity:1;
   pointer-events:auto;
 }
 .drawer{
-  position:fixed;top:0;right:-100%;bottom:0;
+  position:fixed;top:0;right:0;bottom:0;
   width:var(--drawer-w);max-width:85vw;
   background:var(--surface);
   z-index:65;
-  /* الآن: انزلاق جانبي أبطأ وأكثر سلاسة */
-  transition:right 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+  transform:translateX(100%);
+  transition:transform .35s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change:transform;
   display:flex;flex-direction:column;
   box-shadow:-4px 0 24px rgba(0,0,0,.18);
   overflow-y:auto;
 }
-.drawer.open{right:0}
+.drawer.open{
+  transform:translateX(0);
+}
 .drawer-head{
   padding:calc(env(safe-area-inset-top) + 16px) 20px 16px;
   background:var(--accent);color:#fff;
