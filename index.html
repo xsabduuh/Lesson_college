@@ -141,6 +141,7 @@
 <script>
   function init(){
     applySettings();
+    if (!filAtt.date) filAtt.date = today();
     document.getElementById('today-badge').textContent=today().slice(5).replace('-','/');
     updateBadges();
     const last=localStorage.getItem('lastNav')||'dashboard';
@@ -148,17 +149,7 @@
     navHistory=[];
     navigate(k||'dashboard',e||undefined);
   }
-
-  try {
-    init();
-  } catch (e) {
-    document.body.innerHTML =
-      "<pre style='padding:20px;color:red;white-space:pre-wrap;background:#fff;'>" +
-      e.name + "\n\n" +
-      e.message + "\n\n" +
-      e.stack +
-      "</pre>";
-  }
+  init();
 </script>
 </body>
 </html>
