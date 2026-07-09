@@ -46,7 +46,7 @@ function defaultData(){
     homework:[],
     glossary:[],
     settings:{
-      defaultFee:200,
+      defaultFee:150,
       darkMode:false,
       accentColor:'#3B4FC0',
       adminMode:false
