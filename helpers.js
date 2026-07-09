@@ -1,6 +1,44 @@
 /* =================================================================
-   HTML HELPERS
+   HELPERS – دوال المساعدة العامة
 ================================================================= */
+
+// ========== التاريخ والوقت (بتوقيت المغرب) ==========
+
+/**
+ * ترجع تاريخ اليوم بصيغة YYYY-MM-DD حسب توقيت المغرب
+ */
+function today() {
+  const now = new Date();
+  const formatter = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Africa/Casablanca',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  });
+  return formatter.format(now);
+}
+
+/**
+ * تنسيق تاريخ من صيغة YYYY-MM-DD إلى نص عربي (مثال: 09 يوليوز 2026)
+ * إذا كانت fdate موجودة في data.js، يمكنك حذف هذا التعريف والاكتفاء بتعريف data.js الأصلي
+ */
+function fdate(dateStr) {
+  if (!dateStr) return '';
+  const [y, m, d] = dateStr.split('-');
+  const months = ['يناير','فبراير','مارس','أبريل','ماي','يونيو',
+                  'يوليوز','غشت','شتنبر','أكتوبر','نونبر','دجنبر'];
+  const monthName = months[parseInt(m, 10) - 1] || '';
+  return `${parseInt(d, 10)} ${monthName} ${y}`;
+}
+
+/**
+ * ترجع الشهر الحالي بصيغة YYYY-MM
+ */
+function currentMonth() {
+  return today().substring(0, 7);
+}
+
+// ========== HTML helpers (الموجودة أصلاً في ملفك) ==========
 function classTabsHtml(active,fn){
   return `<div class="class-tabs">
     ${CLASSES.map(c=>`<button class="class-tab ${active===c.id?'act-'+c.id:''}" onclick="${fn}('${c.id}')">${c.label}</button>`).join('')}
