@@ -1,8 +1,6 @@
 /* =================================================================
    STUDENTS
 ================================================================= */
-// يمكن نقل هذه الدالة إلى data.js
-function studentsOf(cls){ return DATA.students.filter(s=>s.cls===cls); }
 
 function renderStudents(){
   const cls=filStud.cls;
