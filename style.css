@@ -364,6 +364,13 @@ select.field{-webkit-appearance:none;appearance:none}
 .req{color:var(--danger)}
 .field-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 
+/* ===== منع الزوم التلقائي على الهواتف ===== */
+@media screen and (max-width: 767px) {
+  input, textarea, select {
+    font-size: 16px !important; /* يمنع Safari/Chrome من التكبير */
+  }
+}
+
 /* ===== TABS ===== */
 .tabs-scroll{
   display:flex;gap:0;overflow-x:auto;
