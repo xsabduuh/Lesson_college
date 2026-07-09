@@ -26,13 +26,13 @@ function renderHomework(){
                 <div class="card-item-title">${esc(h.title)} ${h.completed?'<span class="badge badge-green" style="font-size:10px;margin-right:6px">✓ تم</span>':''}</div>
                 <div class="card-item-sub">تسليم: ${fdate(h.dueDate||'')} ${overdue?'<span class="badge badge-red" style="font-size:10px">متأخر</span>':''}</div>
                 ${h.content?`<div style="font-size:12px;color:var(--text-3);margin-top:3px">${esc(h.content.slice(0,80))}${h.content.length>80?'…':''}</div>`:''}
-                ${h.fileName?`<div style="font-size:11px;margin-top:4px"><span style="color:var(--accent);cursor:pointer" onclick="downloadHWFile('${h.id}')">📎 ${esc(h.fileName)}</span></div>`:''}
+                ${h.fileName?`<div style="font-size:11px;margin-top:4px"><span style="color:var(--accent);cursor:pointer" onclick="event.stopPropagation();downloadHWFile('${h.id}')">📎 ${esc(h.fileName)}</span></div>`:''}
               </div>
               <div class="card-item-actions" style="display:flex;gap:6px;align-items:center">
-                <button class="btn-icon ${h.completed?'green':'gray'}" onclick="toggleHomeworkComplete('${h.id}')" title="${h.completed?'إلغاء الإنجاز':'تعليم كمنجز'}">${IC.check}</button>
+                <button class="btn-icon ${h.completed?'green':''}" onclick="event.stopPropagation();toggleHomeworkComplete('${h.id}')" title="${h.completed?'إلغاء الإنجاز':'تعليم كمنجز'}">${IC.check}</button>
                 <div class="admin-actions">
-                  <button class="btn-icon accent" onclick="openHomeworkForm('${h.id}')">${IC.edit}</button>
-                  <button class="btn-icon danger"  onclick="deleteHomework('${h.id}')">${IC.trash}</button>
+                  <button class="btn-icon accent" onclick="event.stopPropagation();openHomeworkForm('${h.id}')">${IC.edit}</button>
+                  <button class="btn-icon danger"  onclick="event.stopPropagation();deleteHomework('${h.id}')">${IC.trash}</button>
                 </div>
               </div>
             </div>`;}).join('')}
@@ -70,7 +70,6 @@ function openHomeworkForm(id){
       ${id && h.fileName ? `<div style="font-size:11px;color:var(--text-3);margin-top:4px">الملف الحالي: ${esc(h.fileName)}</div>` : ''}
     </div>
     <input type="hidden" id="hf-id" value="${id||''}">
-    <input type="hidden" id="hf-completed" value="${h.completed?1:0}">
   `,[
     {label:'إلغاء',cls:'btn-outline',fn:'closeSheet()'},
     {label:'حفظ',cls:'btn-accent',fn:'saveHomework()'}
@@ -92,7 +91,7 @@ function saveHomework(){
     date: document.getElementById('hf-date').value,
     dueDate: document.getElementById('hf-due').value,
     content: document.getElementById('hf-content').value.trim(),
-    completed: document.getElementById('hf-completed').value === '1'
+    completed: existing ? existing.completed : false
   };
 
   // الاحتفاظ بالملف القديم إذا لم يُرفع ملف جديد
@@ -142,13 +141,38 @@ function toggleHomeworkComplete(id){
   renderHomework();
 }
 
-// تحميل الملف المرتبط بالفرض
-function downloadHWFile(id){
-  const hw = DATA.homework.find(h=>h.id===id);
+// فتح أو تحميل الملف المرفق
+function downloadHWFile(id) {
+  const hw = DATA.homework.find(h => h.id === id);
   if (!hw || !hw.fileData) return;
+
+  // إذا كان الملف صورة، نفتحه في نافذة جديدة للمعاينة
+  if (hw.fileType && hw.fileType.startsWith('image/')) {
+    const win = window.open('', '_blank');
+    if (win) {
+      win.document.write(`<img src="${hw.fileData}" style="max-width:100%;height:auto;display:block;margin:auto;">`);
+      win.document.title = hw.fileName || 'صورة الفرض';
+    } else {
+      // في حال منع المتصفح النافذة المنبثقة، نلجأ للتحميل
+      downloadFallback(hw);
+    }
+  } else {
+    // لغير الصور (مثلاً PDF) نحمّل الملف
+    downloadFallback(hw);
+  }
+}
+
+// دالة مساعدة للتحميل القسري
+function downloadFallback(hw) {
   const a = document.createElement('a');
   a.href = hw.fileData;
-  a.download = hw.fileName || 'homework_file';
+  // التأكد من وجود امتداد مناسب في اسم الملف
+  let fileName = hw.fileName || 'homework_file';
+  if (!fileName.includes('.')) {
+    const ext = hw.fileType ? hw.fileType.split('/').pop() : 'bin';
+    fileName += '.' + ext;
+  }
+  a.download = fileName;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
