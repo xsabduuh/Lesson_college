@@ -1,700 +1,185 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#3B4FC0" media="(prefers-color-scheme: light)">
-  <meta name="theme-color" content="#131729"  media="(prefers-color-scheme: dark)">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="مساعد الأستاذ">
-  <meta name="description" content="تطبيق إدارة الفصل — حضور، تخطيط، أداء، نقط">
-  <title>مساعد الأستاذ</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="manifest" href="manifest.json">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="مساعد الأستاذ">
+<meta name="description" content="نظام إدارة الفصل الدراسي — حضور، تخطيط، نقط، أداء">
+<meta name="theme-color" content="#3B4FC0" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#131729"  media="(prefers-color-scheme: dark)">
+<title>مساعد الأستاذ</title>
+<link rel="stylesheet" href="style.css">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
 
-  <!-- أيقونات iOS -->
-  <link rel="apple-touch-icon" href="icons/icon-192.png">
-
-  <!-- Inline critical: منع وميض الوضع الليلي -->
-  <script>
-    (function(){
-      try {
-        var dark = localStorage.getItem('theme') === 'dark' ||
-          (!localStorage.getItem('theme') &&
-           window.matchMedia('(prefers-color-scheme: dark)').matches);
-        if (dark) document.documentElement.classList.add('dark-init');
-      } catch(e){}
-    })();
-  </script>
-  <style>
-    /* منع وميض قبل تحميل JS */
-    html.dark-init body { background: #131729; color: #E8EAF6; }
-  </style>
+<!-- منع وميض الثيم قبل تحميل JS -->
+<script>
+(function(){
+  try{
+    var t=localStorage.getItem('theme');
+    if(t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme:dark)').matches))
+      document.documentElement.setAttribute('data-theme','dark');
+  }catch(e){}
+})();
+</script>
 </head>
-
 <body>
+
+<!-- ===== DRAWER ===== -->
+<div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawer()"></div>
+<nav class="drawer" id="drawer" role="navigation" aria-label="القائمة الجانبية">
+  <div class="drawer-head">
+    <button class="drawer-close" onclick="closeDrawer()" aria-label="إغلاق القائمة">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <h2>مساعد الأستاذ</h2>
+    <p>نظام إدارة مركز الدعم</p>
+  </div>
+  <div id="drawer-content"></div>
+</nav>
+
 <div id="app">
-
-  <!-- ═══════════════════════════════════════════
-       TOPBAR — الشريط العلوي الثابت
-  ════════════════════════════════════════════ -->
+  <!-- ===== TOP BAR ===== -->
   <header class="topbar" id="topbar">
-
-    <!-- زر القائمة الجانبية (يمين = بداية RTL) -->
-    <button class="menu-btn" id="btn-menu"
-            onclick="openDrawer()" aria-label="القائمة الرئيسية">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-           stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-        <line x1="3" y1="6"  x2="21" y2="6"/>
-        <line x1="3" y1="12" x2="21" y2="12"/>
-        <line x1="3" y1="18" x2="21" y2="18"/>
+    <button class="menu-btn" onclick="openDrawer()" aria-label="فتح القائمة">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+        <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
       </svg>
     </button>
-
-    <!-- زر الرجوع (مخفي افتراضياً) -->
-    <button class="back-btn" id="btn-back"
-            onclick="goBack()" style="display:none" aria-label="رجوع">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-           stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-        <polyline points="9 18 15 12 9 6"/>
-      </svg>
-    </button>
-
-    <!-- العنوان -->
-    <h1 class="topbar-title" id="topbar-title">مساعد الأستاذ</h1>
-
-    <!-- الجهة اليسرى -->
-    <div class="topbar-right">
-      <span class="admin-badge" id="admin-badge" style="display:none">إدارة</span>
-
-      <!-- زر البحث -->
-      <button class="search-btn" id="btn-search"
-              onclick="openSearch()" aria-label="بحث">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
-          <circle cx="11" cy="11" r="8"/>
-          <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-        </svg>
+    <div class="topbar-title" id="topbar-title">مساعد الأستاذ</div>
+    <div class="topbar-right" id="topbar-right">
+      <button class="search-btn" onclick="navigate('search')" aria-label="بحث" title="بحث">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       </button>
-
-      <!-- تبديل الثيم -->
-      <button class="btn-icon" id="btn-theme"
-              onclick="toggleTheme()" aria-label="تبديل الوضع">
-        <!-- sun icon (يظهر في الداكن) -->
-        <svg id="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="2" stroke-linecap="round"
-             style="display:none">
-          <circle cx="12" cy="12" r="5"/>
-          <line x1="12" y1="1"  x2="12" y2="3"/>
-          <line x1="12" y1="21" x2="12" y2="23"/>
-          <line x1="4.22" y1="4.22"   x2="5.64" y2="5.64"/>
-          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-          <line x1="1"  y1="12" x2="3"  y2="12"/>
-          <line x1="21" y1="12" x2="23" y2="12"/>
-          <line x1="4.22" y1="19.78"  x2="5.64" y2="18.36"/>
-          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-        </svg>
-        <!-- moon icon (يظهر في الفاتح) -->
-        <svg id="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="2" stroke-linecap="round">
-          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-        </svg>
-      </button>
+      <div id="today-badge" style="font-size:11px;font-weight:700;color:var(--text-3);font-family:var(--mono)" aria-label="تاريخ اليوم"></div>
     </div>
   </header>
 
-  <!-- ═══════════════════════════════════════════
-       PAGE CONTENT — محتوى الصفحات
-  ════════════════════════════════════════════ -->
-  <main id="page-content">
+  <!-- ===== PAGE CONTENT ===== -->
+  <div id="page-content">
+    <div class="section active" id="sec-dashboard"></div>
+    <div class="section" id="sec-students"></div>
+    <div class="section" id="sec-lessons"></div>
+    <div class="section" id="sec-exercises"></div>
+    <div class="section" id="sec-homework"></div>
+    <div class="section" id="sec-glossary"></div>
+    <div class="section" id="sec-sessions"></div>
+    <div class="section" id="sec-attendance"></div>
+    <div class="section" id="sec-grades"></div>
+    <div class="section" id="sec-payments"></div>
+    <div class="section" id="sec-reports"></div>
+    <div class="section" id="sec-settings"></div>
+    <div class="section" id="sec-student-detail"></div>
+    <div class="section" id="sec-search"></div>
+    <div class="section" id="sec-data"></div>
+  </div>
 
-    <!-- ── لوحة القيادة ── -->
-    <section class="section active" id="sec-dashboard"
-             data-title="مساعد الأستاذ" data-fab="none">
-    </section>
-
-    <!-- ── التلاميذ ── -->
-    <section class="section" id="sec-students"
-             data-title="التلاميذ" data-fab="addStudent">
-    </section>
-
-    <!-- ── الحضور والغياب ── -->
-    <section class="section" id="sec-attendance"
-             data-title="الحضور والغياب" data-fab="none">
-    </section>
-
-    <!-- ── التخطيط الزمني ── -->
-    <section class="section" id="sec-sessions"
-             data-title="التخطيط الزمني" data-fab="openSessionForm">
-    </section>
-
-    <!-- ── الدروس ── -->
-    <section class="section" id="sec-lessons"
-             data-title="الدروس" data-fab="openLessonForm">
-    </section>
-
-    <!-- ── التمارين ── -->
-    <section class="section" id="sec-exercises"
-             data-title="التمارين" data-fab="openExerciseForm">
-    </section>
-
-    <!-- ── الفروض ── -->
-    <section class="section" id="sec-homework"
-             data-title="الفروض" data-fab="openHomeworkForm">
-    </section>
-
-    <!-- ── النقط والتقييمات ── -->
-    <section class="section" id="sec-grades"
-             data-title="النقط والتقييمات" data-fab="openGradeForm">
-    </section>
-
-    <!-- ── الدفع الشهري ── -->
-    <section class="section" id="sec-payments"
-             data-title="الأداء الشهري" data-fab="openPaymentForm">
-    </section>
-
-    <!-- ── المصطلحات ── -->
-    <section class="section" id="sec-glossary"
-             data-title="المصطلحات" data-fab="openGlossaryForm">
-    </section>
-
-    <!-- ── التقارير ── -->
-    <section class="section" id="sec-reports"
-             data-title="التقارير" data-fab="none">
-    </section>
-
-    <!-- ── الإعدادات ── -->
-    <section class="section" id="sec-settings"
-             data-title="الإعدادات" data-fab="none">
-    </section>
-
-  </main>
-
-  <!-- ═══════════════════════════════════════════
-       BOTTOM NAV — شريط التنقل السفلي
-  ════════════════════════════════════════════ -->
-  <nav class="bottom-nav" id="bottom-nav" aria-label="التنقل الرئيسي">
-
-    <!-- الرئيسية -->
-    <button class="nav-btn active" id="nav-dashboard"
-            onclick="navigate('dashboard')" aria-label="الرئيسية">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
-           stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-        <polyline points="9 22 9 12 15 12 15 22"/>
+  <!-- ===== BOTTOM NAV ===== -->
+  <nav class="bottom-nav" aria-label="التنقل الرئيسي">
+    <button class="nav-btn active" data-nav="dashboard" onclick="navigate('dashboard')" aria-label="الرئيسية">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/>
+        <rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>
       </svg>
-      <span>الرئيسية</span>
+      الرئيسية
     </button>
-
-    <!-- الحضور -->
-    <button class="nav-btn" id="nav-attendance"
-            onclick="navigate('attendance')" aria-label="الحضور">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
-           stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <button class="nav-btn" data-nav="students" onclick="navigate('students')" aria-label="التلاميذ">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+        <circle cx="9" cy="7" r="4"/>
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+      </svg>
+      التلاميذ
+      <span class="nav-dot" id="nd-students"></span>
+    </button>
+    <button class="nav-btn" data-nav="attendance" onclick="navigate('attendance')" aria-label="الحضور">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M9 11l3 3L22 4"/>
         <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
       </svg>
-      <span>الحضور</span>
-      <span class="nav-dot" id="nav-dot-attendance"></span>
+      الحضور
     </button>
-
-    <!-- التخطيط -->
-    <button class="nav-btn" id="nav-sessions"
-            onclick="navigate('sessions')" aria-label="التخطيط">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
-           stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-        <line x1="16" y1="2"  x2="16" y2="6"/>
-        <line x1="8"  y1="2"  x2="8"  y2="6"/>
-        <line x1="3"  y1="10" x2="21" y2="10"/>
+    <button class="nav-btn" data-nav="grades" onclick="navigate('grades')" aria-label="النقاط">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
       </svg>
-      <span>التخطيط</span>
+      النقاط
     </button>
-
-    <!-- الأداء المالي -->
-    <button class="nav-btn" id="nav-payments"
-            onclick="navigate('payments')" aria-label="الأداء الشهري">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
-           stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
-        <line x1="1" y1="10" x2="23" y2="10"/>
+    <button class="nav-btn" data-nav="settings" onclick="navigate('settings')" aria-label="الإعدادات">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
       </svg>
-      <span>الأداء</span>
+      الإعدادات
     </button>
-
-    <!-- المزيد -->
-    <button class="nav-btn" id="nav-more"
-            onclick="openDrawer()" aria-label="المزيد">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
-           stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="5"  r="1" fill="currentColor"/>
-        <circle cx="12" cy="12" r="1" fill="currentColor"/>
-        <circle cx="12" cy="19" r="1" fill="currentColor"/>
-      </svg>
-      <span>المزيد</span>
-    </button>
-
   </nav>
 
-</div><!-- /#app -->
-
-<!-- ═══════════════════════════════════════════
-     FAB — زر الإضافة العائم
-════════════════════════════════════════════ -->
-<button class="fab" id="fab" onclick="fabAction()" aria-label="إضافة" style="display:none">
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-       stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-    <line x1="12" y1="5" x2="12" y2="19"/>
-    <line x1="5"  y1="12" x2="19" y2="12"/>
-  </svg>
-</button>
-
-<!-- ═══════════════════════════════════════════
-     DRAWER — القائمة الجانبية
-════════════════════════════════════════════ -->
-<div class="drawer-overlay" id="drawer-overlay"
-     onclick="closeDrawer()" aria-hidden="true"></div>
-
-<nav class="drawer" id="drawer" aria-label="القائمة الجانبية">
-
-  <!-- رأس الدراور -->
-  <div class="drawer-head">
-    <button class="drawer-close" onclick="closeDrawer()" aria-label="إغلاق">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-           stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-        <line x1="18" y1="6"  x2="6"  y2="18"/>
-        <line x1="6"  y1="6"  x2="18" y2="18"/>
-      </svg>
-    </button>
-    <div>
-      <h2>مساعد الأستاذ</h2>
-      <p>نظام إدارة الفصل الدراسي</p>
-    </div>
-  </div>
-
-  <!-- ── الصفحات الرئيسية ── -->
-  <div class="drawer-section">
-    <div class="drawer-label">الصفحات الرئيسية</div>
-
-    <div class="drawer-item" id="di-dashboard" onclick="navigate('dashboard');closeDrawer()">
-      <div class="di-icon" style="background:var(--accent-light);color:var(--accent)">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-          <polyline points="9 22 9 12 15 12 15 22"/>
-        </svg>
-      </div>
-      <span>الرئيسية</span>
-    </div>
-
-    <div class="drawer-item" id="di-students" onclick="navigate('students');closeDrawer()">
-      <div class="di-icon" style="background:var(--accent-light);color:var(--accent)">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-          <circle cx="9" cy="7" r="4"/>
-          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-        </svg>
-      </div>
-      <span>التلاميذ</span>
-      <span class="di-count" id="di-count-students">0</span>
-    </div>
-
-    <div class="drawer-item" id="di-attendance" onclick="navigate('attendance');closeDrawer()">
-      <div class="di-icon" style="background:var(--green-light);color:var(--green)">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M9 11l3 3L22 4"/>
-          <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
-        </svg>
-      </div>
-      <span>الحضور والغياب</span>
-    </div>
-
-    <div class="drawer-item" id="di-sessions" onclick="navigate('sessions');closeDrawer()">
-      <div class="di-icon" style="background:var(--amber-light);color:var(--amber)">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-          <line x1="16" y1="2"  x2="16" y2="6"/>
-          <line x1="8"  y1="2"  x2="8"  y2="6"/>
-          <line x1="3"  y1="10" x2="21" y2="10"/>
-        </svg>
-      </div>
-      <span>التخطيط الزمني</span>
-      <span class="di-count" id="di-count-sessions">0</span>
-    </div>
-
-    <div class="drawer-item" id="di-payments" onclick="navigate('payments');closeDrawer()">
-      <div class="di-icon" style="background:var(--green-light);color:var(--green)">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
-          <line x1="1" y1="10" x2="23" y2="10"/>
-        </svg>
-      </div>
-      <span>الأداء الشهري</span>
-    </div>
-  </div>
-
-  <div class="drawer-divider"></div>
-
-  <!-- ── المحتوى التعليمي ── -->
-  <div class="drawer-section">
-    <div class="drawer-label">المحتوى التعليمي</div>
-
-    <div class="drawer-item" id="di-lessons" onclick="navigate('lessons');closeDrawer()">
-      <div class="di-icon" style="background:var(--purple-light);color:var(--purple)">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
-          <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
-        </svg>
-      </div>
-      <span>الدروس</span>
-      <span class="di-count" id="di-count-lessons">0</span>
-    </div>
-
-    <div class="drawer-item" id="di-exercises" onclick="navigate('exercises');closeDrawer()">
-      <div class="di-icon" style="background:var(--accent-light);color:var(--accent)">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="9 11 12 14 22 4"/>
-          <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
-        </svg>
-      </div>
-      <span>التمارين</span>
-      <span class="di-count" id="di-count-exercises">0</span>
-    </div>
-
-    <div class="drawer-item" id="di-homework" onclick="navigate('homework');closeDrawer()">
-      <div class="di-icon" style="background:var(--danger-light);color:var(--danger)">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-          <polyline points="14 2 14 8 20 8"/>
-          <line x1="16" y1="13" x2="8" y2="13"/>
-          <line x1="16" y1="17" x2="8" y2="17"/>
-        </svg>
-      </div>
-      <span>الفروض</span>
-      <span class="di-count" id="di-count-homework">0</span>
-    </div>
-
-    <div class="drawer-item" id="di-grades" onclick="navigate('grades');closeDrawer()">
-      <div class="di-icon" style="background:var(--amber-light);color:var(--amber)">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-        </svg>
-      </div>
-      <span>النقط والتقييمات</span>
-    </div>
-
-    <div class="drawer-item" id="di-glossary" onclick="navigate('glossary');closeDrawer()">
-      <div class="di-icon" style="background:var(--green-light);color:var(--green)">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
-          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
-        </svg>
-      </div>
-      <span>المصطلحات</span>
-      <span class="di-count" id="di-count-glossary">0</span>
-    </div>
-  </div>
-
-  <div class="drawer-divider"></div>
-
-  <!-- ── أخرى ── -->
-  <div class="drawer-section">
-    <div class="drawer-label">أخرى</div>
-
-    <div class="drawer-item" id="di-reports" onclick="navigate('reports');closeDrawer()">
-      <div class="di-icon" style="background:var(--amber-light);color:var(--amber)">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="18" y1="20" x2="18" y2="10"/>
-          <line x1="12" y1="20" x2="12" y2="4"/>
-          <line x1="6"  y1="20" x2="6"  y2="14"/>
-        </svg>
-      </div>
-      <span>التقارير</span>
-    </div>
-
-    <div class="drawer-item" id="di-settings" onclick="navigate('settings');closeDrawer()">
-      <div class="di-icon" style="background:var(--surface-2);color:var(--text-3)">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="3"/>
-          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06
-                   a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09
-                   A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83
-                   l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09
-                   A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83
-                   l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09
-                   a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83
-                   l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09
-                   a1.65 1.65 0 0 0-1.51 1z"/>
-        </svg>
-      </div>
-      <span>الإعدادات</span>
-    </div>
-  </div>
-
-  <!-- نسخة التطبيق -->
-  <div style="padding:16px 20px 24px;text-align:center;
-              font-size:11px;color:var(--text-3);font-weight:600">
-    مساعد الأستاذ · الإصدار 1.0
-  </div>
-
-</nav><!-- /#drawer -->
-
-<!-- ═══════════════════════════════════════════
-     OVERLAY / BOTTOM SHEET — نموذج الإدخال
-════════════════════════════════════════════ -->
-<div class="overlay" id="overlay" onclick="_overlayTap(event)" role="dialog" aria-modal="true">
-  <div class="sheet" id="sheet" onclick="event.stopPropagation()">
-
-    <!-- مقبض السحب -->
-    <div class="sheet-handle"><span></span></div>
-
-    <!-- رأس الـ Sheet -->
-    <div class="sheet-head">
-      <h3 id="sheet-title">عنوان النموذج</h3>
-      <button class="btn-icon" onclick="closeSheet()" aria-label="إغلاق">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-          <line x1="18" y1="6"  x2="6"  y2="18"/>
-          <line x1="6"  y1="6"  x2="18" y2="18"/>
-        </svg>
-      </button>
-    </div>
-
-    <!-- جسم النموذج -->
-    <div class="sheet-body" id="sheet-body"></div>
-
-    <!-- أزرار التذييل -->
-    <div class="sheet-foot" id="sheet-foot"></div>
-
-  </div>
+  <!-- ===== FAB ===== -->
+  <button class="fab" id="main-fab" onclick="handleFab()" style="display:none" aria-label="إضافة">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+      <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+    </svg>
+  </button>
 </div>
 
-<!-- ═══════════════════════════════════════════
-     SEARCH OVERLAY — نافذة البحث
-════════════════════════════════════════════ -->
-<div class="overlay" id="search-overlay" onclick="_searchOverlayTap(event)"
-     role="search" aria-label="البحث">
-  <div class="sheet" id="search-sheet" onclick="event.stopPropagation()"
-       style="max-height:80vh">
-
-    <div class="sheet-handle"><span></span></div>
-
-    <div style="padding:0 14px 12px;border-bottom:1px solid var(--border)">
-      <div class="search-bar" style="margin-bottom:0">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
-          <circle cx="11" cy="11" r="8"/>
-          <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-        </svg>
-        <input type="search" id="search-input"
-               placeholder="ابحث عن تلميذ، درس، فرض..."
-               oninput="doSearch(this.value)"
-               autocomplete="off"
-               aria-label="حقل البحث">
-        <button onclick="closeSearch()" style="color:var(--text-3);font-size:13px;font-weight:700">
-          إلغاء
-        </button>
-      </div>
-    </div>
-
-    <div id="search-results" style="overflow-y:auto;max-height:55vh;padding:8px 0">
-      <div class="empty" style="padding:32px 16px">
-        <svg width="40" height="40" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="1.5">
-          <circle cx="11" cy="11" r="8"/>
-          <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-        </svg>
-        <p>اكتب للبحث في جميع البيانات</p>
-      </div>
-    </div>
-
-  </div>
+<!-- ===== OVERLAY / SHEET ===== -->
+<div class="overlay" id="overlay" onclick="overlayClick(event)"
+     role="dialog" aria-modal="true" aria-labelledby="sheet-title">
+  <div class="sheet" id="sheet" onclick="event.stopPropagation()"></div>
 </div>
 
-<!-- ═══════════════════════════════════════════
-     TOAST AREA — منطقة الإشعارات
-════════════════════════════════════════════ -->
+<!-- ===== TOAST & UTILITIES ===== -->
 <div id="toast-area" aria-live="polite" aria-atomic="true"></div>
-
-<!-- ═══════════════════════════════════════════
-     PRINT AREA — منطقة الطباعة
-════════════════════════════════════════════ -->
 <div id="print-area"></div>
+<input type="file" id="import-input" accept="application/json" style="display:none" aria-hidden="true">
 
-<!-- ═══════════════════════════════════════════
-     SCRIPTS — ترتيب التحميل مهم
-════════════════════════════════════════════ -->
-
-<!-- 1. router.js — يجب أن يُحمَّل أولاً: DATA، ثوابت، دوال مشتركة، IC -->
+<!-- ===== SCRIPTS (الترتيب مهم) ===== -->
+<script src="icons.js"></script>
+<script src="data.js"></script>
+<script src="helpers.js"></script>
 <script src="router.js"></script>
-
-<!-- 2. صفحات التطبيق (بالترتيب) -->
+<script src="drawer.js"></script>
+<script src="toast.js"></script>
 <script src="dashboard.js"></script>
-<script src="sessions.js"></script>
-<script src="attendance.js"></script>
-<script src="payments.js"></script>
 <script src="students.js"></script>
+<script src="student-detail.js"></script>
+<script src="attendance.js"></script>
+<script src="grades.js"></script>
+<script src="sessions.js"></script>
 <script src="lessons.js"></script>
 <script src="exercises.js"></script>
 <script src="homework.js"></script>
-<script src="grades.js"></script>
 <script src="glossary.js"></script>
+<script src="payments.js"></script>
 <script src="reports.js"></script>
 <script src="settings.js"></script>
-
-<!-- 3. تهيئة التطبيق (بعد تحميل كل الصفحات) -->
+<script src="search.js"></script>
+<script src="data-management.js"></script>
+<script src="charts.js"></script>
 <script>
-/* ═══════════════════════════════════════════════════════
-   تهيئة التطبيق عند الاستعداد
-══════════════════════════════════════════════════════ */
-document.addEventListener('DOMContentLoaded', function () {
-
-  /* ── الثيم (داكن / فاتح) ── */
-  function applyTheme(dark) {
-    document.body.classList.toggle('dark', dark);
-    document.getElementById('icon-sun').style.display  = dark ? '' : 'none';
-    document.getElementById('icon-moon').style.display = dark ? 'none' : '';
-  }
-
-  window.toggleTheme = function () {
-    var dark = !document.body.classList.contains('dark');
-    localStorage.setItem('theme', dark ? 'dark' : 'light');
-    applyTheme(dark);
-  };
-
-  /* تطبيق الثيم المحفوظ */
-  var savedTheme = localStorage.getItem('theme');
-  var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  applyTheme(savedTheme === 'dark' || (!savedTheme && prefersDark));
-  document.documentElement.classList.remove('dark-init');
-
-  /* ── الدراور ── */
-  window.openDrawer = function () {
-    document.getElementById('drawer').classList.add('open');
-    document.getElementById('drawer-overlay').classList.add('show');
-    document.body.style.overflow = 'hidden';
-  };
-  window.closeDrawer = function () {
-    document.getElementById('drawer').classList.remove('open');
-    document.getElementById('drawer-overlay').classList.remove('show');
-    document.body.style.overflow = '';
-  };
-
-  /* ── Sheet / Overlay ── */
-  window._overlayTap = function (e) {
-    if (e.target === document.getElementById('overlay')) closeSheet();
-  };
-
-  /* ── البحث ── */
-  window.openSearch = function () {
-    document.getElementById('search-overlay').classList.add('show');
-    setTimeout(function () {
-      document.getElementById('search-input').focus();
-    }, 300);
-  };
-  window.closeSearch = function () {
-    document.getElementById('search-overlay').classList.remove('show');
-    document.getElementById('search-input').value = '';
-    document.getElementById('search-results').innerHTML = '';
-  };
-  window._searchOverlayTap = function (e) {
-    if (e.target === document.getElementById('search-overlay')) closeSearch();
-  };
-
-  /* ── FAB ── */
-  window.fabAction = function () {
-    var sec = document.querySelector('.section.active');
-    var action = sec ? sec.dataset.fab : 'none';
-    if (action && action !== 'none' && window[action]) window[action]();
-  };
-
-  /* ── تحديث شارات الدراور ── */
-  window.updateDrawerCounts = function () {
-    var counts = {
-      students:  (DATA.students  || []).length,
-      sessions:  (DATA.sessions  || []).length,
-      lessons:   (DATA.lessons   || []).length,
-      exercises: (DATA.exercises || []).length,
-      homework:  (DATA.homework  || []).length,
-      glossary:  (DATA.glossary  || []).length,
-    };
-    Object.keys(counts).forEach(function (k) {
-      var el = document.getElementById('di-count-' + k);
-      if (el) el.textContent = counts[k];
-    });
-  };
-
-  /* ── إعادة تعريف navigate لتحديث الشارات والعنوان ── */
-  var _origNavigate = window.navigate;
-  window.navigate = function (page) {
-    if (typeof _origNavigate === 'function') _origNavigate(page);
-
-    /* تحديث الشريط العلوي */
-    var sec = document.getElementById('sec-' + page);
-    if (sec && sec.dataset.title) {
-      document.getElementById('topbar-title').textContent = sec.dataset.title;
-    }
-
-    /* FAB: إظهار أو إخفاء */
-    var fab = document.getElementById('fab');
-    var fabAction = sec ? sec.dataset.fab : 'none';
-    fab.style.display = (fabAction && fabAction !== 'none') ? '' : 'none';
-
-    /* تحديث شارات nav السفلي */
-    document.querySelectorAll('.nav-btn').forEach(function (btn) {
-      btn.classList.remove('active');
-    });
-    var navPages = ['dashboard', 'attendance', 'sessions', 'payments'];
-    if (navPages.includes(page)) {
-      var nb = document.getElementById('nav-' + page);
-      if (nb) nb.classList.add('active');
-    }
-
-    /* تحديث العناصر النشطة في الدراور */
-    document.querySelectorAll('.drawer-item').forEach(function (el) {
-      el.classList.remove('active');
-    });
-    var di = document.getElementById('di-' + page);
-    if (di) di.classList.add('active');
-
-    /* تحديث شارات الأعداد */
-    updateDrawerCounts();
-
-    /* إعادة التمرير للأعلى */
-    document.getElementById('page-content').scrollTop = 0;
-  };
-
-  /* ── لوحة مفاتيح: Escape يغلق الشيت والدراور ── */
-  document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape') {
-      if (document.getElementById('overlay').classList.contains('show'))        closeSheet();
-      else if (document.getElementById('search-overlay').classList.contains('show')) closeSearch();
-      else if (document.getElementById('drawer').classList.contains('open'))   closeDrawer();
-    }
+  /* إغلاق الدراور والشيت بـ Escape */
+  document.addEventListener('keydown', function(e){
+    if(e.key !== 'Escape') return;
+    if(document.getElementById('overlay').classList.contains('show'))
+      closeSheet ? closeSheet() : null;
+    else if(document.getElementById('drawer').classList.contains('open'))
+      closeDrawer ? closeDrawer() : null;
   });
 
-  /* ── تهيئة أولية ── */
-  updateDrawerCounts();
-  document.getElementById('di-dashboard').classList.add('active');
-
-  /* تشغيل الصفحة الأولى */
-  if (typeof renderDashboard === 'function') renderDashboard();
-
-});
+  function init(){
+    applySettings();
+    if(!filAtt.date) filAtt.date = today();
+    document.getElementById('today-badge').textContent = today().slice(5).replace('-','/');
+    updateBadges();
+    const last = localStorage.getItem('lastNav') || 'dashboard';
+    const [k, e] = last.split('|');
+    navHistory = [];
+    navigate(k || 'dashboard', e || undefined);
+  }
+  init();
 </script>
-
 </body>
 </html>
