@@ -29,11 +29,21 @@ function showSheet(title,bodyHtml,actions=[]){
     <div class="sheet-body">${bodyHtml}</div>
     ${actHtml?`<div class="sheet-foot">${actHtml}</div>`:''}
   `;
-  document.getElementById('overlay').classList.add('show');
+  const overlay = document.getElementById('overlay');
+  overlay.classList.add('show');
+  overlay.addEventListener('touchmove', preventScroll, { passive: false });
 }
+
 function closeSheet(){
-  document.getElementById('overlay').classList.remove('show');
+  const overlay = document.getElementById('overlay');
+  overlay.classList.remove('show');
+  overlay.removeEventListener('touchmove', preventScroll);
 }
+
+function preventScroll(e) {
+  e.preventDefault();
+}
+
 function overlayClick(e){
   if(e.target===document.getElementById('overlay')) closeSheet();
 }
