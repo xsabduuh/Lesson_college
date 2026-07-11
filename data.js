@@ -1,98 +1,139 @@
 /* =================================================================
-   HELPERS – دوال المساعدة العامة
+   CONSTANTS & DATA
 ================================================================= */
+const SK = 'tutorV4';
 
-// ========== التاريخ والوقت (بتوقيت المغرب) ==========
+const CLASSES = [
+  { id:'1ere', label:'1ère Collège', color:'var(--c1)', bg:'var(--c1-bg)', short:'1ère', badge:'badge-c1' },
+  { id:'2eme', label:'2ème Collège', color:'var(--c2)', bg:'var(--c2-bg)', short:'2ème', badge:'badge-c2' }
+];
 
-function today() {
+const SUBJECTS = [
+  { id:'math', label:'Mathématiques', short:'Maths',   color:'var(--math)', bg:'var(--math-bg)', cls:'math' },
+  { id:'phy',  label:'Physique-Chimie', short:'Physique', color:'var(--phy)',  bg:'var(--phy-bg)',  cls:'phy'  },
+  { id:'svt',  label:'SVT',            short:'SVT',    color:'var(--svt)',  bg:'var(--svt-bg)',  cls:'svt'  }
+];
+
+const GRADE_TYPES = ['فرض محروس','اختبار','مشاركة','ملاحظة','فرض منزلي'];
+const ATT_STATUS  = { present:'حاضر', absent:'غائب', late:'متأخر' };
+const PAY_STATUS  = { paid:'مدفوع', unpaid:'غير مدفوع', partial:'جزئي', late:'متأخر', none:'—' };
+const PAY_STATUS_CLS = { paid:'paid', unpaid:'unpaid', partial:'partial', late:'late', none:'none' };
+const MONTHS_AR = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليوز','غشت','شتنبر','أكتوبر','نونبر','دجنبر'];
+const LEVEL_COLORS = {
+  'سهل':'badge-green','متوسط':'badge-amber','صعب':'badge-red','تحدٍّ':'badge-blue'
+};
+const ACCENT_COLORS = [
+  {name:'أزرق داكن',val:'#3B4FC0'},
+  {name:'أخضر',val:'#178A6F'},
+  {name:'بنفسجي',val:'#7C3AED'},
+  {name:'برتقالي',val:'#D05A20'},
+  {name:'وردي',val:'#C0396A'},
+  {name:'سماوي',val:'#0891B2'},
+];
+
+function subjById(id){ return SUBJECTS.find(s=>s.id===id) || SUBJECTS[0]; }
+function clsById(id){  return CLASSES.find(c=>c.id===id) || CLASSES[0];  }
+
+/** helper: level color class for exercises */
+function levelColor(level) {
+  return LEVEL_COLORS[level] || '';
+}
+
+/* =================================================================
+   DATA
+================================================================= */
+function defaultData(){
+  return {
+    students:[],
+    sessions:[],
+    attendance:[],
+    grades:[],
+    payments:[],
+    lessons:[],
+    exercises:[],
+    homework:[],
+    glossary:[],
+    settings:{
+      defaultFee:150,
+      darkMode:false,
+      accentColor:'#3B4FC0',
+      adminMode:false
+    }
+  };
+}
+
+let DATA = (function(){
+  try{
+    const r = localStorage.getItem(SK);
+    if(r){
+      const p = JSON.parse(r);
+      const merged = { ...defaultData(), ...p };
+      merged.settings = { ...defaultData().settings, ...(p.settings||{}) };
+      return merged;
+    }
+    const old = localStorage.getItem('tutorV3');
+    if(old){
+      const p = JSON.parse(old);
+      const d = defaultData();
+      return { ...d, ...p, settings: { ...d.settings, ...(p.settings||{}) } };
+    }
+    return defaultData();
+  } catch(e){ return defaultData(); }
+})();
+
+function save(){
+  localStorage.setItem(SK, JSON.stringify(DATA));
+  updateBadges();
+}
+
+/* =================================================================
+   HELPERS (تعتمد على helpers.js المحمّل أولاً)
+================================================================= */
+function studentsOf(cls){
+  return DATA.students.filter(s => s.cls === cls);
+}
+
+function monthLabel(ym){
+  if(!ym) return '—';
+  const [y,m] = ym.split('-');
+  return (MONTHS_AR[+m-1] || ym) + ' ' + y;
+}
+
+function getYearMonths(){
+  const months = [];
   const now = new Date();
-  const formatter = new Intl.DateTimeFormat('en-CA', {
-    timeZone: 'Africa/Casablanca',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit'
-  });
-  return formatter.format(now);
+  const yr = now.getFullYear();
+  const start = now.getMonth() < 8 ? yr-1 : yr;
+  for(let m=8; m<12; m++) months.push(`${start}-${String(m+1).padStart(2,'0')}`);
+  for(let m=0; m<6; m++) months.push(`${start+1}-${String(m+1).padStart(2,'0')}`);
+  return months;
 }
 
-const MONTHS = ['يناير','فبراير','مارس','أبريل','ماي','يونيو',
-                'يوليوز','غشت','شتنبر','أكتوبر','نونبر','دجنبر'];
-
-function fdate(dateStr) {
-  if (!dateStr) return '';
-  const [y, m, d] = dateStr.split('-');
-  const monthName = MONTHS[parseInt(m, 10) - 1] || '';
-  return `${parseInt(d, 10)} ${monthName} ${y}`;
+/* =================================================================
+   APPLY SETTINGS
+================================================================= */
+function applySettings(){
+  document.body.classList.toggle('dark', !!DATA.settings.darkMode);
+  document.body.classList.toggle('admin-mode', !!DATA.settings.adminMode);
+  const r = document.documentElement;
+  const c = DATA.settings.accentColor || '#3B4FC0';
+  r.style.setProperty('--accent', c);
+  r.style.setProperty('--accent-dark', shadeColor(c, -15));
+  r.style.setProperty('--accent-light', hexToLight(c));
 }
 
-function currentMonth() {
-  return today().substring(0, 7);
+function shadeColor(hex, pct){
+  const n = parseInt(hex.slice(1), 16);
+  const r = Math.min(255, Math.max(0, (n>>16) + (pct*2.55|0)));
+  const g = Math.min(255, Math.max(0, ((n>>8)&0xff) + (pct*2.55|0)));
+  const b = Math.min(255, Math.max(0, (n&0xff) + (pct*2.55|0)));
+  return `#${(r<<16|g<<8|b).toString(16).padStart(6,'0')}`;
 }
 
-// ========== دوال تعريفية موحدة ==========
-
-function uid() {
-  return '_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
-}
-
-function esc(str) {
-  if (str == null) return '';
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
-}
-
-// ========== HTML helpers ==========
-
-function adminBtns(editFn, delFn) {
-  if (!DATA.settings.adminMode) return '';
-  return `<div class="admin-actions">
-    <button class="btn-icon accent" onclick="${editFn}">${IC.edit}</button>
-    <button class="btn-icon danger"  onclick="${delFn}">${IC.trash}</button>
-  </div>`;
-}
-
-function classTabsHtml(active, fn, showAll = false) {
-  const allBtn = showAll
-    ? `<button class="class-tab ${active === 'all' ? 'active' : ''}" onclick="${fn}('all')">الكل</button>`
-    : '';
-  return `<div class="class-tabs">
-    ${allBtn}
-    ${CLASSES.map(c => `<button class="class-tab ${active === c.id ? 'act-' + c.id : ''}" onclick="${fn}('${c.id}')">${c.label}</button>`).join('')}
-  </div>`;
-}
-
-function subjPillsHtml(active, fn, all = false) {
-  const allBtn = all
-    ? `<button class="subj-pill ${active === '' ? '' : ''}" onclick="${fn}('')">الكل</button>`
-    : '';
-  return `<div class="subj-row">
-    ${allBtn}
-    ${SUBJECTS.map(s => `<button class="subj-pill ${active === s.id ? s.cls : ''}" onclick="${fn}('${s.id}')">${s.label}</button>`).join('')}
-  </div>`;
-}
-
-function classColor(cls) {
-  const found = CLASSES.find(c => c.id === cls);
-  return found?.color || 'var(--c1)';
-}
-
-function classBg(cls) {
-  const found = CLASSES.find(c => c.id === cls);
-  return found?.bg || 'var(--c1-bg)';
-}
-
-function classBadge(cls) {
-  const found = CLASSES.find(c => c.id === cls);
-  return found?.badge || 'badge-c1';
-}
-
-function emptyHtml(title, sub) {
-  return `<div class="empty">
-    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12" opacity=".4"/></svg>
-    <h4>${title}</h4><p>${sub}</p>
-  </div>`;
+function hexToLight(hex){
+  const n = parseInt(hex.slice(1), 16);
+  const r = (n>>16), g = (n>>8)&0xff, b = n&0xff;
+  if(document.body.classList.contains('dark'))
+    return `rgba(${r},${g},${b},0.18)`;
+  return `rgba(${r},${g},${b},0.12)`;
 }
