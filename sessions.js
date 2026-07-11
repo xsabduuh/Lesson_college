@@ -491,6 +491,7 @@ function openSessionForm(id) {
   const subjOpts = SUBJECTS.map(s =>
     `<option value="${s.id}" ${subj === s.id ? 'selected' : ''}>${s.label}</option>`).join('');
 
+  document.body.style.overflow = 'hidden';
   showSheet(id ? 'تعديل حصة' : 'تخطيط حصة جديدة', `
     <div style="overflow-x:hidden;overflow-y:auto;max-height:80vh;">
       <!-- ─── قسم 1: الأساسيات ─── -->
@@ -551,9 +552,14 @@ function openSessionForm(id) {
       <input type="hidden" id="xf-id" value="${id || ''}">
     </div>
   `, [
-    { label: 'إلغاء',       cls: 'btn-outline', fn: 'closeSheet()' },
+    { label: 'إلغاء',       cls: 'btn-outline', fn: '_sessCancel()' },
     { label: 'حفظ الحصة',  cls: 'btn-accent',  fn: 'saveSession()' },
   ]);
+}
+
+function _sessCancel() {
+  document.body.style.overflow = '';
+  closeSheet();
 }
 
 /* ════════════════════════════════════════════════════════════
@@ -587,6 +593,7 @@ function saveSession() {
 
   save();
   closeSheet();
+  document.body.style.overflow = '';
   renderSessions();
 }
 
