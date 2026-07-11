@@ -175,7 +175,28 @@ function renderSessions() {
         </button>`).join('')}
     </div>
 
-    <!-- ══ 5. قائمة الحصص ══ -->
+    <!-- ══ 5. شريط إضافة درس سريع في الشاشة الرئيسية ══ -->
+    <div style="margin-bottom:14px;display:flex;gap:8px;align-items:center">
+      <input type="text" id="quick-lesson-input" placeholder="أضف درساً جديداً…" 
+        style="flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:10px;
+        font-size:13px;font-family:inherit;background:var(--surface-1);color:var(--text);
+        outline:none;">
+      <button onclick="addLessonFromMainView()" 
+        style="padding:8px 16px;background:var(--accent);color:#fff;border:none;
+        border-radius:10px;font-weight:700;font-size:12px;cursor:pointer;
+        white-space:nowrap;flex-shrink:0;">إضافة</button>
+    </div>
+    <div id="quick-lessons-list" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;">
+      ${(DATA.lessons || []).map(l => `
+        <span class="badge badge-blue" style="display:inline-flex;align-items:center;gap:4px;
+          padding:4px 10px;font-size:11px;cursor:pointer;"
+          onclick="deleteLessonQuick('${l.id}')" title="حذف الدرس">
+          ${esc(l.title)} ×
+        </span>
+      `).join('')}
+    </div>
+
+    <!-- ══ 6. قائمة الحصص ══ -->
     ${filtered.length === 0
       ? `<div class="panel">${emptyHtml(
           'لا توجد حصص',
@@ -477,6 +498,35 @@ function setSessSubjF(subj)    { _sessInit(); filSess.subjFil = subj; renderSess
 function setSessCls(cls)       { filSess.cls = cls;  renderSessions(); }
 function setSessSubj(subj)     { filSess.subjFil = subj; renderSessions(); }
 
+/* ── إضافة درس من الشاشة الرئيسية ────────────────────────── */
+function addLessonFromMainView() {
+  const input = document.getElementById('quick-lesson-input');
+  if (!input) return;
+  const lessonName = input.value.trim();
+  if (!lessonName) return;
+
+  if (!DATA.lessons) DATA.lessons = [];
+  if (DATA.lessons.some(l => l.title.toLowerCase() === lessonName.toLowerCase())) {
+    toast('الدرس موجود مسبقاً', 'warning');
+    input.value = '';
+    return;
+  }
+
+  DATA.lessons.push({ id: uid(), title: lessonName });
+  save();
+  input.value = '';
+  toast('تمت إضافة الدرس', 'success');
+  renderSessions(); // إعادة عرض القائمة لإظهار الدرس الجديد
+}
+
+function deleteLessonQuick(id) {
+  if (!confirm('حذف هذا الدرس؟')) return;
+  DATA.lessons = (DATA.lessons || []).filter(l => l.id !== id);
+  save();
+  toast('تم حذف الدرس');
+  renderSessions();
+}
+
 /* ════════════════════════════════════════════════════════════
    نموذج إضافة / تعديل حصة
    ═══════════════════════════════════════════════════════════ */
@@ -568,7 +618,6 @@ function addNewLessonFromSession() {
   if (!lessonName || !lessonName.trim()) return;
 
   if (!DATA.lessons) DATA.lessons = [];
-  // تجنب التكرار
   if (DATA.lessons.some(l => l.title.toLowerCase() === lessonName.trim().toLowerCase())) {
     toast('الدرس موجود مسبقاً', 'warning');
     return;
@@ -627,7 +676,7 @@ function saveSession() {
   }
 
   save();
-  closeSheet();  // يعيد التمرير تلقائياً
+  closeSheet();
   renderSessions();
 }
 
