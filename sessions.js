@@ -521,6 +521,7 @@ function openSessionForm(id) {
         <div class="field-row">
           <label>الوقت</label>
           <input class="field" type="time" id="xf-time"
+            style="width:100%;box-sizing:border-box;"
             value="${x.time || ''}">
         </div>
       </div>
