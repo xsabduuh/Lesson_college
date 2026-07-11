@@ -6,7 +6,7 @@
    1. بطاقة تاريخ اليوم
    2. بطاقات مربعة — التلاميذ / الحضور / الدروس / نسبة الحضور
    3. حصص اليوم والقادمة
-   4. جدول معدلات المواد حسب الفصيل
+   4. جدول معدلات المواد حسب القسم
    5. اختصارات الصفحات
 ================================================================= */
 
@@ -54,7 +54,7 @@ function renderDashboard() {
     return { ...c, stds, attRate, lpct, ldone, ltotal: lessons.length, todayP, todayA, todayL };
   });
 
-  /* ── معدلات المواد حسب الفصيل (جدول الإحصائيات) ──────── */
+  /* ── معدلات المواد حسب القسم (جدول الإحصائيات) ──────── */
   const subjectMatrix = SUBJECTS.map(subj => {
     const perClass = CLASSES.map(cls => {
       const g   = allGrades.filter(x => x.subj === subj.id && x.cls === cls.id && x.max > 0);
@@ -429,7 +429,7 @@ function renderDashboard() {
 
     <!-- ══ 4. جدول إحصائيات المواد ══ -->
     <div class="panel" style="margin-bottom:12px">
-      <div class="panel-title">معدلات المواد حسب الفصيل</div>
+      <div class="panel-title">المواد حسب القسم</div>
       <div style="overflow-x:auto;margin:0 -2px">
         <table style="width:100%;border-collapse:collapse;font-size:13px;min-width:220px">
           <thead>
