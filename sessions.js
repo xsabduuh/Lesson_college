@@ -492,98 +492,64 @@ function openSessionForm(id) {
     `<option value="${s.id}" ${subj === s.id ? 'selected' : ''}>${s.label}</option>`).join('');
 
   showSheet(id ? 'تعديل حصة' : 'تخطيط حصة جديدة', `
-
-    <!-- ─── قسم 1: الأساسيات ─── -->
-    <div style="font-size:11px;font-weight:800;color:var(--accent);
-      text-transform:uppercase;letter-spacing:.6px;margin-bottom:12px;
-      padding:6px 10px;background:var(--accent-light);border-radius:8px">
-      الأساسيات
-    </div>
-
-    <div class="field-grid-2">
-      <div class="field-row">
-        <label>الفصيل <span style="color:var(--danger)">*</span></label>
-        <select class="field" id="xf-cls">${clsOpts}</select>
+    <div style="overflow-x:hidden;overflow-y:auto;max-height:80vh;">
+      <!-- ─── قسم 1: الأساسيات ─── -->
+      <div style="font-size:11px;font-weight:800;color:var(--accent);
+        text-transform:uppercase;letter-spacing:.6px;margin-bottom:12px;
+        padding:6px 10px;background:var(--accent-light);border-radius:8px">
+        الأساسيات
       </div>
-      <div class="field-row">
-        <label>المادة <span style="color:var(--danger)">*</span></label>
-        <select class="field" id="xf-subj">${subjOpts}</select>
+
+      <div class="field-grid-2">
+        <div class="field-row">
+          <label>الفصيل <span style="color:var(--danger)">*</span></label>
+          <select class="field" id="xf-cls">${clsOpts}</select>
+        </div>
+        <div class="field-row">
+          <label>المادة <span style="color:var(--danger)">*</span></label>
+          <select class="field" id="xf-subj">${subjOpts}</select>
+        </div>
       </div>
-    </div>
 
-    <div class="field-row">
-      <label>عنوان الحصة <span style="color:var(--danger)">*</span></label>
-      <input class="field" id="xf-title"
-        placeholder="موضوع الحصة أو عنوانها"
-        value="${esc(x.title || '')}">
-    </div>
-
-    <div class="field-grid-2">
-      <div class="field-row">
-        <label>التاريخ</label>
-        <input class="field" type="date" id="xf-date"
-          value="${x.date || today()}">
+      <div class="field-grid-2">
+        <div class="field-row">
+          <label>التاريخ</label>
+          <input class="field" type="date" id="xf-date"
+            value="${x.date || today()}">
+        </div>
+        <div class="field-row">
+          <label>الوقت</label>
+          <input class="field" type="time" id="xf-time"
+            value="${x.time || ''}">
+        </div>
       </div>
+
       <div class="field-row">
-        <label>الوقت</label>
-        <input class="field" type="time" id="xf-time"
-          value="${x.time || ''}">
+        <label>الدرس المقرر تدريسه</label>
+        <input class="field" id="xf-lesson" list="xf-lesson-datalist"
+          placeholder="اختر أو اكتب الدرس"
+          value="${esc(x.lesson || '')}">
+        <datalist id="xf-lesson-datalist">
+          ${(DATA.lessons || []).map(l => `<option value="${esc(l.title)}">`).join('')}
+        </datalist>
       </div>
-    </div>
 
-    <div class="field-row">
-      <label>مدة الحصة (بالدقائق)</label>
-      <input class="field" type="number" id="xf-duration"
-        placeholder="مثال: 60" min="15" max="240"
-        value="${esc(x.duration || '')}">
-    </div>
+      <div class="field-row">
+        <label>التمارين المخططة</label>
+        <textarea class="field" id="xf-exercises"
+          style="min-height:72px"
+          placeholder="التمارين التي ستُنجز خلال الحصة أو تُسند للتلاميذ">${esc(x.exercises || '')}</textarea>
+      </div>
 
-    <!-- ─── قسم 2: محتوى الحصة ─── -->
-    <div style="height:1px;background:var(--border);margin:14px 0 12px"></div>
-    <div style="font-size:11px;font-weight:800;color:var(--purple);
-      text-transform:uppercase;letter-spacing:.6px;margin-bottom:12px;
-      padding:6px 10px;background:var(--purple-light);border-radius:8px">
-      محتوى الحصة
-    </div>
+      <div class="field-row">
+        <label>الفرض (إن وجد)</label>
+        <input class="field" id="xf-homework"
+          placeholder="عنوان الفرض أو الواجب المنزلي"
+          value="${esc(x.homework || '')}">
+      </div>
 
-    <div class="field-row">
-      <label>الدرس المقرر تدريسه</label>
-      <input class="field" id="xf-lesson"
-        placeholder="عنوان الدرس"
-        value="${esc(x.lesson || '')}">
+      <input type="hidden" id="xf-id" value="${id || ''}">
     </div>
-
-    <div class="field-row">
-      <label>أهداف الحصة</label>
-      <textarea class="field" id="xf-objectives"
-        style="min-height:72px"
-        placeholder="ما الذي سيتعلمه التلاميذ في هذه الحصة؟">${esc(x.objectives || '')}</textarea>
-    </div>
-
-    <div class="field-row">
-      <label>التمارين المخططة</label>
-      <textarea class="field" id="xf-exercises"
-        style="min-height:72px"
-        placeholder="التمارين التي ستُنجز خلال الحصة أو تُسند للتلاميذ">${esc(x.exercises || '')}</textarea>
-    </div>
-
-    <div class="field-row">
-      <label>الفرض (إن وجد)</label>
-      <input class="field" id="xf-homework"
-        placeholder="عنوان الفرض أو الواجب المنزلي"
-        value="${esc(x.homework || '')}">
-    </div>
-
-    <!-- ─── قسم 3: ملاحظات ─── -->
-    <div style="height:1px;background:var(--border);margin:14px 0 12px"></div>
-    <div class="field-row">
-      <label>ملاحظات إضافية</label>
-      <textarea class="field" id="xf-notes"
-        style="min-height:72px"
-        placeholder="تذكيرات، وسائل مطلوبة، أشياء يجب تجهيزها...">${esc(x.notes || '')}</textarea>
-    </div>
-
-    <input type="hidden" id="xf-id" value="${id || ''}">
   `, [
     { label: 'إلغاء',       cls: 'btn-outline', fn: 'closeSheet()' },
     { label: 'حفظ الحصة',  cls: 'btn-accent',  fn: 'saveSession()' },
@@ -595,21 +561,19 @@ function openSessionForm(id) {
    ═══════════════════════════════════════════════════════════ */
 function saveSession() {
   const id    = document.getElementById('xf-id').value;
-  const title = document.getElementById('xf-title').value.trim();
-  if (!title) { toast('أدخل عنوان الحصة', 'error'); return; }
 
   const obj = {
     cls:        document.getElementById('xf-cls').value,
     subj:       document.getElementById('xf-subj').value,
-    title,
+    title:      '',
     date:       document.getElementById('xf-date').value,
     time:       document.getElementById('xf-time').value,
-    duration:   document.getElementById('xf-duration').value.trim(),
+    duration:   '',
     lesson:     document.getElementById('xf-lesson').value.trim(),
-    objectives: document.getElementById('xf-objectives').value.trim(),
+    objectives: '',
     exercises:  document.getElementById('xf-exercises').value.trim(),
     homework:   document.getElementById('xf-homework').value.trim(),
-    notes:      document.getElementById('xf-notes').value.trim(),
+    notes:      '',
   };
 
   if (id) {
