@@ -137,7 +137,7 @@ function renderGlossary() {
 }
 
 /* ════════════════════════════════════════════════════════════
-   بطاقة مصطلح
+   بطاقة مصطلح (نسخة مبسطة: عربي + فرنسي + مادة فقط)
    ═══════════════════════════════════════════════════════════ */
 function _glossCard(t) {
   const s = subjById(t.subj);
@@ -148,7 +148,7 @@ function _glossCard(t) {
     ">
       <!-- رأس البطاقة -->
       <div style="display:flex;justify-content:space-between;align-items:flex-start;
-        margin-bottom:${t.wordFr ? '2px' : '8px'}">
+        margin-bottom:8px">
         <div style="flex:1;min-width:0">
           <div class="term-word" style="font-size:16px;font-weight:800;
             color:var(--text);line-height:1.3">
@@ -168,40 +168,17 @@ function _glossCard(t) {
         </div>
       </div>
 
-      <!-- التعريف -->
-      <div class="term-def" style="font-size:13px;color:var(--text-2);
-        line-height:1.7;margin-bottom:8px">
-        ${esc(t.definition)}
-      </div>
-
-      <!-- المثال -->
-      ${t.example ? `
-        <div style="background:var(--surface-2);border-radius:8px;
-          padding:8px 10px;margin-bottom:8px;
-          border-right:2px solid var(--border-2)">
-          <div style="font-size:10px;font-weight:800;color:var(--text-3);
-            letter-spacing:.4px;margin-bottom:3px">مثال</div>
-          <div style="font-size:12px;color:var(--text-2);
-            font-family:var(--mono);direction:ltr;text-align:right">
-            ${esc(t.example)}
-          </div>
-        </div>` : ''}
-
-      <!-- الوسوم -->
+      <!-- الوسوم: المادة فقط -->
       <div class="term-tags" style="display:flex;gap:6px;flex-wrap:wrap">
         <span class="badge badge-${s.cls}" style="font-size:10px">
           ${s.short}
         </span>
-        ${t.unit ? `
-          <span class="badge badge-gray" style="font-size:10px">
-            ${esc(t.unit)}
-          </span>` : ''}
       </div>
     </div>`;
 }
 
 /* ════════════════════════════════════════════════════════════
-   نموذج إضافة / تعديل
+   نموذج إضافة / تعديل (من دون تعريف، مثال، وفصل)
    ═══════════════════════════════════════════════════════════ */
 function openGlossaryForm(id) {
   _glossInit();
@@ -227,38 +204,16 @@ function openGlossaryForm(id) {
 
     <!-- المصطلح بالفرنسية -->
     <div class="field-row">
-      <label>المصطلح بالفرنسية</label>
+      <label>المصطلح بالفرنسية <span class="req">*</span></label>
       <input class="field" id="tf-wordfr" value="${esc(x.wordFr || '')}"
         placeholder="مثال: Fonction numérique"
         style="direction:ltr;text-align:right">
     </div>
 
-    <!-- التعريف -->
+    <!-- المادة -->
     <div class="field-row">
-      <label>التعريف <span class="req">*</span></label>
-      <textarea class="field" id="tf-def"
-        style="min-height:90px"
-        placeholder="اكتب شرحاً واضحاً ومختصراً...">${esc(x.definition || '')}</textarea>
-    </div>
-
-    <!-- مثال -->
-    <div class="field-row">
-      <label>مثال تطبيقي</label>
-      <input class="field" id="tf-example" value="${esc(x.example || '')}"
-        placeholder="مثال اختياري">
-    </div>
-
-    <!-- المادة والوحدة -->
-    <div class="field-grid-2">
-      <div class="field-row">
-        <label>المادة</label>
-        <select class="field" id="tf-subj">${subjOpts}</select>
-      </div>
-      <div class="field-row">
-        <label>الوحدة / الفصل</label>
-        <input class="field" id="tf-unit" value="${esc(x.unit || '')}"
-          placeholder="مثال: الدوال">
-      </div>
+      <label>المادة <span class="req">*</span></label>
+      <select class="field" id="tf-subj">${subjOpts}</select>
     </div>
 
     <input type="hidden" id="tf-id" value="${id || ''}">
@@ -272,22 +227,23 @@ function openGlossaryForm(id) {
    حفظ / حذف
    ═══════════════════════════════════════════════════════════ */
 function saveGlossary() {
-  const id  = document.getElementById('tf-id').value;
-  const word = document.getElementById('tf-word').value.trim();
-  const def  = document.getElementById('tf-def').value.trim();
+  const id     = document.getElementById('tf-id').value;
+  const word   = document.getElementById('tf-word').value.trim();
+  const wordFr = document.getElementById('tf-wordfr').value.trim();
+  const subj   = document.getElementById('tf-subj').value;
 
-  if (!word || !def) {
-    toast('أدخل المصطلح والتعريف', 'error');
+  if (!word || !wordFr || !subj) {
+    toast('يجب ملء المصطلح بالعربية والفرنسية والمادة', 'error');
     return;
   }
 
   const obj = {
     word,
-    wordFr:     document.getElementById('tf-wordfr').value.trim(),
-    definition: def,
-    example:    document.getElementById('tf-example').value.trim(),
-    subj:       document.getElementById('tf-subj').value,
-    unit:       document.getElementById('tf-unit').value.trim(),
+    wordFr,
+    definition: '',
+    example: '',
+    subj,
+    unit: '',
   };
 
   if (id) {
