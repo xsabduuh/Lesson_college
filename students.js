@@ -18,29 +18,61 @@ function renderStudents(){
     </div>
     <div class="section-header">
       <h2>تلاميذ ${clsById(cls).label}</h2>
-      <span class="count-badge">${list.length}</span>
+      <span class="count-badge" id="student-count">${list.length}</span>
     </div>
-    <div class="panel">
-      ${list.length===0
-        ? emptyHtml(q?'لا نتائج':'لا يوجد تلاميذ',q?'جرب كلمة بحث أخرى':'أضف تلميذاً باستخدام الزر أسفله')
-        : list.map((s,i)=>`
-          <div class="card-item" onclick="navigate('student-detail','${s.id}')">
-            <div class="card-item-icon" style="background:${classBg(s.cls)};color:${classColor(s.cls)}">
-              <span style="font-size:17px;font-weight:800;font-family:var(--mono)">${i+1}</span>
-            </div>
-            <div class="card-item-body">
-              <div class="card-item-title">${esc(s.name)}</div>
-              <div class="card-item-sub">${s.phone?esc(s.phone):'لا يوجد هاتف'} ${s.status?`· <span style="color:${s.status==='نشط'?'var(--green)':'var(--danger)'}">${esc(s.status)}</span>`:''}</div>
-            </div>
-            <div class="card-item-actions">
-              ${adminBtns(`event.stopPropagation();openStudentForm('${s.id}')`,`event.stopPropagation();deleteStudent('${s.id}')`)}
-              <span style="color:var(--text-3)">${IC.chev}</span>
-            </div>
-          </div>`).join('')}
+    <div class="panel" id="student-list-container">
+      ${studentListHTML(list)}
     </div>`;
 }
+
+function studentListHTML(list){
+  if(list.length===0){
+    const q=filStud.q||'';
+    return emptyHtml(q?'لا نتائج':'لا يوجد تلاميذ',q?'جرب كلمة بحث أخرى':'أضف تلميذاً باستخدام الزر أسفله');
+  }
+  return list.map((s,i)=>`
+    <div class="card-item" onclick="navigate('student-detail','${s.id}')">
+      <div class="card-item-icon" style="background:${classBg(s.cls)};color:${classColor(s.cls)}">
+        <span style="font-size:17px;font-weight:800;font-family:var(--mono)">${i+1}</span>
+      </div>
+      <div class="card-item-body">
+        <div class="card-item-title">${esc(s.name)}</div>
+        <div class="card-item-sub">${s.phone?esc(s.phone):'لا يوجد هاتف'} ${s.status?`· <span style="color:${s.status==='نشط'?'var(--green)':'var(--danger)'}">${esc(s.status)}</span>`:''}</div>
+      </div>
+      <div class="card-item-actions">
+        ${adminBtns(`event.stopPropagation();openStudentForm('${s.id}')`,`event.stopPropagation();deleteStudent('${s.id}')`)}
+        <span style="color:var(--text-3)">${IC.chev}</span>
+      </div>
+    </div>`).join('');
+}
+
 function setStudCls(cls){ filStud.cls=cls; filStud.q=''; renderStudents(); }
-function filterStudents(q){ filStud.q=q; renderStudents(); }
+
+function filterStudents(q){
+  filStud.q=q;
+  const cls=filStud.cls;
+  const query=q.toLowerCase();
+  let list=studentsOf(cls);
+  if(query) list=list.filter(s=>s.name.toLowerCase().includes(query)||(s.phone||'').includes(query));
+  
+  // تحديث العداد والقائمة فقط دون إعادة بناء الحقل
+  const countSpan=document.getElementById('student-count');
+  if(countSpan) countSpan.textContent=list.length;
+  
+  const container=document.getElementById('student-list-container');
+  if(container){
+    container.innerHTML=studentListHTML(list);
+  }
+  
+  // الحفاظ على التركيز في حقل البحث
+  const searchInput=document.getElementById('stud-search');
+  if(searchInput){
+    searchInput.focus();
+    // وضع المؤشر في نهاية النص
+    const val=searchInput.value;
+    searchInput.setSelectionRange(val.length,val.length);
+  }
+}
 
 function openStudentForm(id){
   const s=id?DATA.students.find(x=>x.id===id):{};
