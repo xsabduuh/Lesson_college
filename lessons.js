@@ -30,7 +30,7 @@ let lessonsSearch = '';
 let openUnits     = {};        // { unitId: true/false } — أيّ وحدة مفتوحة
 
 /* ═══════════════════════════════════════════════════════════════
-   renderLessons — دالة العرض الرئيسية
+   renderLessons — دالة العرض الرئيسية (تبني الهيكل الكامل)
 ═══════════════════════════════════════════════════════════════ */
 function renderLessons() {
   const cls   = filLess.cls;
@@ -77,11 +77,11 @@ function renderLessons() {
     <div style="position:relative;margin-bottom:12px">
       <span style="position:absolute;right:11px;top:50%;transform:translateY(-50%);
         color:var(--text-3);pointer-events:none">${IC.search}</span>
-      <input class="field" style="padding-right:36px"
+      <input class="field" id="lesson-search-input" style="padding-right:36px"
         placeholder="بحث في الدروس والوحدات…"
         value="${esc(lessonsSearch)}"
-        oninput="lessonsSearch=this.value;renderLessons()">
-      ${lessonsSearch ? `<button onclick="lessonsSearch='';renderLessons()"
+        oninput="lessonsSearch=this.value;updateLessonsList()">
+      ${lessonsSearch ? `<button onclick="lessonsSearch='';updateLessonsList()"
         style="position:absolute;left:10px;top:50%;transform:translateY(-50%);
           background:none;border:none;cursor:pointer;color:var(--text-3);font-size:16px">✕</button>` : ''}
     </div>
@@ -108,10 +108,10 @@ function renderLessons() {
       </div>
     </div>
 
-    <!-- المحتوى الرئيسي -->
-    ${lessonsView === 'units' ? _renderByUnits(cls, subj, units, all)
-    : lessonsView === 'all'   ? _renderAllLessons(all, units)
-    :                           _renderLessonsStats(units, all)}
+    <!-- المحتوى الرئيسي (سيتم تحديثه جزئياً عند البحث) -->
+    <div id="lessons-list-container">
+      ${generateLessonsContent(cls, subj, units, all)}
+    </div>
   `;
 
   /* تفعيل الأكورديون بعد الرسم */
@@ -132,6 +132,35 @@ function renderLessons() {
         openUnits[uid] ? 'rotate(180deg)' : 'rotate(0deg)';
     });
   });
+}
+
+/* ── توليد محتوى القائمة حسب طريقة العرض الحالية ────────────── */
+function generateLessonsContent(cls, subj, units, all) {
+  if (lessonsView === 'units') return _renderByUnits(cls, subj, units, all);
+  if (lessonsView === 'all')   return _renderAllLessons(all, units);
+  return _renderLessonsStats(units, all);
+}
+
+/* ── تحديث جزئي للقائمة عند البحث فقط (يحافظ على التركيز) ───── */
+function updateLessonsList() {
+  const cls   = filLess.cls;
+  const subj  = filLess.subj;
+  const units = DATA.units.filter(u => u.cls === cls && u.subj === subj)
+                           .sort((a, b) => (a.order || 0) - (b.order || 0));
+  const all   = DATA.lessons.filter(l => l.cls === cls && l.subj === subj);
+
+  const container = document.getElementById('lessons-list-container');
+  if (container) {
+    container.innerHTML = generateLessonsContent(cls, subj, units, all);
+  }
+
+  // إبقاء التركيز على حقل البحث
+  const searchInput = document.getElementById('lesson-search-input');
+  if (searchInput) {
+    searchInput.focus();
+    const val = searchInput.value;
+    searchInput.setSelectionRange(val.length, val.length);
+  }
 }
 
 /* ── تبديل العرض ─────────────────────────────────────────────── */
