@@ -491,6 +491,7 @@ function openSessionForm(id) {
   const subjOpts = SUBJECTS.map(s =>
     `<option value="${s.id}" ${subj === s.id ? 'selected' : ''}>${s.label}</option>`).join('');
 
+  // منع تمرير الخلفية يدوياً - سيُستعاد في closeSheet المُعدَّلة
   document.body.style.overflow = 'hidden';
   showSheet(id ? 'تعديل حصة' : 'تخطيط حصة جديدة', `
     <div style="overflow-x:hidden;overflow-y:auto;max-height:80vh;">
@@ -552,14 +553,9 @@ function openSessionForm(id) {
       <input type="hidden" id="xf-id" value="${id || ''}">
     </div>
   `, [
-    { label: 'إلغاء',       cls: 'btn-outline', fn: '_sessCancel()' },
+    { label: 'إلغاء',       cls: 'btn-outline', fn: 'closeSheet()' },
     { label: 'حفظ الحصة',  cls: 'btn-accent',  fn: 'saveSession()' },
   ]);
-}
-
-function _sessCancel() {
-  document.body.style.overflow = '';
-  closeSheet();
 }
 
 /* ════════════════════════════════════════════════════════════
@@ -592,8 +588,7 @@ function saveSession() {
   }
 
   save();
-  closeSheet();
-  document.body.style.overflow = '';
+  closeSheet();  // closeSheet المُعدَّلة ستعيد التمرير تلقائياً
   renderSessions();
 }
 
@@ -604,3 +599,35 @@ function deleteSession(id) {
   toast('تم حذف الحصة');
   renderSessions();
 }
+
+/* ────────────────────────────────────────────────────────────
+   معالجة قفل التمرير: نضمن أن closeSheet() دائماً تعيد overflow
+   للـ body بغضّ النظر عن طريقة إغلاق الـ Sheet
+   ──────────────────────────────────────────────────────────── */
+(function patchCloseSheet() {
+  if (typeof closeSheet === 'function') {
+    const _orig = closeSheet;
+    closeSheet = function() {
+      _orig.apply(this, arguments);
+      document.body.style.overflow = '';
+    };
+  } else {
+    // في حال لم تكن مُعرّفة بعد، ننتظر ظهورها
+    Object.defineProperty(window, 'closeSheet', {
+      configurable: true,
+      enumerable: true,
+      set(fn) {
+        const patched = function() {
+          fn.apply(this, arguments);
+          document.body.style.overflow = '';
+        };
+        Object.defineProperty(window, 'closeSheet', {
+          value: patched,
+          configurable: true,
+          enumerable: true,
+          writable: true
+        });
+      }
+    });
+  }
+})();
