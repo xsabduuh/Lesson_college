@@ -341,13 +341,13 @@ function renderDashboard() {
     </div>
 
     <!-- ══ 3. حصص اليوم والقادمة ══ -->
-    <div class="panel" style="margin-bottom:12px">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-        <div style="display:flex;align-items:center;gap:8px">
+    <div class="panel" style="margin-bottom:12px; padding:12px 14px;">
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+        <div style="display:flex; align-items:center; gap:8px;">
           <div class="panel-title" style="margin:0">حصص اليوم</div>
           ${todaySess.length ? `
-            <span style="font-size:11px;padding:2px 9px;border-radius:20px;
-              background:var(--accent-light);color:var(--accent);font-weight:700">
+            <span style="font-size:11px; padding:2px 9px; border-radius:20px;
+              background:var(--accent-light); color:var(--accent); font-weight:700">
               ${todaySess.length}
             </span>` : ''}
         </div>
@@ -357,54 +357,68 @@ function renderDashboard() {
       </div>
 
       ${!todaySess.length
-        ? `<div style="padding:18px 0;font-size:13px;color:var(--text-3);text-align:center">
+        ? `<div style="padding:14px 0; font-size:13px; color:var(--text-3); text-align:center;">
             لا توجد حصص مسجلة اليوم
-           </div>`
-        : todaySess.map(s => {
-            const sj = subjById(s.subj);
-            const cl = clsById(s.cls);
-            return `
-              <div style="display:flex;align-items:center;gap:10px;
-                padding:9px 0;border-bottom:1px solid var(--border)">
+          </div>`
+        : `
+          <div style="display:flex; gap:10px; overflow-x:auto; padding-bottom:4px; -webkit-overflow-scrolling:touch; scrollbar-width:thin;">
+            ${todaySess.map(s => {
+              const sj = subjById(s.subj);
+              const cl = clsById(s.cls);
+              return `
                 <div style="
-                  width:40px;height:40px;border-radius:10px;flex-shrink:0;
-                  background:${sj.bg||'var(--bg)'};color:${sj.color||'var(--accent)'};
-                  display:flex;align-items:center;justify-content:center;
-                  font-weight:800;font-size:11px;
-                ">${sj.short}</div>
-                <div style="flex:1;min-width:0">
-                  <div style="font-size:13px;font-weight:700;
-                    white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+                  background:var(--surface-2);
+                  border-radius:12px;
+                  padding:12px;
+                  min-width:150px;
+                  display:flex;
+                  flex-direction:column;
+                  gap:8px;
+                  border:1px solid var(--border);
+                  flex-shrink:0;
+                ">
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <div style="
+                      width:34px; height:34px; border-radius:10px;
+                      background:${sj.bg || 'var(--accent-light)'};
+                      color:${sj.color || 'var(--accent)'};
+                      display:flex; align-items:center; justify-content:center;
+                      font-size:15px; font-weight:800;
+                    ">${sj.short.charAt(0)}</div>
+                    <div style="font-size:14px; font-weight:800; font-family:var(--mono); color:var(--accent);">
+                      ${s.time || '—'}
+                    </div>
+                  </div>
+                  <div style="font-size:13px; font-weight:700; color:var(--text); line-height:1.3;
+                    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
                     ${esc(s.title)}
                   </div>
-                  <div style="font-size:11px;color:var(--text-3)">
-                    ${cl.short}${s.time ? ' — ' + s.time : ''}
+                  <div style="font-size:10px; color:var(--text-3); display:flex; gap:6px;">
+                    <span>${cl.short}</span>
+                    <span>·</span>
+                    <span>${sj.short}</span>
                   </div>
-                </div>
-                ${s.time ? `
-                  <div style="font-size:11px;font-family:var(--mono);color:var(--text-3);
-                    flex-shrink:0">
-                    ${s.time}
-                  </div>` : ''}
-              </div>`;
-          }).join('')}
+                </div>`;
+            }).join('')}
+          </div>
+        `}
 
       ${upcomingSess.length ? `
-        <div style="margin-top:10px">
-          <div style="font-size:11px;font-weight:700;color:var(--text-3);
-            letter-spacing:.5px;margin-bottom:8px;padding-top:4px">
+        <div style="margin-top:12px; padding-top:8px; border-top:1px solid var(--border);">
+          <div style="font-size:11px; font-weight:700; color:var(--text-3);
+            letter-spacing:.5px; margin-bottom:8px;">
             الحصص القادمة
           </div>
           ${upcomingSess.map(s => {
             const sj = subjById(s.subj);
             const cl = clsById(s.cls);
             return `
-              <div style="display:flex;align-items:center;gap:8px;
-                padding:7px 0;border-bottom:1px solid var(--border)">
-                <div style="font-size:11px;font-family:var(--mono);color:var(--text-3);
-                  min-width:72px;flex-shrink:0">${fdate(s.date)}</div>
-                <div style="font-size:12px;flex:1;min-width:0;
-                  white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+              <div style="display:flex; align-items:center; gap:8px;
+                padding:6px 0; border-bottom:1px solid var(--border);">
+                <div style="font-size:11px; font-family:var(--mono); color:var(--text-3);
+                  min-width:72px; flex-shrink:0;">${fdate(s.date)}</div>
+                <div style="font-size:12px; flex:1; min-width:0;
+                  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
                   <span style="font-weight:600">${esc(s.title)}</span>
                   <span style="color:var(--text-3)"> · ${cl.short} · ${sj.short}</span>
                 </div>
