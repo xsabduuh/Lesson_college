@@ -6,6 +6,8 @@ function renderStudents(){
   const cls=filStud.cls;
   const q=(filStud.q||'').toLowerCase();
   let list=studentsOf(cls);
+  // فلترة التلاميذ غير الصالحين (بدون اسم) لتجنب "التلميذ الشبح"
+  list = list.filter(s => s && s.name && s.name.trim() !== '');
   if(q) list=list.filter(s=>s.name.toLowerCase().includes(q)||(s.phone||'').includes(q));
   const sec=document.getElementById('sec-students');
   sec.innerHTML=`
@@ -26,6 +28,8 @@ function renderStudents(){
 }
 
 function studentListHTML(list){
+  // فلترة إضافية للتأكيد
+  list = list.filter(s => s && s.name && s.name.trim() !== '');
   if(list.length===0){
     const q=filStud.q||'';
     return emptyHtml(q?'لا نتائج':'لا يوجد تلاميذ',q?'جرب كلمة بحث أخرى':'أضف تلميذاً باستخدام الزر أسفله');
@@ -53,6 +57,8 @@ function filterStudents(q){
   const cls=filStud.cls;
   const query=q.toLowerCase();
   let list=studentsOf(cls);
+  // فلترة التلاميذ غير الصالحين
+  list = list.filter(s => s && s.name && s.name.trim() !== '');
   if(query) list=list.filter(s=>s.name.toLowerCase().includes(query)||(s.phone||'').includes(query));
   
   // تحديث العداد والقائمة فقط دون إعادة بناء الحقل
@@ -68,7 +74,6 @@ function filterStudents(q){
   const searchInput=document.getElementById('stud-search');
   if(searchInput){
     searchInput.focus();
-    // وضع المؤشر في نهاية النص
     const val=searchInput.value;
     searchInput.setSelectionRange(val.length,val.length);
   }
