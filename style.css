@@ -1203,3 +1203,10 @@ canvas{display:block;max-width:100%}
   .field-grid-2{grid-template-columns:1fr}
   .pay-month-grid{grid-template-columns:repeat(2,1fr)}
 }
+
+html {
+  overflow-y: scroll;
+}
+body {
+  overflow-x: hidden;
+}
