@@ -163,8 +163,9 @@ function _glossCard(t) {
         <div style="display:flex;gap:4px;flex-shrink:0;margin-right:8px">
           <button class="btn-icon accent" onclick="openGlossaryForm('${t.id}')"
             aria-label="تعديل">${IC.edit}</button>
-          <button class="btn-icon danger"  onclick="deleteGlossary('${t.id}')"
-            aria-label="حذف">${IC.trash}</button>
+          ${DATA.settings.adminMode ? `
+            <button class="btn-icon danger" onclick="deleteGlossary('${t.id}')"
+              aria-label="حذف">${IC.trash}</button>` : ''}
         </div>
       </div>
 
