@@ -18,7 +18,7 @@ function _glossInit() {
 }
 
 /* ════════════════════════════════════════════════════════════
-   renderGlossary — الدالة الرئيسية
+   renderGlossary — الدالة الرئيسية (تبني الهيكل الكامل)
    ═══════════════════════════════════════════════════════════ */
 function renderGlossary() {
   _glossInit();
@@ -119,21 +119,32 @@ function renderGlossary() {
       </div>
     </div> 
 
-    <!-- ══ 4. قائمة المصطلحات ══ -->
-    ${items.length === 0
-      ? `<div class="panel">${emptyHtml(
-          q ? 'لا توجد نتائج' : 'لا توجد مصطلحات',
-          q ? 'جرّب كلمة أخرى' : 'اضغط + لإضافة مصطلح'
-        )}</div>`
-      : useGroups
-        ? Object.entries(grouped).map(([unit, terms]) => `
-            <div style="margin-bottom:6px">
-              <div class="divider-label">${esc(unit)}</div>
-              ${terms.map(t => _glossCard(t)).join('')}
-            </div>`).join('')
-        : items.map(t => _glossCard(t)).join('')
-    }
+    <!-- ══ 3. قائمة المصطلحات (سيتم تحديثها جزئياً عند البحث) ══ -->
+    <div id="glossary-list-container">
+      ${glossaryListHTML(items, useGroups, grouped)}
+    </div>
   `;
+}
+
+/* ────────────────────────────────────────────────────────────
+   دالة مساعدة: توليد HTML القائمة فقط
+   ──────────────────────────────────────────────────────────── */
+function glossaryListHTML(items, useGroups, grouped) {
+  if (items.length === 0) {
+    const q = filGloss.q || '';
+    return `<div class="panel">${emptyHtml(
+      q ? 'لا توجد نتائج' : 'لا توجد مصطلحات',
+      q ? 'جرّب كلمة أخرى' : 'اضغط + لإضافة مصطلح'
+    )}</div>`;
+  }
+  if (useGroups) {
+    return Object.entries(grouped).map(([unit, terms]) => `
+      <div style="margin-bottom:6px">
+        <div class="divider-label">${esc(unit)}</div>
+        ${terms.map(t => _glossCard(t)).join('')}
+      </div>`).join('');
+  }
+  return items.map(t => _glossCard(t)).join('');
 }
 
 /* ════════════════════════════════════════════════════════════
@@ -272,6 +283,59 @@ function deleteGlossary(id) {
 /* ════════════════════════════════════════════════════════════
    دوال الفلاتر
    ═══════════════════════════════════════════════════════════ */
+
+// تغيير المادة أو الفرز => إعادة بناء كاملة للصفحة
 function setGlossSubj(subj) { _glossInit(); filGloss.subj = subj; renderGlossary(); }
-function setGlossQ(q)       { _glossInit(); filGloss.q    = q;    renderGlossary(); }
-function setGlossSort(s)    { _glossInit(); filGloss.sort = s;     renderGlossary(); }
+function setGlossSort(s)    { _glossInit(); filGloss.sort = s;   renderGlossary(); }
+
+// البحث: تحديث جزئي للقائمة فقط، مع الحفاظ على التركيز
+function setGlossQ(q) {
+  _glossInit();
+  filGloss.q = q;
+
+  // حساب القائمة المصفاة الجديدة
+  const { subj, sort } = filGloss;
+  let items = DATA.glossary.slice();
+  if (subj) items = items.filter(t => t.subj === subj);
+  if (q.trim()) {
+    const kw = q.trim().toLowerCase();
+    items = items.filter(t =>
+      (t.word       || '').toLowerCase().includes(kw) ||
+      (t.wordFr     || '').toLowerCase().includes(kw) ||
+      (t.definition || '').toLowerCase().includes(kw) ||
+      (t.unit       || '').toLowerCase().includes(kw)
+    );
+  }
+  if (sort === 'alpha') {
+    items.sort((a, b) => (a.word || '').localeCompare(b.word || '', 'ar'));
+  } else if (sort === 'subj') {
+    items.sort((a, b) => (a.subj||'').localeCompare(b.subj||''));
+  } else {
+    items = items.reverse();
+  }
+
+  // تجميع للعرض
+  let grouped = {};
+  if (sort === 'subj' || (!subj && !q.trim())) {
+    items.forEach(t => {
+      const key = t.unit || '—';
+      if (!grouped[key]) grouped[key] = [];
+      grouped[key].push(t);
+    });
+  }
+  const useGroups = Object.keys(grouped).length > 1;
+
+  // تحديث حاوية القائمة فقط
+  const container = document.getElementById('glossary-list-container');
+  if (container) {
+    container.innerHTML = glossaryListHTML(items, useGroups, grouped);
+  }
+
+  // إبقاء التركيز على حقل البحث
+  const searchInput = document.getElementById('gloss-search');
+  if (searchInput) {
+    searchInput.focus();
+    const val = searchInput.value;
+    searchInput.setSelectionRange(val.length, val.length);
+  }
+}
