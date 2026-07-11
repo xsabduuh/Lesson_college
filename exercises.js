@@ -106,11 +106,11 @@ function renderExercises() {
       <div style="flex:1;min-width:160px;position:relative">
         <span style="position:absolute;right:11px;top:50%;transform:translateY(-50%);
           color:var(--text-3);pointer-events:none">${IC.search}</span>
-        <input class="field" style="padding-right:36px"
+        <input class="field" id="exer-search-input" style="padding-right:36px"
           placeholder="بحث في التمارين…"
           value="${esc(exerSearch)}"
-          oninput="exerSearch=this.value;renderExercises()">
-        ${exerSearch ? `<button onclick="exerSearch='';renderExercises()"
+          oninput="exerSearch=this.value;updateExercisesList()">
+        ${exerSearch ? `<button onclick="exerSearch='';updateExercisesList()"
           style="position:absolute;left:10px;top:50%;transform:translateY(-50%);
             background:none;border:none;cursor:pointer;color:var(--text-3)">✕</button>` : ''}
       </div>
@@ -161,11 +161,38 @@ function renderExercises() {
       </div>
     </div>
 
-    <!-- المحتوى الرئيسي -->
-    ${exerView === 'bylevel' ? _renderByLevel(all)
-    : exerView === 'all'     ? _renderAllExercises(all)
-    :                          _renderExerStats(all)}
+    <!-- المحتوى الرئيسي (سيتم تحديثه جزئياً عند البحث) -->
+    <div id="exercises-list-container">
+      ${generateExercisesContent(cls, subj, all)}
+    </div>
   `;
+}
+
+/* ── توليد محتوى القائمة حسب طريقة العرض الحالية ────────────── */
+function generateExercisesContent(cls, subj, all) {
+  if (exerView === 'bylevel') return _renderByLevel(all);
+  if (exerView === 'all')     return _renderAllExercises(all);
+  return _renderExerStats(all);
+}
+
+/* ── تحديث جزئي للقائمة عند البحث فقط (يحافظ على التركيز) ───── */
+function updateExercisesList() {
+  const cls  = filExer.cls;
+  const subj = filExer.subj;
+  const all  = DATA.exercises.filter(e => e.cls === cls && e.subj === subj);
+
+  const container = document.getElementById('exercises-list-container');
+  if (container) {
+    container.innerHTML = generateExercisesContent(cls, subj, all);
+  }
+
+  // إبقاء التركيز على حقل البحث
+  const searchInput = document.getElementById('exer-search-input');
+  if (searchInput) {
+    searchInput.focus();
+    const val = searchInput.value;
+    searchInput.setSelectionRange(val.length, val.length);
+  }
 }
 
 /* ── تبديل العرض ─────────────────────────────────────────────── */
