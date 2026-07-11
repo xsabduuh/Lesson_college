@@ -450,18 +450,18 @@ function _sessCard(x, t) {
               </div>
             </div>` : ''}
 
-          <!-- أزرار الإدارة / الحذف -->
-          <div style="display:flex;gap:8px;margin-top:14px">
-            ${DATA.settings.adminMode ? `
+          <!-- أزرار الإدارة (وضع الإدارة فقط) -->
+          ${DATA.settings.adminMode ? `
+            <div style="display:flex;gap:8px;margin-top:14px">
               <button class="btn btn-outline btn-sm" style="flex:1"
                 onclick="openSessionForm('${x.id}')">
                 ${IC.edit}&nbsp; تعديل
-              </button>` : ''}
-            <button class="btn btn-danger btn-sm" style="flex:1"
-              onclick="deleteSession('${x.id}')">
-              ${IC.trash}&nbsp; حذف
-            </button>
-          </div>
+              </button>
+              <button class="btn btn-danger btn-sm"
+                onclick="deleteSession('${x.id}')">
+                ${IC.trash}
+              </button>
+            </div>` : ''}
         </div>` : ''}
     </div>`;
 }
@@ -491,6 +491,7 @@ function openSessionForm(id) {
   const subjOpts = SUBJECTS.map(s =>
     `<option value="${s.id}" ${subj === s.id ? 'selected' : ''}>${s.label}</option>`).join('');
 
+  // منع تمرير الخلفية يدوياً - سيُستعاد في closeSheet المُعدَّلة
   document.body.style.overflow = 'hidden';
   showSheet(id ? 'تعديل حصة' : 'تخطيط حصة جديدة', `
     <div style="overflow-x:hidden;overflow-y:auto;max-height:80vh;">
@@ -526,18 +527,13 @@ function openSessionForm(id) {
       </div>
 
       <div class="field-row">
-        <label>الدرس المقرر تدريسه <span style="color:var(--danger)">*</span></label>
+        <label>الدرس المقرر تدريسه</label>
         <input class="field" id="xf-lesson" list="xf-lesson-datalist"
           placeholder="اختر أو اكتب الدرس"
           value="${esc(x.lesson || '')}">
         <datalist id="xf-lesson-datalist">
           ${(DATA.lessons || []).map(l => `<option value="${esc(l.title)}">`).join('')}
         </datalist>
-        <button type="button" class="btn btn-outline btn-sm"
-          style="width:100%;margin-top:6px;border-style:dashed;border-width:1px;padding:6px 0;"
-          onclick="addNewLessonFromSession()">
-          + إضافة درس جديد
-        </button>
       </div>
 
       <div class="field-row">
@@ -562,46 +558,11 @@ function openSessionForm(id) {
   ]);
 }
 
-/* ── إضافة درس جديد من داخل شيت الجلسة ──────────────────── */
-function addNewLessonFromSession() {
-  const lessonName = prompt('أدخل عنوان الدرس الجديد:');
-  if (!lessonName || !lessonName.trim()) return;
-
-  if (!DATA.lessons) DATA.lessons = [];
-  // تجنب التكرار
-  if (DATA.lessons.some(l => l.title.toLowerCase() === lessonName.trim().toLowerCase())) {
-    toast('الدرس موجود مسبقاً', 'warning');
-    return;
-  }
-
-  const newLesson = { id: uid(), title: lessonName.trim() };
-  DATA.lessons.push(newLesson);
-  save();
-  toast('تمت إضافة الدرس', 'success');
-
-  // تحديث datalist
-  const datalist = document.getElementById('xf-lesson-datalist');
-  if (datalist) {
-    const opt = document.createElement('option');
-    opt.value = newLesson.title;
-    datalist.appendChild(opt);
-  }
-  // تعبئة الحقل بالدرس الجديد
-  const input = document.getElementById('xf-lesson');
-  if (input) input.value = newLesson.title;
-}
-
 /* ════════════════════════════════════════════════════════════
    حفظ / حذف
    ═══════════════════════════════════════════════════════════ */
 function saveSession() {
   const id    = document.getElementById('xf-id').value;
-  const lesson = document.getElementById('xf-lesson').value.trim();
-
-  if (!lesson) {
-    toast('الدرس المقرر تدريسه ضروري — لا يمكن ترك الحصة فارغة', 'error');
-    return;
-  }
 
   const obj = {
     cls:        document.getElementById('xf-cls').value,
@@ -610,7 +571,7 @@ function saveSession() {
     date:       document.getElementById('xf-date').value,
     time:       document.getElementById('xf-time').value,
     duration:   '',
-    lesson:     lesson,
+    lesson:     document.getElementById('xf-lesson').value.trim(),
     objectives: '',
     exercises:  document.getElementById('xf-exercises').value.trim(),
     homework:   document.getElementById('xf-homework').value.trim(),
@@ -627,7 +588,7 @@ function saveSession() {
   }
 
   save();
-  closeSheet();  // يعيد التمرير تلقائياً
+  closeSheet();  // closeSheet المُعدَّلة ستعيد التمرير تلقائياً
   renderSessions();
 }
 
@@ -640,7 +601,7 @@ function deleteSession(id) {
 }
 
 /* ────────────────────────────────────────────────────────────
-   معالجة قفل التمرير: نضمن أن closeSheet() تعيد overflow
+   معالجة قفل التمرير: نضمن أن closeSheet() دائماً تعيد overflow
    للـ body بغضّ النظر عن طريقة إغلاق الـ Sheet
    ──────────────────────────────────────────────────────────── */
 (function patchCloseSheet() {
@@ -651,6 +612,7 @@ function deleteSession(id) {
       document.body.style.overflow = '';
     };
   } else {
+    // في حال لم تكن مُعرّفة بعد، ننتظر ظهورها
     Object.defineProperty(window, 'closeSheet', {
       configurable: true,
       enumerable: true,
