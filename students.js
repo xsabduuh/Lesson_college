@@ -1,134 +1,172 @@
 /* =================================================================
-   STUDENTS
+   EXERCISES – بطاقات تمارين بسيطة
 ================================================================= */
 
-function renderStudents(){
-  const cls=filStud.cls;
-  const q=(filStud.q||'').toLowerCase();
-  let list=studentsOf(cls);
-  // فلترة التلاميذ غير الصالحين (بدون اسم) لتجنب "التلميذ الشبح"
-  list = list.filter(s => s && s.name && s.name.trim() !== '');
-  if(q) list=list.filter(s=>s.name.toLowerCase().includes(q)||(s.phone||'').includes(q));
-  const sec=document.getElementById('sec-students');
-  sec.innerHTML=`
-    ${classTabsHtml(cls,"setStudCls")}
-    <div class="search-bar">
-      ${IC.search}
-      <input id="stud-search" placeholder="بحث بالاسم أو الهاتف..." value="${esc(filStud.q||'')}"
-        oninput="filterStudents(this.value)">
-      ${filStud.q?`<button onclick="filterStudents('')" style="color:var(--text-3)">✕</button>`:''}
+function renderExercises(){
+  const cls  = filExer.cls;
+  const subj = filExer.subj;
+  const items = DATA.exercises
+    .filter(e => e.cls === cls && e.subj === subj)
+    .sort((a,b) => (a.date||'').localeCompare(b.date||''));
+
+  const sec = document.getElementById('sec-exercises');
+  sec.innerHTML = `
+    ${classTabsHtml(cls, 'setExerCls')}
+    ${subjPillsHtml(subj, 'setExerSubj')}
+
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">
+      <h2 style="font-size:16px; font-weight:800;">التمارين</h2>
+      <button class="btn btn-accent btn-sm" onclick="openExerciseForm()">
+        ${IC.plus} إضافة تمرين
+      </button>
     </div>
-    <div class="section-header">
-      <h2>تلاميذ ${clsById(cls).label}</h2>
-      <span class="count-badge" id="student-count">${list.length}</span>
+
+    <div id="exercises-list" style="display:flex; flex-direction:column; gap:12px;">
+      ${items.length === 0
+        ? `<div class="panel" style="padding:20px; text-align:center; color:var(--text-3);">
+             لا توجد تمارين بعد
+           </div>`
+        : items.map(e => `
+          <div class="panel" style="padding:0; overflow:hidden;">
+            <!-- صورة التمرين -->
+            ${e.image ? `
+              <div style="width:100%; max-height:200px; overflow:hidden; background:var(--surface-2);">
+                <img src="${e.image}" alt="صورة التمرين" style="width:100%; height:auto; display:block; object-fit:cover;">
+              </div>` : ''}
+
+            <div style="padding:14px;">
+              <div style="display:flex; align-items:flex-start; gap:10px;">
+                <div style="flex:1; min-width:0;">
+                  <!-- العنوان -->
+                  <div style="font-size:14px; font-weight:800; margin-bottom:6px; word-break:break-word;">
+                    ${esc(e.title)}
+                  </div>
+
+                  <!-- المادة + القسم -->
+                  <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+                    <span class="badge badge-${subjById(e.subj).cls}" style="font-size:11px;">
+                      ${subjById(e.subj).short}
+                    </span>
+                    <span class="badge ${classBadge(e.cls)}" style="font-size:11px;">
+                      ${clsById(e.cls).short}
+                    </span>
+                    ${e.notes ? `
+                      <span style="font-size:11px; color:var(--text-3);">
+                        ${esc(e.notes.length > 40 ? e.notes.slice(0,40)+'…' : e.notes)}
+                      </span>` : ''}
+                  </div>
+                </div>
+
+                <!-- أزرار الإدارة -->
+                <div style="display:flex; gap:4px; flex-shrink:0;">
+                  <button class="btn-icon accent" onclick="openExerciseForm('${e.id}')"
+                    aria-label="تعديل">${IC.edit}</button>
+                  ${DATA.settings.adminMode ? `
+                    <button class="btn-icon danger" onclick="deleteExercise('${e.id}')"
+                      aria-label="حذف">${IC.trash}</button>` : ''}
+                </div>
+              </div>
+            </div>
+          </div>`).join('')}
     </div>
-    <div class="panel" id="student-list-container">
-      ${studentListHTML(list)}
-    </div>`;
+  `;
 }
 
-function studentListHTML(list){
-  // فلترة إضافية للتأكيد
-  list = list.filter(s => s && s.name && s.name.trim() !== '');
-  if(list.length===0){
-    const q=filStud.q||'';
-    return emptyHtml(q?'لا نتائج':'لا يوجد تلاميذ',q?'جرب كلمة بحث أخرى':'أضف تلميذاً باستخدام الزر أسفله');
-  }
-  return list.map((s,i)=>`
-    <div class="card-item" onclick="navigate('student-detail','${s.id}')">
-      <div class="card-item-icon" style="background:${classBg(s.cls)};color:${classColor(s.cls)}">
-        <span style="font-size:17px;font-weight:800;font-family:var(--mono)">${i+1}</span>
-      </div>
-      <div class="card-item-body">
-        <div class="card-item-title">${esc(s.name)}</div>
-        <div class="card-item-sub">${s.phone?esc(s.phone):'لا يوجد هاتف'} ${s.status?`· <span style="color:${s.status==='نشط'?'var(--green)':'var(--danger)'}">${esc(s.status)}</span>`:''}</div>
-      </div>
-      <div class="card-item-actions">
-        ${adminBtns(`event.stopPropagation();openStudentForm('${s.id}')`,`event.stopPropagation();deleteStudent('${s.id}')`)}
-        <span style="color:var(--text-3)">${IC.chev}</span>
-      </div>
-    </div>`).join('');
-}
+function setExerCls(cls)   { filExer.cls  = cls; renderExercises(); }
+function setExerSubj(subj) { filExer.subj = subj; renderExercises(); }
 
-function setStudCls(cls){ filStud.cls=cls; filStud.q=''; renderStudents(); }
+/* ── نموذج إضافة / تعديل تمرين ─────────────────────────────── */
+function openExerciseForm(id){
+  const e    = id ? DATA.exercises.find(x => x.id === id) : {};
+  const cls  = e.cls  || filExer.cls;
+  const subj = e.subj || filExer.subj;
 
-function filterStudents(q){
-  filStud.q=q;
-  const cls=filStud.cls;
-  const query=q.toLowerCase();
-  let list=studentsOf(cls);
-  // فلترة التلاميذ غير الصالحين
-  list = list.filter(s => s && s.name && s.name.trim() !== '');
-  if(query) list=list.filter(s=>s.name.toLowerCase().includes(query)||(s.phone||'').includes(query));
-  
-  // تحديث العداد والقائمة فقط دون إعادة بناء الحقل
-  const countSpan=document.getElementById('student-count');
-  if(countSpan) countSpan.textContent=list.length;
-  
-  const container=document.getElementById('student-list-container');
-  if(container){
-    container.innerHTML=studentListHTML(list);
-  }
-  
-  // الحفاظ على التركيز في حقل البحث
-  const searchInput=document.getElementById('stud-search');
-  if(searchInput){
-    searchInput.focus();
-    const val=searchInput.value;
-    searchInput.setSelectionRange(val.length,val.length);
-  }
-}
+  const clsOpts  = CLASSES.map(c =>
+    `<option value="${c.id}" ${cls === c.id ? 'selected' : ''}>${c.label}</option>`).join('');
+  const subjOpts = SUBJECTS.map(s =>
+    `<option value="${s.id}" ${subj === s.id ? 'selected' : ''}>${s.label}</option>`).join('');
 
-function openStudentForm(id){
-  const s=id?DATA.students.find(x=>x.id===id):{};
-  const clsOpts=CLASSES.map(c=>`<option value="${c.id}" ${(s.cls||filStud.cls)===c.id?'selected':''}>${c.label}</option>`).join('');
-  const statusOpts=['نشط','متوقف','منسحب'].map(v=>`<option value="${v}" ${(s.status||'نشط')===v?'selected':''}>${v}</option>`).join('');
-  showSheet(id?'تعديل بيانات التلميذ':'تسجيل تلميذ جديد',`
-    <div class="field-row"><label>الاسم الكامل <span class="req">*</span></label>
-      <input class="field" id="sf-name" placeholder="اسم ولقب التلميذ" value="${esc(s.name||'')}"></div>
+  showSheet(id ? 'تعديل تمرين' : 'إضافة تمرين جديد', `
+    <div class="field-row">
+      <label>عنوان التمرين <span class="req">*</span></label>
+      <input class="field" id="ef-title"
+        placeholder="اكتب عنوان التمرين" value="${esc(e.title || '')}">
+    </div>
+
     <div class="field-grid-2">
-      <div class="field-row"><label>القسم <span class="req">*</span></label>
-        <select class="field" id="sf-cls">${clsOpts}</select></div>
-      <div class="field-row"><label>الحالة</label>
-        <select class="field" id="sf-status">${statusOpts}</select></div>
+      <div class="field-row">
+        <label>المادة</label>
+        <select class="field" id="ef-subj">${subjOpts}</select>
+      </div>
+      <div class="field-row">
+        <label>القسم</label>
+        <select class="field" id="ef-cls">${clsOpts}</select>
+      </div>
     </div>
-    <div class="field-row"><label>رقم ولي الأمر</label>
-      <input class="field" id="sf-phone" type="tel" placeholder="0600000000" value="${esc(s.phone||'')}"></div>
-    <div class="field-grid-2">
-      <div class="field-row"><label>تاريخ التسجيل</label>
-        <input class="field" type="date" id="sf-regdate" value="${s.regDate||today()}"></div>
-      <div class="field-row"><label>الأجر الشهري (د.م)</label>
-        <input class="field" type="number" id="sf-fee" value="${s.fee||DATA.settings.defaultFee||150}"></div>
+
+    <div class="field-row">
+      <label>صورة التمرين</label>
+      <input type="file" id="ef-image" accept="image/*" style="display:block; margin-top:4px;">
+      ${e.image ? `<div style="margin-top:8px;"><img src="${e.image}" style="max-width:100%; max-height:120px; border-radius:8px;"></div>` : ''}
     </div>
-    <div class="field-row"><label>ملاحظات</label>
-      <textarea class="field" id="sf-notes">${esc(s.notes||'')}</textarea></div>
-    <input type="hidden" id="sf-id" value="${id||''}">
-  `,[
-    {label:'إلغاء',cls:'btn-outline',fn:'closeSheet()'},
-    {label:'حفظ',cls:'btn-accent',fn:'saveStudent()'}
+
+    <div class="field-row">
+      <label>ملاحظات</label>
+      <textarea class="field" id="ef-notes" rows="2"
+        placeholder="ملاحظات سريعة...">${esc(e.notes || '')}</textarea>
+    </div>
+
+    <input type="hidden" id="ef-id" value="${id || ''}">
+  `, [
+    { label: 'إلغاء', cls: 'btn-outline', fn: 'closeSheet()' },
+    { label: 'حفظ',   cls: 'btn-accent',  fn: 'saveExercise()' }
   ]);
 }
-function saveStudent(){
-  const id=document.getElementById('sf-id').value;
-  const name=document.getElementById('sf-name').value.trim();
-  const cls=document.getElementById('sf-cls').value;
-  if(!name){toast('أدخل اسم التلميذ','error');return;}
-  const obj={name,cls,
-    status:document.getElementById('sf-status').value,
-    phone:document.getElementById('sf-phone').value.trim(),
-    regDate:document.getElementById('sf-regdate').value,
-    fee:+document.getElementById('sf-fee').value||DATA.settings.defaultFee,
-    notes:document.getElementById('sf-notes').value.trim()
+
+/* ── حفظ التمرين ─────────────────────────────────────────────── */
+function saveExercise(){
+  const id    = document.getElementById('ef-id').value;
+  const title = document.getElementById('ef-title').value.trim();
+  if(!title){ toast('أدخل عنوان التمرين', 'error'); return; }
+
+  const existing = id ? DATA.exercises.find(x => x.id === id) : null;
+
+  const obj = {
+    cls:   document.getElementById('ef-cls').value,
+    subj:  document.getElementById('ef-subj').value,
+    title: title,
+    notes: document.getElementById('ef-notes').value.trim(),
+    date:  existing ? existing.date : today(),
+    image: existing ? existing.image : null
   };
-  if(id){ Object.assign(DATA.students.find(x=>x.id===id),obj); }
-  else { DATA.students.push({id:uid(),...obj}); }
-  save();closeSheet();toast('تم الحفظ','success');renderStudents();
+
+  const fileInput = document.getElementById('ef-image');
+  const processSave = () => {
+    if (id) {
+      Object.assign(DATA.exercises.find(x => x.id === id), obj);
+    } else {
+      DATA.exercises.push({ id: uid(), ...obj });
+    }
+    save(); closeSheet(); toast('تم الحفظ', 'success'); renderExercises();
+  };
+
+  if (fileInput.files[0]) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      obj.image = e.target.result;
+      processSave();
+    };
+    reader.readAsDataURL(fileInput.files[0]);
+  } else {
+    processSave();
+  }
 }
-function deleteStudent(id){
-  if(!confirm('سيتم حذف التلميذ وجميع بياناته (الحضور، النقاط، الأداءات). هل تؤكد؟'))return;
-  DATA.students=DATA.students.filter(s=>s.id!==id);
-  DATA.attendance=DATA.attendance.filter(a=>a.sid!==id);
-  DATA.grades=DATA.grades.filter(g=>g.sid!==id);
-  DATA.payments=DATA.payments.filter(p=>p.sid!==id);
-  save();toast('تم الحذف');renderStudents();
+
+/* ── حذف تمرين ───────────────────────────────────────────────── */
+function deleteExercise(id){
+  if (!confirm('حذف هذا التمرين؟')) return;
+  DATA.exercises = DATA.exercises.filter(e => e.id !== id);
+  save();
+  toast('تم الحذف');
+  renderExercises();
 }
