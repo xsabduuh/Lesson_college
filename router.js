@@ -68,7 +68,6 @@ const MAIN_SECTIONS = ['dashboard', 'students', 'attendance', 'grades', 'setting
 /* الصفحات التي يظهر فيها زر الإضافة العائم (FAB) */
 const FAB_SECTIONS = {
   students:  () => openStudentForm(),
-  grades:    () => openGradeForm(),
   sessions:  () => openSessionForm(),
 };
 
