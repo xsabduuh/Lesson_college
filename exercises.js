@@ -7,7 +7,16 @@ function renderExercises(){
   const subj = filExer.subj;
   const items = DATA.exercises
     .filter(e => e.cls === cls && e.subj === subj)
-    .sort((a,b) => (a.date||'').localeCompare(b.date||''));
+    .sort((a,b) => {
+      // نرتب تنازلياً حسب التاريخ (الأحدث أولاً)
+      const dateA = a.date || '';
+      const dateB = b.date || '';
+      if (dateA === '' && dateB === '') return 0;
+      if (dateA === '') return 1;  // العناصر بدون تاريخ تذهب للأسفل
+      if (dateB === '') return -1;
+      // ترتيب تنازلي: b - a
+      return dateB.localeCompare(dateA);
+    });
 
   const sec = document.getElementById('sec-exercises');
   sec.innerHTML = `
