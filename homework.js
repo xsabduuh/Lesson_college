@@ -12,13 +12,18 @@ function renderHomework(){
   sec.innerHTML=`
     ${classTabsHtml(cls,"setHWCls")}
     ${subjPillsHtml(subj,"setHWSubj")}
-    <div class="section-header">
-      <h2>${IC.clip} فروض ${s.label}</h2>
-      <span class="count-badge">${items.length}</span>
+    
+    <!-- شريط علوي مع زر الإضافة -->
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">
+      <h2 style="font-size:16px; font-weight:800;">${IC.clip} فروض ${s.label}</h2>
+      <button class="btn btn-accent btn-sm" onclick="openHomeworkForm()">
+        ${IC.plus} إضافة فرض
+      </button>
     </div>
+    
     <div id="homework-container" style="display:flex;flex-direction:column;gap:12px;margin-top:8px;">
       ${items.length===0
-        ? emptyHtml('لا توجد فروض','أضف فرضاً باستخدام الزر أسفله')
+        ? emptyHtml('لا توجد فروض','أضف فرضاً باستخدام الزر أعلاه')
         : items.map(h=>renderHomeworkCard(h,s)).join('')}
     </div>
   `;
