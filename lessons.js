@@ -3,7 +3,6 @@
    يتطلب SortableJS (محمّل في index.html)
 ================================================================= */
 
-/* ── متغيرات عامة محلية ────────────────────────────────────── */
 let currentView = 'list';
 let currentLessonId = null;
 
@@ -38,7 +37,6 @@ function renderLessons() {
     </div>
   `;
 
-  // تهيئة السحب على قائمة الدروس
   if (typeof Sortable !== 'undefined') initLessonsDrag();
 }
 
@@ -105,7 +103,7 @@ function viewLesson(id) {
 
   const sec = document.getElementById('sec-lessons');
   sec.innerHTML = `
-    <div class="back-link" onclick="renderLessons()" style="margin-bottom:14px; cursor:pointer; color:var(--accent); display:flex; align-items:center; gap:4px;">
+    <div style="margin-bottom:14px; cursor:pointer; color:var(--accent); display:flex; align-items:center; gap:4px;" onclick="renderLessons()">
       ${IC.chev} الرجوع للقائمة
     </div>
     <div class="panel" style="padding:14px;">
@@ -133,10 +131,10 @@ function viewLesson(id) {
       <div id="sections-list" style="display:flex; flex-direction:column;">
         ${sections.length === 0 ? `<div style="text-align:center; color:var(--text-3); padding:20px;">لا توجد فقرات بعد</div>` : ''}
         ${sections.map((sec, i) => `
-          <div class="section-row" data-index="${i}" style="display:flex; align-items:center; border:1px solid var(--border); border-radius:10px; padding:12px; background:var(--surface-2); margin-bottom:8px;">
+          <div class="section-row" data-index="${i}">
             <span class="grip" style="margin-left:8px;">⠿</span>
             <div class="checkbox-custom ${sec.done ? 'checked' : ''}" onclick="toggleSectionDone('${id}', ${i})" style="margin-left:8px;"></div>
-            <div class="section-title" style="flex:1; font-size:13px; font-weight:700; color:${sec.done ? 'var(--green)' : 'var(--text)'};">${esc(sec.title || 'فقرة '+(i+1))}</div>
+            <div class="section-title" style="color:${sec.done ? 'var(--green)' : 'var(--text)'};">${esc(sec.title || 'فقرة '+(i+1))}</div>
             <button class="btn-icon danger" style="width:28px;height:28px;" onclick="deleteSection('${id}', ${i})">${IC.trash}</button>
           </div>
         `).join('')}
@@ -144,7 +142,6 @@ function viewLesson(id) {
     </div>
   `;
 
-  // تهيئة السحب على الفقرات
   if (typeof Sortable !== 'undefined') initSectionsDrag(id);
 }
 
@@ -296,15 +293,11 @@ function initLessonsDrag() {
       const oldIndex = evt.oldIndex;
       const newIndex = evt.newIndex;
       if (oldIndex !== newIndex && id) {
-        // إعادة ترتيب المصفوفة
         const movedLesson = DATA.lessons.find(l => l.id === id);
         if (movedLesson) {
           const remaining = DATA.lessons.filter(l => l.id !== id);
           remaining.splice(newIndex, 0, movedLesson);
-          // تحديث البيانات الفعلية (مع مراعاة الفلاتر قد تؤثر على المصفوفة الكاملة)
-          // هذا تبسيط: يفترض أن القائمة المعروضة هي كل الدروس أو مجموعة فلتر معين.
-          // للحفاظ على الترتيب في البيانات الأصلية، قد نحتاج لمنطق أكثر تعقيداً.
-          // لكن حالياً سنعيد ترتيب المصفوفة الأساسية.
+          // إعادة ترتيب المصفوفة الأساسية حسب القائمة الجديدة
           const mainList = DATA.lessons;
           mainList.sort((a, b) => {
             const indexA = remaining.indexOf(a);
