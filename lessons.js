@@ -1,18 +1,7 @@
 /* =================================================================
-   LESSONS — دروس مع فقرات قابلة للسحب والإفلات
-   يستخدم custom-drag.js (سحب مخصص عبر Pointer Events)
-   بديل عن SortableJS لحل مشكلة عدم عمل السحب على Chrome iOS
-   ⚠️ لازم يكون custom-drag.js محمّل قبل هذا الملف في index.html:
-   <script src="custom-drag.js"></script>
-   <script src="lessons.js"></script>
+   LESSONS — دروس مع فقرات (ترتيب يدوي)
 ================================================================= */
 
-let currentView = 'list';
-let currentLessonId = null;
-
-/* ═══════════════════════════════════════════════════════════════
-   renderLessons — عرض قائمة الدروس
-═══════════════════════════════════════════════════════════════ */
 function renderLessons() {
   const cls  = filLess.cls;
   const subj = filLess.subj;
@@ -40,8 +29,6 @@ function renderLessons() {
         : items.map(l => lessonCard(l)).join('')}
     </div>
   `;
-
-  initLessonsDrag();
 }
 
 function lessonCard(l) {
@@ -54,7 +41,7 @@ function lessonCard(l) {
   const pct = totalSections > 0 ? Math.round(doneSections / totalSections * 100) : (isDone ? 100 : 0);
 
   return `
-    <div class="panel" data-id="${l.id}" style="padding:0; overflow:hidden; border-right:4px solid ${s.color};">
+    <div class="panel" style="padding:0; overflow:hidden; border-right:4px solid ${s.color};">
       <div style="padding:14px; display:flex; align-items:center; gap:10px;" onclick="viewLesson('${l.id}')">
         <div style="display:flex; align-items:center; gap:8px; flex:1; min-width:0;">
           <div style="width:40px;height:40px;border-radius:10px;background:${s.bg};color:${s.color};display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;flex-shrink:0;">
@@ -79,8 +66,11 @@ function lessonCard(l) {
               </div>` : ''}
           </div>
         </div>
+        <div style="display:flex; flex-direction:column; gap:2px; flex-shrink:0;" onclick="event.stopPropagation();">
+          <button class="btn-icon" style="width:24px; height:24px; font-size:14px;" onclick="moveLesson('up', '${l.id}')" title="تحريك لأعلى">▲</button>
+          <button class="btn-icon" style="width:24px; height:24px; font-size:14px;" onclick="moveLesson('down', '${l.id}')" title="تحريك لأسفل">▼</button>
+        </div>
         <div style="display:flex; align-items:center; gap:4px; flex-shrink:0;" onclick="event.stopPropagation();">
-          <span class="grip">⠿</span>
           ${adminBtns(`event.stopPropagation();openLessonForm('${l.id}')`, `event.stopPropagation();deleteLesson('${l.id}')`)}
         </div>
       </div>
@@ -92,8 +82,6 @@ function lessonCard(l) {
    viewLesson — عرض تفاصيل الدرس (فقرات)
 ═══════════════════════════════════════════════════════════════ */
 function viewLesson(id) {
-  currentView = 'detail';
-  currentLessonId = id;
   const l = DATA.lessons.find(x => x.id === id);
   if (!l) return;
   updateLessonStatus(l);
@@ -135,8 +123,11 @@ function viewLesson(id) {
       <div id="sections-list" style="display:flex; flex-direction:column;">
         ${sections.length === 0 ? `<div style="text-align:center; color:var(--text-3); padding:20px;">لا توجد فقرات بعد</div>` : ''}
         ${sections.map((sec, i) => `
-          <div class="section-row" data-index="${i}">
-            <span class="grip" style="margin-left:8px;">⠿</span>
+          <div class="section-row">
+            <div style="display:flex; flex-direction:column; gap:2px; margin-left:8px;">
+              <button class="btn-icon" style="width:24px; height:24px; font-size:12px;" onclick="moveSection('up', '${id}', ${i})" title="تحريك لأعلى">▲</button>
+              <button class="btn-icon" style="width:24px; height:24px; font-size:12px;" onclick="moveSection('down', '${id}', ${i})" title="تحريك لأسفل">▼</button>
+            </div>
             <div class="checkbox-custom ${sec.done ? 'checked' : ''}" onclick="toggleSectionDone('${id}', ${i})" style="margin-left:8px;"></div>
             <div class="section-title" style="color:${sec.done ? 'var(--green)' : 'var(--text)'};">${esc(sec.title || 'فقرة '+(i+1))}</div>
             <button class="btn-icon danger" style="width:28px;height:28px;" onclick="deleteSection('${id}', ${i})">${IC.trash}</button>
@@ -145,8 +136,6 @@ function viewLesson(id) {
       </div>
     </div>
   `;
-
-  initSectionsDrag(id);
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -178,6 +167,33 @@ function addSectionFromSheet() {
     closeSheet();
     viewLesson(lessonId);
   }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   دوال التحريك (ترتيب يدوي)
+═══════════════════════════════════════════════════════════════ */
+function moveLesson(dir, id) {
+  const index = DATA.lessons.findIndex(l => l.id === id);
+  if (index === -1) return;
+  if (dir === 'up' && index > 0) {
+    [DATA.lessons[index], DATA.lessons[index - 1]] = [DATA.lessons[index - 1], DATA.lessons[index]];
+  } else if (dir === 'down' && index < DATA.lessons.length - 1) {
+    [DATA.lessons[index], DATA.lessons[index + 1]] = [DATA.lessons[index + 1], DATA.lessons[index]];
+  }
+  save();
+  renderLessons();
+}
+
+function moveSection(dir, lessonId, secIndex) {
+  const l = DATA.lessons.find(x => x.id === lessonId);
+  if (!l || !l.sections) return;
+  if (dir === 'up' && secIndex > 0) {
+    [l.sections[secIndex], l.sections[secIndex - 1]] = [l.sections[secIndex - 1], l.sections[secIndex]];
+  } else if (dir === 'down' && secIndex < l.sections.length - 1) {
+    [l.sections[secIndex], l.sections[secIndex + 1]] = [l.sections[secIndex + 1], l.sections[secIndex]];
+  }
+  save();
+  viewLesson(lessonId);
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -277,54 +293,6 @@ function updateLessonStatus(lesson) {
   }
   const allDone = lesson.sections.every(sec => sec.done === true);
   lesson.status = allDone ? 'done' : 'planned';
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   السحب والإفلات — نظام مخصص عبر Pointer Events (custom-drag.js)
-   بديل عن SortableJS: يحل مشكلة عدم عمل السحب على Chrome iOS
-   (سببها تعارض SortableJS مع ميزة Haptic Touch الخاصة بـ WKWebView)
-═══════════════════════════════════════════════════════════════ */
-
-function initLessonsDrag() {
-  const list = document.getElementById('lessons-list');
-  if (!list || typeof makeDraggableList === 'undefined') return;
-  if (window.lessonsSortable) window.lessonsSortable.destroy();
-
-  window.lessonsSortable = makeDraggableList(
-    list,
-    '.panel[data-id]',
-    '.grip',
-    (oldIndex, newIndex, el) => {
-      const id = el.getAttribute('data-id');
-      const movedLesson = DATA.lessons.find(l => l.id === id);
-      if (!movedLesson) return;
-      const remaining = DATA.lessons.filter(l => l.id !== id);
-      remaining.splice(newIndex, 0, movedLesson);
-      DATA.lessons = remaining;
-      save();
-    }
-  );
-}
-
-function initSectionsDrag(lessonId) {
-  const list = document.getElementById('sections-list');
-  if (!list || typeof makeDraggableList === 'undefined') return;
-  if (window.sectionsSortable) window.sectionsSortable.destroy();
-
-  window.sectionsSortable = makeDraggableList(
-    list,
-    '.section-row',
-    '.grip',
-    (oldIndex, newIndex) => {
-      const l = DATA.lessons.find(x => x.id === lessonId);
-      if (l && l.sections) {
-        const moved = l.sections.splice(oldIndex, 1)[0];
-        l.sections.splice(newIndex, 0, moved);
-        save();
-        viewLesson(lessonId); // إعادة الرسم لتحديث data-index
-      }
-    }
-  );
 }
 
 /* ── دوال مساعدة للفلاتر (مطلوبة من router.js) ───────────── */
