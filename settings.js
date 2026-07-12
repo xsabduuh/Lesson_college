@@ -1,18 +1,24 @@
 /* =================================================================
-   SETTINGS (الإعدادات)
+   SETTINGS (الإعدادات) — متوافقة مع Store
 ================================================================= */
+
+// تسجيل المستمع لتحديث الواجهة تلقائياً عند تغير الإعدادات
+Store.subscribe((key) => {
+  if (key === 'settings') renderSettings();
+});
+
 function renderSettings(){
-  const s=DATA.settings;
-  const sec=document.getElementById('sec-settings');
-  sec.innerHTML=`
+  const s = Store.get('settings') || DATA.settings;
+  const sec = document.getElementById('sec-settings');
+  sec.innerHTML = `
     <div class="panel" style="margin-bottom:12px">
       <div class="panel-title">المظهر</div>
       <div class="setting-row">
         <div>
-          <div class="setting-label">${s.darkMode?IC.moon:IC.sun} الوضع الليلي</div>
+          <div class="setting-label">${s.darkMode ? IC.moon : IC.sun} الوضع الليلي</div>
           <div class="setting-sub">تغيير مظهر التطبيق</div>
         </div>
-        <div class="toggle ${s.darkMode?'on':''}" onclick="toggleDark()"></div>
+        <div class="toggle ${s.darkMode ? 'on' : ''}" onclick="toggleDark()"></div>
       </div>
       <div class="setting-row" style="flex-direction:column;align-items:flex-start;gap:12px">
         <div>
@@ -20,8 +26,8 @@ function renderSettings(){
           <div class="setting-sub">تخصيص لون واجهة التطبيق</div>
         </div>
         <div class="color-options">
-          ${ACCENT_COLORS.map(c=>`
-            <div class="color-opt ${(s.accentColor||'#3B4FC0')===c.val?'selected':''}"
+          ${ACCENT_COLORS.map(c => `
+            <div class="color-opt ${(s.accentColor || '#3B4FC0') === c.val ? 'selected' : ''}"
               style="background:${c.val}" title="${c.name}"
               onclick="setAccent('${c.val}')"></div>`).join('')}
         </div>
@@ -35,8 +41,7 @@ function renderSettings(){
           <div class="setting-label">وضع الإدارة</div>
           <div class="setting-sub">إظهار أزرار التعديل والحذف</div>
         </div>
-        <!-- تم إضافة id="admin-toggle" هنا للتحديث المباشر -->
-        <div class="toggle ${s.adminMode?'on':''}" id="admin-toggle" onclick="toggleAdminMode()"></div>
+        <div class="toggle ${s.adminMode ? 'on' : ''}" id="admin-toggle" onclick="toggleAdminMode()"></div>
       </div>
     </div>
 
@@ -45,7 +50,7 @@ function renderSettings(){
       <div class="setting-row">
         <div class="setting-label">الأجر الشهري الافتراضي</div>
         <div style="display:flex;align-items:center;gap:8px">
-          <input id="set-fee" type="number" class="field" style="width:90px;padding:7px 10px;text-align:center" value="${s.defaultFee||150}">
+          <input id="set-fee" type="number" class="field" style="width:90px;padding:7px 10px;text-align:center" value="${s.defaultFee || 150}">
           <span style="font-size:13px;color:var(--text-3)">د.م</span>
           <button class="btn btn-accent btn-sm" onclick="saveFee()">حفظ</button>
         </div>
@@ -81,19 +86,33 @@ function renderSettings(){
     <p style="text-align:center;font-size:11px;color:var(--text-3);padding:8px">مساعد الأستاذ v4.0 · جميع البيانات محفوظة محلياً</p>
   `;
 }
+
 function toggleDark(){
-  DATA.settings.darkMode=!DATA.settings.darkMode;
-  save();applySettings();renderSettings();
-  // Update accent light after dark mode switch
-  setTimeout(()=>{ const c=DATA.settings.accentColor||'#3B4FC0'; document.documentElement.style.setProperty('--accent-light',hexToLight(c)); },50);
+  const s = Store.get('settings') || DATA.settings;
+  s.darkMode = !s.darkMode;
+  Store.set('settings', s);
+  save();
+  applySettings();
+  setTimeout(() => {
+    const c = s.accentColor || '#3B4FC0';
+    document.documentElement.style.setProperty('--accent-light', hexToLight(c));
+  }, 50);
 }
+
 function setAccent(val){
-  DATA.settings.accentColor=val;
-  save();applySettings();renderSettings();
+  const s = Store.get('settings') || DATA.settings;
+  s.accentColor = val;
+  Store.set('settings', s);
+  save();
+  applySettings();
 }
+
 function saveFee(){
-  const v=+document.getElementById('set-fee').value;
-  if(v<=0){toast('أدخل مبلغاً صحيحاً','error');return;}
-  DATA.settings.defaultFee=v;
-  save();toast('تم الحفظ','success');
+  const v = +document.getElementById('set-fee').value;
+  if (v <= 0) { toast('أدخل مبلغاً صحيحاً', 'error'); return; }
+  const s = Store.get('settings') || DATA.settings;
+  s.defaultFee = v;
+  Store.set('settings', s);
+  save();
+  toast('تم الحفظ', 'success');
 }
