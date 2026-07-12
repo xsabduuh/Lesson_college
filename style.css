@@ -1296,8 +1296,11 @@ body {
   font-size: 18px;
   letter-spacing: 2px;
   user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
   border-radius: 6px;
   transition: background 0.15s, color 0.15s;
+  touch-action: none;
 }
 .grip:hover { background: var(--surface-2); color: var(--accent); }
 .grip:active { cursor: grabbing; }
