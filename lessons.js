@@ -1,7 +1,10 @@
 /* =================================================================
    LESSONS — دروس مع فقرات قابلة للسحب والإفلات
-   يتطلب SortableJS (محمّل في index.html)
-   يدعم اللمس على iOS عبر forceFallback
+   يستخدم custom-drag.js (سحب مخصص عبر Pointer Events)
+   بديل عن SortableJS لحل مشكلة عدم عمل السحب على Chrome iOS
+   ⚠️ لازم يكون custom-drag.js محمّل قبل هذا الملف في index.html:
+   <script src="custom-drag.js"></script>
+   <script src="lessons.js"></script>
 ================================================================= */
 
 let currentView = 'list';
@@ -38,7 +41,7 @@ function renderLessons() {
     </div>
   `;
 
-  if (typeof Sortable !== 'undefined') initLessonsDrag();
+  initLessonsDrag();
 }
 
 function lessonCard(l) {
@@ -143,7 +146,7 @@ function viewLesson(id) {
     </div>
   `;
 
-  if (typeof Sortable !== 'undefined') initSectionsDrag(id);
+  initSectionsDrag(id);
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -277,78 +280,51 @@ function updateLessonStatus(lesson) {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   السحب والإفلات (SortableJS) — مُحسَّن لـ iOS
+   السحب والإفلات — نظام مخصص عبر Pointer Events (custom-drag.js)
+   بديل عن SortableJS: يحل مشكلة عدم عمل السحب على Chrome iOS
+   (سببها تعارض SortableJS مع ميزة Haptic Touch الخاصة بـ WKWebView)
 ═══════════════════════════════════════════════════════════════ */
 
 function initLessonsDrag() {
   const list = document.getElementById('lessons-list');
-  if (!list) return;
+  if (!list || typeof makeDraggableList === 'undefined') return;
   if (window.lessonsSortable) window.lessonsSortable.destroy();
-  window.lessonsSortable = new Sortable(list, {
-    animation: 200,
-    handle: '.grip',
-    ghostClass: 'sortable-ghost',
-    chosenClass: 'sortable-chosen',
-    forceFallback: true,
-    fallbackTolerance: 3,
-    fallbackOnBody: true,
-    delay: 100,
-    delayOnTouchOnly: true,
-    touchStartThreshold: 5,
-    onEnd: function(evt) {
-      const id = evt.item.getAttribute('data-id');
-      const oldIndex = evt.oldIndex;
-      const newIndex = evt.newIndex;
-      if (oldIndex !== newIndex && id) {
-        const movedLesson = DATA.lessons.find(l => l.id === id);
-        if (movedLesson) {
-          const remaining = DATA.lessons.filter(l => l.id !== id);
-          remaining.splice(newIndex, 0, movedLesson);
-          const mainList = DATA.lessons;
-          mainList.sort((a, b) => {
-            const indexA = remaining.indexOf(a);
-            const indexB = remaining.indexOf(b);
-            if (indexA !== -1 && indexB !== -1) return indexA - indexB;
-            if (indexA !== -1) return -1;
-            if (indexB !== -1) return 1;
-            return 0;
-          });
-          save();
-        }
-      }
+
+  window.lessonsSortable = makeDraggableList(
+    list,
+    '.panel[data-id]',
+    '.grip',
+    (oldIndex, newIndex, el) => {
+      const id = el.getAttribute('data-id');
+      const movedLesson = DATA.lessons.find(l => l.id === id);
+      if (!movedLesson) return;
+      const remaining = DATA.lessons.filter(l => l.id !== id);
+      remaining.splice(newIndex, 0, movedLesson);
+      DATA.lessons = remaining;
+      save();
     }
-  });
+  );
 }
 
 function initSectionsDrag(lessonId) {
   const list = document.getElementById('sections-list');
-  if (!list) return;
+  if (!list || typeof makeDraggableList === 'undefined') return;
   if (window.sectionsSortable) window.sectionsSortable.destroy();
-  window.sectionsSortable = new Sortable(list, {
-    animation: 200,
-    handle: '.grip',
-    ghostClass: 'sortable-ghost',
-    chosenClass: 'sortable-chosen',
-    forceFallback: true,
-    fallbackTolerance: 3,
-    fallbackOnBody: true,
-    delay: 100,
-    delayOnTouchOnly: true,
-    touchStartThreshold: 5,
-    onEnd: function(evt) {
-      const oldIndex = evt.oldIndex;
-      const newIndex = evt.newIndex;
-      if (oldIndex !== newIndex) {
-        const l = DATA.lessons.find(x => x.id === lessonId);
-        if (l && l.sections) {
-          const moved = l.sections.splice(oldIndex, 1)[0];
-          l.sections.splice(newIndex, 0, moved);
-          save();
-          viewLesson(lessonId);
-        }
+
+  window.sectionsSortable = makeDraggableList(
+    list,
+    '.section-row',
+    '.grip',
+    (oldIndex, newIndex) => {
+      const l = DATA.lessons.find(x => x.id === lessonId);
+      if (l && l.sections) {
+        const moved = l.sections.splice(oldIndex, 1)[0];
+        l.sections.splice(newIndex, 0, moved);
+        save();
+        viewLesson(lessonId); // إعادة الرسم لتحديث data-index
       }
     }
-  });
+  );
 }
 
 /* ── دوال مساعدة للفلاتر (مطلوبة من router.js) ───────────── */
