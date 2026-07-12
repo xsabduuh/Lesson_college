@@ -28,7 +28,7 @@ function renderLessons() {
       </button>
     </div>
 
-    <div id="lessons-list" style="display:flex; flex-direction:column; gap:12px;">
+    <div id="lessons-list" style="display:flex; flex-direction:column; gap:6px;">
       ${items.length === 0
         ? `<div class="panel" style="padding:20px; text-align:center; color:var(--text-3);">
              لا توجد دروس بعد
