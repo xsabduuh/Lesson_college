@@ -1210,3 +1210,85 @@ html {
 body {
   overflow-x: hidden;
 }
+
+/* ===== أيقونة القبضة للسحب (⠿) ===== */
+.grip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  margin-left: 8px;
+  color: var(--text-3);
+  cursor: grab;
+  font-size: 18px;
+  letter-spacing: 2px;
+  user-select: none;
+  border-radius: 6px;
+  transition: background 0.15s, color 0.15s;
+}
+.grip:hover { background: var(--surface-2); color: var(--accent); }
+.grip:active { cursor: grabbing; }
+
+/* ===== صف الفقرة داخل الدرس ===== */
+.section-row {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+  background: var(--surface-2);
+  margin-bottom: 8px;
+}
+.section-title {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* ===== تأثيرات السحب (SortableJS) ===== */
+.sortable-ghost {
+  opacity: 0.4;
+  background: var(--accent-light);
+  border: 2px dashed var(--accent);
+}
+.sortable-chosen {
+  box-shadow: var(--shadow-lg);
+}
+
+/* ===== مربع اختيار مخصص للفقرات ===== */
+.checkbox-custom {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--border-2);
+  border-radius: 5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  background: var(--surface);
+  transition: background 0.15s, border-color 0.15s;
+  margin-left: 8px;
+}
+.checkbox-custom.checked {
+  background: var(--green);
+  border-color: var(--green);
+}
+.checkbox-custom.checked::after {
+  content: '✓';
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* ===== رابط الرجوع للقائمة ===== */
+.back-link {
+  font-size: 14px;
+  color: var(--accent);
+  cursor: pointer;
+  margin-bottom: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
