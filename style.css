@@ -1331,6 +1331,9 @@ body {
 .sortable-chosen {
   box-shadow: var(--shadow-lg);
 }
+.sortable-fallback {
+  opacity: 0.9 !important;
+}
 
 /* ===== مربع اختيار مخصص للفقرات ===== */
 .checkbox-custom {
