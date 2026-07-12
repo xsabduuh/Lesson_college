@@ -1314,6 +1314,7 @@ body {
   padding: 12px;
   background: var(--surface-2);
   margin-bottom: 8px;
+  touch-action: pan-y;
 }
 .section-title {
   flex: 1;
