@@ -5,9 +5,8 @@
    2. شريط بحث فوري
    3. تصفية بالمادة + الفصيل
    4. فرز: أبجدي / حديث / بالوحدة
-   5. بطاقات منسقة (عربي + فرنسي + مثال + وحدة)
+   5. بطاقات منسقة (عربي + فرنسي + مادة فقط)
    6. نموذج إضافة/تعديل متكامل
-   7. مصطلحات مدمجة جاهزة للاستيراد (رياضيات / فيزياء / علوم)
 ================================================================= */
  
 /* ── تهيئة حالة الفلاتر ────────────────────────────────────────── */
@@ -18,7 +17,7 @@ function _glossInit() {
 }
 
 /* ════════════════════════════════════════════════════════════
-   renderGlossary — الدالة الرئيسية (تبني الهيكل الكامل)
+   renderGlossary — الدالة الرئيسية
    ═══════════════════════════════════════════════════════════ */
 function renderGlossary() {
   _glossInit();
@@ -98,7 +97,14 @@ function renderGlossary() {
         </button>`).join('')}
     </div>
 
-    <!-- ══ 2. شريط البحث والفرز ══ -->
+    <!-- ══ 2. شريط البحث والفرز + زر الإضافة ══ -->
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
+      <h2 style="font-size:16px; font-weight:800;">المصطلحات</h2>
+      <button class="btn btn-accent btn-sm" onclick="openGlossaryForm()">
+        ${IC.plus} إضافة مصطلح
+      </button>
+    </div>
+
     <div class="panel" style="padding:10px 12px;margin-bottom:12px">
       <div style="display:flex;gap:8px;align-items:center">
         <div class="search-bar" style="flex:1;margin-bottom:0">
@@ -119,32 +125,21 @@ function renderGlossary() {
       </div>
     </div> 
 
-    <!-- ══ 3. قائمة المصطلحات (سيتم تحديثها جزئياً عند البحث) ══ -->
-    <div id="glossary-list-container">
-      ${glossaryListHTML(items, useGroups, grouped)}
-    </div>
+    <!-- ══ 4. قائمة المصطلحات ══ -->
+    ${items.length === 0
+      ? `<div class="panel">${emptyHtml(
+          q ? 'لا توجد نتائج' : 'لا توجد مصطلحات',
+          q ? 'جرّب كلمة أخرى' : 'اضغط + لإضافة مصطلح'
+        )}</div>`
+      : useGroups
+        ? Object.entries(grouped).map(([unit, terms]) => `
+            <div style="margin-bottom:6px">
+              <div class="divider-label">${esc(unit)}</div>
+              ${terms.map(t => _glossCard(t)).join('')}
+            </div>`).join('')
+        : items.map(t => _glossCard(t)).join('')
+    }
   `;
-}
-
-/* ────────────────────────────────────────────────────────────
-   دالة مساعدة: توليد HTML القائمة فقط
-   ──────────────────────────────────────────────────────────── */
-function glossaryListHTML(items, useGroups, grouped) {
-  if (items.length === 0) {
-    const q = filGloss.q || '';
-    return `<div class="panel">${emptyHtml(
-      q ? 'لا توجد نتائج' : 'لا توجد مصطلحات',
-      q ? 'جرّب كلمة أخرى' : 'اضغط + لإضافة مصطلح'
-    )}</div>`;
-  }
-  if (useGroups) {
-    return Object.entries(grouped).map(([unit, terms]) => `
-      <div style="margin-bottom:6px">
-        <div class="divider-label">${esc(unit)}</div>
-        ${terms.map(t => _glossCard(t)).join('')}
-      </div>`).join('');
-  }
-  return items.map(t => _glossCard(t)).join('');
 }
 
 /* ════════════════════════════════════════════════════════════
@@ -283,59 +278,6 @@ function deleteGlossary(id) {
 /* ════════════════════════════════════════════════════════════
    دوال الفلاتر
    ═══════════════════════════════════════════════════════════ */
-
-// تغيير المادة أو الفرز => إعادة بناء كاملة للصفحة
 function setGlossSubj(subj) { _glossInit(); filGloss.subj = subj; renderGlossary(); }
-function setGlossSort(s)    { _glossInit(); filGloss.sort = s;   renderGlossary(); }
-
-// البحث: تحديث جزئي للقائمة فقط، مع الحفاظ على التركيز
-function setGlossQ(q) {
-  _glossInit();
-  filGloss.q = q;
-
-  // حساب القائمة المصفاة الجديدة
-  const { subj, sort } = filGloss;
-  let items = DATA.glossary.slice();
-  if (subj) items = items.filter(t => t.subj === subj);
-  if (q.trim()) {
-    const kw = q.trim().toLowerCase();
-    items = items.filter(t =>
-      (t.word       || '').toLowerCase().includes(kw) ||
-      (t.wordFr     || '').toLowerCase().includes(kw) ||
-      (t.definition || '').toLowerCase().includes(kw) ||
-      (t.unit       || '').toLowerCase().includes(kw)
-    );
-  }
-  if (sort === 'alpha') {
-    items.sort((a, b) => (a.word || '').localeCompare(b.word || '', 'ar'));
-  } else if (sort === 'subj') {
-    items.sort((a, b) => (a.subj||'').localeCompare(b.subj||''));
-  } else {
-    items = items.reverse();
-  }
-
-  // تجميع للعرض
-  let grouped = {};
-  if (sort === 'subj' || (!subj && !q.trim())) {
-    items.forEach(t => {
-      const key = t.unit || '—';
-      if (!grouped[key]) grouped[key] = [];
-      grouped[key].push(t);
-    });
-  }
-  const useGroups = Object.keys(grouped).length > 1;
-
-  // تحديث حاوية القائمة فقط
-  const container = document.getElementById('glossary-list-container');
-  if (container) {
-    container.innerHTML = glossaryListHTML(items, useGroups, grouped);
-  }
-
-  // إبقاء التركيز على حقل البحث
-  const searchInput = document.getElementById('gloss-search');
-  if (searchInput) {
-    searchInput.focus();
-    const val = searchInput.value;
-    searchInput.setSelectionRange(val.length, val.length);
-  }
-}
+function setGlossQ(q)       { _glossInit(); filGloss.q    = q;    renderGlossary(); }
+function setGlossSort(s)    { _glossInit(); filGloss.sort = s;     renderGlossary(); }
