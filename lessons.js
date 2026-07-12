@@ -289,7 +289,12 @@ function initLessonsDrag() {
     handle: '.grip',
     ghostClass: 'sortable-ghost',
     chosenClass: 'sortable-chosen',
-    forceFallback: true,            // يحل مشكلة اللمس على iOS
+    forceFallback: true,
+    fallbackTolerance: 3,
+    fallbackOnBody: true,
+    delay: 100,
+    delayOnTouchOnly: true,
+    touchStartThreshold: 5,
     onEnd: function(evt) {
       const id = evt.item.getAttribute('data-id');
       const oldIndex = evt.oldIndex;
@@ -324,7 +329,12 @@ function initSectionsDrag(lessonId) {
     handle: '.grip',
     ghostClass: 'sortable-ghost',
     chosenClass: 'sortable-chosen',
-    forceFallback: true,            // يحل مشكلة اللمس على iOS
+    forceFallback: true,
+    fallbackTolerance: 3,
+    fallbackOnBody: true,
+    delay: 100,
+    delayOnTouchOnly: true,
+    touchStartThreshold: 5,
     onEnd: function(evt) {
       const oldIndex = evt.oldIndex;
       const newIndex = evt.newIndex;
