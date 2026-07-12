@@ -1,10 +1,6 @@
 /* =================================================================
-   LESSONS — دروس مع فقرات قابلة للسحب والإفلات
-   يستخدم custom-drag.js (سحب مخصص عبر Pointer Events)
-   بديل عن SortableJS لحل مشكلة عدم عمل السحب على Chrome iOS
-   ⚠️ لازم يكون custom-drag.js محمّل قبل هذا الملف في index.html:
-   <script src="custom-drag.js"></script>
-   <script src="lessons.js"></script>
+   LESSONS — دروس مع فقرات قابلة للسحب (custom-drag.js)
+   يتطلب custom-drag.js محمّلاً قبله في index.html
 ================================================================= */
 
 let currentView = 'list';
@@ -41,7 +37,8 @@ function renderLessons() {
     </div>
   `;
 
-  initLessonsDrag();
+  // تهيئة السحب المخصص
+  if (typeof makeDraggableList === 'function') initLessonsDrag();
 }
 
 function lessonCard(l) {
@@ -92,8 +89,6 @@ function lessonCard(l) {
    viewLesson — عرض تفاصيل الدرس (فقرات)
 ═══════════════════════════════════════════════════════════════ */
 function viewLesson(id) {
-  currentView = 'detail';
-  currentLessonId = id;
   const l = DATA.lessons.find(x => x.id === id);
   if (!l) return;
   updateLessonStatus(l);
@@ -146,7 +141,8 @@ function viewLesson(id) {
     </div>
   `;
 
-  initSectionsDrag(id);
+  // تهيئة السحب المخصص للفقرات
+  if (typeof makeDraggableList === 'function') initSectionsDrag(id);
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -280,15 +276,15 @@ function updateLessonStatus(lesson) {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   السحب والإفلات — نظام مخصص عبر Pointer Events (custom-drag.js)
-   بديل عن SortableJS: يحل مشكلة عدم عمل السحب على Chrome iOS
-   (سببها تعارض SortableJS مع ميزة Haptic Touch الخاصة بـ WKWebView)
+   دوال السحب والإفلات (تعتمد على custom-drag.js)
 ═══════════════════════════════════════════════════════════════ */
 
 function initLessonsDrag() {
   const list = document.getElementById('lessons-list');
-  if (!list || typeof makeDraggableList === 'undefined') return;
-  if (window.lessonsSortable) window.lessonsSortable.destroy();
+  if (!list) return;
+  if (window.lessonsSortable && window.lessonsSortable.destroy) {
+    window.lessonsSortable.destroy();
+  }
 
   window.lessonsSortable = makeDraggableList(
     list,
@@ -308,8 +304,10 @@ function initLessonsDrag() {
 
 function initSectionsDrag(lessonId) {
   const list = document.getElementById('sections-list');
-  if (!list || typeof makeDraggableList === 'undefined') return;
-  if (window.sectionsSortable) window.sectionsSortable.destroy();
+  if (!list) return;
+  if (window.sectionsSortable && window.sectionsSortable.destroy) {
+    window.sectionsSortable.destroy();
+  }
 
   window.sectionsSortable = makeDraggableList(
     list,
@@ -321,7 +319,7 @@ function initSectionsDrag(lessonId) {
         const moved = l.sections.splice(oldIndex, 1)[0];
         l.sections.splice(newIndex, 0, moved);
         save();
-        viewLesson(lessonId); // إعادة الرسم لتحديث data-index
+        viewLesson(lessonId);
       }
     }
   );
