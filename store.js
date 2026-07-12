@@ -80,3 +80,8 @@ const Store = {
     });
   }
 };
+
+// تهيئة المخزن تلقائياً بعد تحميل البيانات
+if (typeof DATA !== 'undefined') {
+  Store.init();
+}
