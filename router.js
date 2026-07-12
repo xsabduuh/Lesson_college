@@ -70,7 +70,6 @@ const FAB_SECTIONS = {
   students:  () => openStudentForm(),
   grades:    () => openGradeForm(),
   sessions:  () => openSessionForm(),
-  lessons:   () => openLessonForm(),
   exercises: () => openExerciseForm(),
   homework:  () => openHomeworkForm(),
   glossary:  () => openGlossaryForm(),
