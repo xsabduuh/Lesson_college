@@ -6,8 +6,7 @@
    1. بطاقة تاريخ اليوم
    2. بطاقات مربعة — التلاميذ / الحضور / الدروس / نسبة الحضور
    3. حصص اليوم والقادمة
-   4. جدول معدلات المواد حسب القسم
-   5. اختصارات الصفحات
+   4. اختصارات الصفحات
 ================================================================= */
 
 function renderDashboard() {
@@ -24,7 +23,6 @@ function renderDashboard() {
   const upcomingSess = (DATA.sessions || []).filter(s => s.date > t)
                          .sort((a, b) => a.date > b.date ? 1 : -1).slice(0, 5);
   const allLessons   = DATA.lessons || [];
-  const allGrades    = DATA.grades  || [];
 
   const lessonsDone  = allLessons.filter(l => l.status === 'done').length;
   const lessonsTotal = allLessons.length;
@@ -52,22 +50,6 @@ function renderDashboard() {
     const todayA     = todayAtt.filter(a => a.cls === c.id && a.status === 'absent').length;
     const todayL     = todayAtt.filter(a => a.cls === c.id && a.status === 'late').length;
     return { ...c, stds, attRate, lpct, ldone, ltotal: lessons.length, todayP, todayA, todayL };
-  });
-
-  /* ── معدلات المواد حسب القسم (جدول الإحصائيات) ──────── */
-  const subjectMatrix = SUBJECTS.map(subj => {
-    const perClass = CLASSES.map(cls => {
-      const g   = allGrades.filter(x => x.subj === subj.id && x.cls === cls.id && x.max > 0);
-      const avg = g.length
-        ? g.reduce((s, x) => s + (x.score / x.max) * 20, 0) / g.length
-        : null;
-      return { cls: cls.id, clsLabel: cls.short, avg };
-    });
-    const all   = allGrades.filter(x => x.subj === subj.id && x.max > 0);
-    const total = all.length
-      ? all.reduce((s, x) => s + (x.score / x.max) * 20, 0) / all.length
-      : null;
-    return { ...subj, perClass, total };
   });
 
   /* ── تاريخ اليوم بالعربية ───────────────────────────────── */
@@ -427,59 +409,7 @@ function renderDashboard() {
         </div>` : ''}
     </div>
 
-    <!-- ══ 4. جدول إحصائيات المواد ══ -->
-    <div class="panel" style="margin-bottom:12px">
-      <div class="panel-title">المواد حسب القسم</div>
-      <div style="overflow-x:auto;margin:0 -2px">
-        <table style="width:100%;border-collapse:collapse;font-size:13px;min-width:220px">
-          <thead>
-            <tr>
-              <th style="text-align:right;padding:8px 6px;color:var(--text-3);
-                font-weight:600;font-size:11px;border-bottom:2px solid var(--border)">
-                المادة
-              </th>
-              ${CLASSES.map(c => `
-                <th style="text-align:center;padding:8px 6px;
-                  color:${c.color};font-weight:700;font-size:11px;
-                  border-bottom:2px solid var(--border)">
-                  ${c.short}
-                </th>`).join('')}
-              <th style="text-align:center;padding:8px 6px;color:var(--text-3);
-                font-weight:600;font-size:11px;border-bottom:2px solid var(--border)">
-                المجموع
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            ${subjectMatrix.map((subj, i) => `
-              <tr style="background:${i % 2 === 0 ? 'transparent' : 'var(--surface-2)'}">
-                <td style="padding:10px 6px;border-bottom:1px solid var(--border)">
-                  <span style="display:inline-block;padding:3px 9px;border-radius:8px;
-                    background:${subj.bg};color:${subj.color};
-                    font-size:11px;font-weight:700">
-                    ${subj.short}
-                  </span>
-                </td>
-                ${subj.perClass.map(p => `
-                  <td style="text-align:center;padding:10px 6px;
-                    font-family:var(--mono);font-weight:700;font-size:14px;
-                    border-bottom:1px solid var(--border);
-                    color:${p.avg != null ? (p.avg >= 10 ? 'var(--green)' : 'var(--danger)') : 'var(--text-3)'}">
-                    ${p.avg != null ? p.avg.toFixed(1) : '—'}
-                  </td>`).join('')}
-                <td style="text-align:center;padding:10px 6px;
-                  font-family:var(--mono);font-weight:800;font-size:14px;
-                  border-bottom:1px solid var(--border);
-                  color:${subj.total != null ? (subj.total >= 10 ? 'var(--green)' : 'var(--danger)') : 'var(--text-3)'}">
-                  ${subj.total != null ? subj.total.toFixed(1) : '—'}
-                </td>
-              </tr>`).join('')}
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- ══ 5. اختصارات الصفحات ══ -->
+    <!-- ══ 4. اختصارات الصفحات ══ -->
     <div style="margin-bottom:6px">
       <div style="font-size:11px;font-weight:700;color:var(--text-3);
         letter-spacing:.6px;margin-bottom:10px">الصفحات</div>
