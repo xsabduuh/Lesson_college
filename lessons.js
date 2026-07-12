@@ -53,13 +53,13 @@ function lessonCard(l) {
   return `
     <div class="panel" data-id="${l.id}" style="padding:0; overflow:hidden; border-right:4px solid ${s.color};">
       <div style="padding:14px; display:flex; align-items:center; gap:10px;" onclick="viewLesson('${l.id}')">
-        <div style="display:flex; align-items:center; gap:8px; flex:1; min-width:0;">
+        <div style="display:flex; align-items:center; gap:4px; flex:1; min-width:0;">
           <div style="width:40px;height:40px;border-radius:10px;background:${s.bg};color:${s.color};display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;flex-shrink:0;">
             ${s.short.charAt(0)}
           </div>
           <div style="flex:1; min-width:0;">
             <div style="font-size:14px; font-weight:800; word-break:break-word; margin-bottom:6px;">${esc(l.title)}</div>
-            <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:4px;">
+            <div style="display:flex; gap:4px; align-items:center; flex-wrap:wrap; margin-bottom:4px;">
               <span class="badge ${classBadge(l.cls)}" style="font-size:10px;">${cl.short}</span>
               <span class="badge badge-${s.cls}" style="font-size:10px;">${s.short}</span>
               ${l.date ? `<span style="font-size:10px; color:var(--text-3);">${fdate(l.date)}</span>` : ''}
