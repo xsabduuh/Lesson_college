@@ -1,6 +1,7 @@
 /* =================================================================
    LESSONS — دروس مع فقرات قابلة للسحب والإفلات
    يتطلب SortableJS (محمّل في index.html)
+   يدعم اللمس على iOS عبر forceFallback
 ================================================================= */
 
 let currentView = 'list';
@@ -276,7 +277,7 @@ function updateLessonStatus(lesson) {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   السحب والإفلات (SortableJS)
+   السحب والإفلات (SortableJS) — مُحسَّن لـ iOS
 ═══════════════════════════════════════════════════════════════ */
 
 function initLessonsDrag() {
@@ -288,6 +289,7 @@ function initLessonsDrag() {
     handle: '.grip',
     ghostClass: 'sortable-ghost',
     chosenClass: 'sortable-chosen',
+    forceFallback: true,            // يحل مشكلة اللمس على iOS
     onEnd: function(evt) {
       const id = evt.item.getAttribute('data-id');
       const oldIndex = evt.oldIndex;
@@ -297,7 +299,6 @@ function initLessonsDrag() {
         if (movedLesson) {
           const remaining = DATA.lessons.filter(l => l.id !== id);
           remaining.splice(newIndex, 0, movedLesson);
-          // إعادة ترتيب المصفوفة الأساسية حسب القائمة الجديدة
           const mainList = DATA.lessons;
           mainList.sort((a, b) => {
             const indexA = remaining.indexOf(a);
@@ -323,6 +324,7 @@ function initSectionsDrag(lessonId) {
     handle: '.grip',
     ghostClass: 'sortable-ghost',
     chosenClass: 'sortable-chosen',
+    forceFallback: true,            // يحل مشكلة اللمس على iOS
     onEnd: function(evt) {
       const oldIndex = evt.oldIndex;
       const newIndex = evt.newIndex;
